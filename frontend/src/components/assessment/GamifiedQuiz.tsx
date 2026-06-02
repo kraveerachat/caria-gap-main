@@ -215,8 +215,8 @@ export function GamifiedQuiz({ onComplete, onBack, onSkip, lang }: GamifiedQuizP
           <Sparkles className="size-10 animate-bounce" />
         </div>
         
-        <h3 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white mb-4">
-          {thai ? "ยอดเยี่ยมมาก! 🎉" : "Excellent Job! 🎉"}
+        <h3 className="mb-4 font-syne text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white md:text-3xl">
+          {thai ? "ยอดเยี่ยมมาก!" : "Excellent Job!"}
         </h3>
         
         <p className="text-base text-slate-600 dark:text-slate-300 max-w-lg mb-8 leading-relaxed font-semibold">
@@ -234,7 +234,7 @@ export function GamifiedQuiz({ onComplete, onBack, onSkip, lang }: GamifiedQuizP
             setCurrentSection(pendingSection);
             setShowTransition(false);
           }}
-          className="px-8 py-3.5 rounded-2xl bg-brand-orange text-white font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-orange/20 flex items-center gap-2"
+          className="flex items-center gap-2 rounded-full bg-brand-orange px-8 py-3.5 font-bold text-white shadow-lg shadow-brand-orange/20 transition-all duration-300 hover:scale-[1.02] active:scale-95"
         >
           <span>{thai ? "ลุยต่อเลย!" : "Continue!"}</span>
           <ChevronRight size={18} />
@@ -286,7 +286,7 @@ export function GamifiedQuiz({ onComplete, onBack, onSkip, lang }: GamifiedQuizP
                 {isActive && (
                   <motion.div
                     layoutId="activeSectionProgress"
-                    className="absolute inset-0 bg-gradient-to-r from-brand-orange to-amber-500"
+                    className="absolute inset-0 bg-linear-to-r from-brand-orange to-amber-500"
                     initial={{ width: "0%" }}
                     animate={{ width: "100%" }}
                     transition={{ duration: 0.5 }}

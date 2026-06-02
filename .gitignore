@@ -33,3 +33,14 @@ Thumbs.db
 
 # Nested Git backups
 **/.git_backup/
+
+# AI and IDE
+.gemini/
+.claude/
+.cursor/
+.agents/
+.impeccable/
+
+# Scratch
+test.png
+download_logos.py

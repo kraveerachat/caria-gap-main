@@ -50,10 +50,10 @@ export const api = {
       });
     } catch (error) {
       console.error("Submission failed:", error);
-      showToast("เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้ง", "error");
+      // showToast("เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้ง", "error");
       
       console.warn("API Offline, using Mock Data", error);
-      showToast("Offline Mode Active: Using mock data", "info");
+      // showToast("Offline Mode Active: Using mock data", "info");
       await simulateDelay(2000); // simulate 2s processing
       return MOCK_TOP10;
     }
@@ -64,7 +64,7 @@ export const api = {
       return await request<Top10Response>(`/api/v1/recommendations/${userId}`);
     } catch (error) {
       console.warn("API Offline, using Mock Data", error);
-      showToast("Offline Mode Active", "info");
+      // showToast("Offline Mode Active", "info");
       return MOCK_TOP10;
     }
   },
@@ -74,7 +74,7 @@ export const api = {
       return await request<GapAnalysisResponse>(`/api/v1/gap-analysis/${userId}/${careerId}`);
     } catch (error) {
       console.warn("API Offline, using Mock Data", error);
-      showToast("Offline Mode Active", "info");
+      // showToast("Offline Mode Active", "info");
       return MOCK_GAP_ANALYSIS;
     }
   },

@@ -14,7 +14,7 @@ function Skeleton({ className, lines = 1 }: SkeletonProps) {
           key={i}
           className={cn(
             'h-4 rounded-lg',
-            'bg-gradient-to-r from-white/5 via-white/10 to-white/5',
+            'bg-linear-to-r from-white/5 via-white/10 to-white/5',
             'animate-shimmer',
             i === lines - 1 && lines > 1 ? 'w-3/4' : 'w-full',
             className,
@@ -28,7 +28,7 @@ function Skeleton({ className, lines = 1 }: SkeletonProps) {
 /** Full-page loading animation with CARIA-GAP branding */
 function FullPageLoading() {
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-[#0F172A] to-[#1E293B]">
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-linear-to-br from-[#0F172A] to-[#1E293B]">
       {/* Pulsing circles */}
       <div className="relative w-24 h-24 mb-8">
         <div className="absolute inset-0 rounded-full border-2 border-accent/30 animate-ping" />
@@ -54,7 +54,7 @@ function FullPageLoading() {
           SUT-CARIA is preparing your advisory data...
         </p>
         {/* Shimmer overlay */}
-        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite]" />
+        <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite]" />
       </div>
     </div>
   );

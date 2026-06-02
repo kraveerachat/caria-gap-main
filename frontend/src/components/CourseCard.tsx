@@ -65,7 +65,7 @@ export default function CourseCard({ course, gapScore, className }: CourseCardPr
             }}
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-100 dark:from-slate-800 dark:to-slate-900" />
+          <div className="w-full h-full bg-linear-to-br from-slate-200 to-slate-100 dark:from-slate-800 dark:to-slate-900" />
         )}
       </div>
 

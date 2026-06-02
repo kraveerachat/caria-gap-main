@@ -17,11 +17,11 @@ export default function ProgressBar({ currentStep, totalSteps = 3 }: ProgressBar
       <div className="relative h-2 rounded-full bg-white/10 overflow-hidden">
         {/* Filled portion */}
         <div
-          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-accent to-[#FFB340] transition-all duration-700 ease-out"
+          className="absolute inset-y-0 left-0 rounded-full bg-linear-to-r from-accent to-[#FFB340] transition-all duration-700 ease-out"
           style={{ width: `${progress}%` }}
         >
           {/* Shimmer overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
         </div>
       </div>
 

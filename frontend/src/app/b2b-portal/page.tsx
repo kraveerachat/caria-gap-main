@@ -13,7 +13,7 @@ export default function B2BPortalPage() {
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between border-b border-border pb-6">
           <div>
             <h1 className="text-3xl font-bold md:text-4xl">
-              <span className="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
                 CARIA Talent Matcher for HR
               </span>
             </h1>
@@ -62,7 +62,7 @@ export default function B2BPortalPage() {
             <div className="p-6 border-b border-border">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xl font-bold">
+                  <div className="h-12 w-12 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xl font-bold">
                     ต
                   </div>
                   <div>
@@ -99,7 +99,7 @@ export default function B2BPortalPage() {
             </div>
             
             <div className="p-4 bg-muted/40">
-              <button className="w-full group relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-blue-500/25 flex items-center justify-center gap-2">
+              <button className="w-full group relative overflow-hidden rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-blue-500/25 flex items-center justify-center gap-2">
                 <Lock size={16} className="group-hover:hidden" />
                 <Star size={16} className="hidden group-hover:block text-yellow-300" />
                 Unlock Profile (5,000 THB)

@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CourseCard from "@/components/CourseCard";
 import Loading from "@/components/ui/Loading";
+import { CheckCircle2, ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 import { api } from "@/lib/api";
 import { MOCK_GAP_ANALYSIS } from "@/lib/mockData";
 import type { GapAnalysisResponse, CourseRec } from "@/types";
@@ -77,29 +78,31 @@ function MarketplaceContent() {
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="mb-6 inline-flex items-center gap-2 font-thai text-sm font-medium text-slate-500 transition-colors hover:text-brand-orange dark:text-slate-400"
         >
-          ← กลับไปหน้า Gap Analysis
+          <ArrowLeft className="size-4" strokeWidth={2.5} aria-hidden />
+          กลับไปหน้า Gap Analysis
         </button>
 
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-4xl font-bold md:text-5xl">
-            <span className="mr-3">📚</span>
-            <span className="bg-gradient-to-r from-brand-orange to-orange-400 bg-clip-text text-transparent">
-              คอร์สเรียนเพื่อปิด Gap
-            </span>
+        <div className="mb-10 font-thai">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-brand-orange/10 px-3 py-1 font-syne text-[11px] font-bold uppercase tracking-[0.18em] text-brand-orange">
+            <BookOpen className="size-3" strokeWidth={2.5} aria-hidden />
+            Curriculum Match
+          </div>
+          <h1 className="font-syne text-4xl font-bold tracking-tight text-slate-900 dark:text-white md:text-5xl leading-tight text-balance">
+            คอร์สเรียนเพื่อปิด Gap
           </h1>
-          <p className="mt-3 text-lg text-muted-foreground">
+          <p className="mt-3 text-base font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
             คอร์สแนะนำสำหรับอาชีพ{" "}
-            <span className="font-semibold text-brand-orange">
+            <span className="font-bold text-brand-orange">
               {data.career.career_name}
             </span>
           </p>
         </div>
 
         {/* Summary Card */}
-        <div className="mb-10 rounded-2xl border border-border bg-gradient-to-br from-brand-orange/10 to-[#2563EB]/5 p-8 backdrop-blur-md">
+        <div className="mb-10 rounded-2xl border border-border bg-linear-to-br from-brand-orange/10 to-[#2563EB]/5 p-8 backdrop-blur-md">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="text-2xl font-bold text-foreground">
@@ -147,20 +150,23 @@ function MarketplaceContent() {
             ))}
           </div>
         ) : (
-          /* Empty state */
-          <div className="mt-16 text-center">
-            <div className="text-7xl">🎉</div>
-            <h3 className="mt-6 text-2xl font-bold text-foreground">
-              ไม่มี Gap ที่ต้องปิด!
+          /* Empty state — competency profile complete for this career */
+          <div className="mt-16 flex flex-col items-center text-center font-thai">
+            <div className="flex size-20 items-center justify-center rounded-2xl border border-emerald-500/30 bg-white/70 text-emerald-500 backdrop-blur-xl dark:border-emerald-400/20 dark:bg-slate-900/60">
+              <CheckCircle2 className="size-10" strokeWidth={2} aria-hidden />
+            </div>
+            <h3 className="mt-6 font-syne text-2xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
+              ไม่มี Gap ที่ต้องปิด
             </h3>
-            <p className="mt-3 text-muted-foreground">
-              สมรรถนะของคุณครบถ้วนสำหรับอาชีพนี้แล้ว
+            <p className="mt-3 max-w-md text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+              สมรรถนะของคุณครบถ้วนสำหรับอาชีพนี้แล้ว สามารถสำรวจอาชีพอื่นได้ทันที
             </p>
             <button
               onClick={() => router.push(`/dashboard?user=${userId}`)}
-              className="mt-8 rounded-xl bg-brand-orange px-8 py-3 font-bold text-brand-orange-foreground transition-all hover:scale-105"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-3 font-bold text-brand-orange-foreground shadow-[0_10px_30px_-8px_rgba(243,146,0,0.6)] transition-all duration-300 hover:scale-[1.02] active:scale-95"
             >
               กลับไปดูอาชีพอื่น
+              <ArrowRight className="size-4" strokeWidth={2.5} aria-hidden />
             </button>
           </div>
         )}
@@ -172,9 +178,10 @@ function MarketplaceContent() {
               onClick={() =>
                 router.push(`/career/${careerId}?user=${userId}`)
               }
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-6 py-3 font-semibold text-muted-foreground backdrop-blur-sm transition-all duration-300 hover:border-brand-orange/30 hover:bg-muted hover:text-foreground"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-6 py-3 font-thai text-sm font-semibold text-slate-600 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-brand-orange/40 hover:text-brand-orange dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-300"
             >
-              ← กลับไป Gap Analysis
+              <ArrowLeft className="size-4" strokeWidth={2.5} aria-hidden />
+              กลับไป Gap Analysis
             </button>
           </div>
         )}

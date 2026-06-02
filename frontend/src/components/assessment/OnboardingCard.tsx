@@ -39,7 +39,7 @@ export function OnboardingCard({ onStart, lang }: OnboardingCardProps) {
 
       {/* Research Stat Card */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="p-5 rounded-2xl border border-slate-200/50 bg-slate-50/50 dark:border-white/5 dark:bg-white/[0.02] flex flex-col justify-center text-center">
+        <div className="p-5 rounded-2xl border border-slate-200/50 bg-slate-50/50 dark:border-white/5 dark:bg-white/2 flex flex-col justify-center text-center">
           <span className="text-4xl font-extrabold text-brand-orange font-syne">83%</span>
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">
             {thai ? "ความแม่นยำ Precision@10" : "Precision@10 Accuracy"}
@@ -49,7 +49,7 @@ export function OnboardingCard({ onStart, lang }: OnboardingCardProps) {
           </span>
         </div>
 
-        <div className="p-5 rounded-2xl border border-slate-200/50 bg-slate-50/50 dark:border-white/5 dark:bg-white/[0.02] flex flex-col justify-center text-center">
+        <div className="p-5 rounded-2xl border border-slate-200/50 bg-slate-50/50 dark:border-white/5 dark:bg-white/2 flex flex-col justify-center text-center">
           <span className="text-4xl font-extrabold text-blue-400 font-syne">MES</span>
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">
             {thai ? "สมการความคล้ายคลึงแบบถ่วงน้ำหนัก" : "Weighted Similarity Equation"}

@@ -6,95 +6,214 @@
 "use client";
 
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { CareerRoadmapTimeline } from "@/components/results/CareerRoadmapTimeline";
+import { Lock, Target, DollarSign, TrendingUp, ChevronRight, Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const CARD_BG_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663715925716/C5srhVpvKrV4qWgj4NxM6w/career-card-bg-5L8EkNTMfS6jDs3zeQRXYj.webp";
 
-const careers = [
+const defaultCareers = [
   {
     rank: 1,
     title: "Data Scientist",
-    match: 87,
-    department: "Analytics & AI",
-    skills: ["Python", "Machine Learning", "Statistics", "Data Viz"],
-    gaps: 3,
-    salary: "฿85K–120K",
-    trend: "+24% demand",
+    match: null,
+    department: null,
+    skills: [],
+    gaps: null,
+    salary: null,
+    trend: null,
     trendUp: true,
     color: "#F39200",
-    description: "Design and implement ML models to extract insights from complex datasets. Lead data-driven decision making across the organization.",
+    description: null,
   },
   {
     rank: 2,
     title: "Cloud Architect",
-    match: 74,
-    department: "Infrastructure",
-    skills: ["AWS", "Kubernetes", "DevOps", "Security"],
-    gaps: 7,
-    salary: "฿90K–140K",
-    trend: "+31% demand",
+    match: null,
+    department: null,
+    skills: [],
+    gaps: null,
+    salary: null,
+    trend: null,
     trendUp: true,
     color: "#1E90FF",
-    description: "Design scalable, resilient cloud infrastructure solutions. Architect multi-cloud strategies and drive digital transformation initiatives.",
+    description: null,
   },
   {
     rank: 3,
     title: "Cybersecurity Analyst",
-    match: 68,
-    department: "Security Operations",
-    skills: ["SIEM", "Penetration Testing", "Risk Analysis", "Compliance"],
-    gaps: 11,
-    salary: "฿75K–110K",
-    trend: "+18% demand",
+    match: null,
+    department: null,
+    skills: [],
+    gaps: null,
+    salary: null,
+    trend: null,
     trendUp: true,
     color: "#A78BFA",
-    description: "Monitor, detect, and respond to security threats. Implement defense strategies and ensure compliance with security frameworks.",
+    description: null,
   },
 ];
 
-function CareerCard({ career, index }: { career: typeof careers[0]; index: number }) {
+const CAREER_DESCRIPTIONS: Record<string, { th: string; en: string }> = {
+  DT08: {
+    th: "ออกแบบ วิเคราะห์ และพัฒนาเว็บแอปพลิเคชันและระบบซอฟต์แวร์ เพื่อแก้โจทย์ปัญหาธุรกิจและเพิ่มประสิทธิภาพของกระบวนการทำงานดิจิทัล",
+    en: "Design, analyze, and develop web applications and software systems to solve business problems and optimize digital processes."
+  },
+  DT18: {
+    th: "ออกแบบและพัฒนาโมเดล ML เพื่อสกัดข้อมูลเชิงลึก ขับเคลื่อนการตัดสินใจขององค์กรและหลักสูตรการศึกษาด้วยข้อมูล",
+    en: "Design and develop ML models to extract deep insights, driving data-driven organizational and academic decision-making."
+  },
+  DT26: {
+    th: "ออกแบบสถาปัตยกรรมคลาวด์ที่ยืดหยุ่นและปลอดภัย ขับเคลื่อนระบบเครือข่ายและโครงสร้างพื้นฐานดิจิทัล",
+    en: "Design flexible and secure cloud architectures, driving digital network systems and infrastructures."
+  },
+  DT31: {
+    th: "เฝ้าระวัง ตรวจจับ และตอบสนองต่อภัยคุกคามความปลอดภัย ติดตั้งกลยุทธ์การป้องกันและตรวจสอบการปฏิบัติตามเกณฑ์มาตรฐาน",
+    en: "Monitor, detect, and respond to security threats, establishing defense strategies and verifying standards compliance."
+  },
+  DT17: {
+    th: "ออกแบบและพัฒนาท่อนำส่งข้อมูล (Data Pipeline) เพื่อจัดเก็บและประมวลผลข้อมูลขนาดใหญ่ในระบบวิเคราะห์ข้อมูล",
+    en: "Design and develop data pipelines to store and process big data inside data analytics systems."
+  },
+  DT04: {
+    th: "ออกแบบและพัฒนาเว็บแอปพลิเคชันที่รองรับการใช้งานทุกหน้าจอ (Responsive Web) ด้วยความปลอดภัยและประสิทธิภาพสูงสุด",
+    en: "Design and develop responsive web applications with maximum security and performance."
+  }
+};
+
+function getCareerDescription(id: string, name: string, group: string, isThai: boolean): string {
+  if (!id && !name) return "";
+  
+  const matchId = id === "DT18" || name.toLowerCase().includes("data scientist") ? "DT18"
+    : id === "DT26" || name.toLowerCase().includes("cloud architect") ? "DT26"
+    : id === "DT31" || name.toLowerCase().includes("security") || name.toLowerCase().includes("cyber") ? "DT31"
+    : id === "DT08" || name.toLowerCase().includes("software developer") ? "DT08"
+    : id === "DT17" || name.toLowerCase().includes("data engineer") ? "DT17"
+    : id === "DT04" || name.toLowerCase().includes("web developer") ? "DT04"
+    : "";
+
+  const mapped = CAREER_DESCRIPTIONS[matchId];
+  if (mapped) {
+    return isThai ? mapped.th : mapped.en;
+  }
+
+  const cleanGroup = group ? group.toLowerCase() : "";
+  if (cleanGroup.includes("software") || cleanGroup.includes("web")) {
+    return isThai 
+      ? "ออกแบบและวิเคราะห์ระบบซอฟต์แวร์ วางโครงสร้างแอปพลิเคชันเพื่อแก้ปัญหาทางวิศวกรรมคอมพิวเตอร์และธุรกิจดิจิทัล"
+      : "Design and analyze software systems, structuring applications to solve computer engineering and digital business problems.";
+  }
+  if (cleanGroup.includes("data") || cleanGroup.includes("ai")) {
+    return isThai
+      ? "ออกแบบและจัดการฐานข้อมูล จัดเตรียมท่อนำส่งประมวลผลข้อมูลระดับมหภาค และวิเคราะห์สถิติตลาดแรงงาน"
+      : "Design and manage databases, preparing macro data pipelines and analyzing labor market stats.";
+  }
+  
+  return isThai 
+    ? `ออกแบบและบริหารจัดการโซลูชันในกลุ่มสายงาน ${group || ""} เพื่อขับเคลื่อนศักยภาพองค์กรด้วยเทคโนโลยีและความเชี่ยวชาญระดับสูง`
+    : `Design and manage solutions in ${group || ""} to drive organizational capability with high technology and expertise.`;
+}
+
+function cleanTagName(tag: string, isThai: boolean): string {
+  const clean = tag.replace(/^[SKA]\d+_(Group_)?/, '').replace(/_/g, ' ');
+  
+  const thMap: Record<string, string> = {
+    "Programming": "เขียนโปรแกรม",
+    "Complex Problem Solving": "แก้ปัญหาซับซ้อน",
+    "Technology Design": "ออกแบบเทคโนโลยี",
+    "Negotiation": "การเจรจาต่อรอง",
+    "Sales and Marketing": "การขายและการตลาด",
+    "Persuasion": "การโน้มน้าวใจ",
+    "Design": "การออกแบบ",
+    "Mathematics": "คณิตศาสตร์",
+    "Systems Analysis": "วิเคราะห์ระบบ",
+    "Artistic": "ศิลปะและความสร้างสรรค์",
+    "Fine Arts": "วิจิตรศิลป์",
+    "Critical Thinking": "การคิดเชิงวิพากษ์",
+    "Troubleshooting": "การแก้ปัญหาเทคนิค",
+    "Quality Control Analysis": "ควบคุมตรวจสอบคุณภาพ",
+    "Systems Design": "ออกแบบระบบ",
+    "Management of Financial Resources": "การบริหารเงินทุน",
+    "Economics and Accounting": "เศรษฐศาสตร์และบัญชี",
+    "Communications and Media": "สื่อและการสื่อสาร",
+    "Psychology": "จิตวิทยา",
+    "Administration and Management": "การบริหารการจัดการ"
+  };
+
+  if (isThai && thMap[clean]) {
+    return thMap[clean];
+  }
+  return clean;
+}
+
+function CareerCard({
+  career,
+  index,
+  hasAssessmentResult,
+  onClick
+}: {
+  career: any;
+  index: number;
+  hasAssessmentResult: boolean;
+  onClick: () => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const cardRotateX = useTransform(scrollYProgress, [0, 0.5, 1], [8, 0, -8]);
-  const cardScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.98]);
+  const cardRotateX = useTransform(scrollYProgress, [0, 0.5, 1], [6, 0, -6]);
+  const cardScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.97, 1, 0.98]);
   const { t, lang } = useLanguage();
   const thai = lang === "th";
+  const router = useRouter();
 
-  const isTop = career.rank === 1;
+  const isTop = career.rank === 1 && hasAssessmentResult;
+
+  // Safe formatting checks
+  const salaryDisplay = career.salary || "-";
+  const demandDisplay = career.trend ? career.trend.split(" ")[0] : "-";
+  const gapDisplay = career.gaps !== null && career.gaps !== undefined ? `${career.gaps} ทักษะ` : "-";
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 120, rotateX: 30, scale: 0.85 }}
+      initial={{ opacity: 0, y: 80, rotateX: 20, scale: 0.9 }}
       whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
       viewport={{ once: true, margin: "-100px" }}
-      transition={{ type: "spring", stiffness: 40, damping: 15, duration: 1.2, delay: index * 0.15 }}
+      transition={{ type: "spring", stiffness: 45, damping: 15, duration: 1.0, delay: index * 0.12 }}
       style={{ perspective: "1200px", transformStyle: "preserve-3d" }}
-      className={`relative ${isTop ? "lg:-mt-4 lg:mb-4" : ""}`}
+      className={`relative h-full ${isTop ? "lg:-mt-4 lg:mb-4" : ""}`}
     >
       <motion.div
-        className={`relative rounded-3xl overflow-hidden h-full border bg-white shadow-[0_10px_40px_rgb(0,0,0,0.06)] dark:bg-[#0d1726] ${
-          isTop
-            ? "border-[#F39200]/30 dark:shadow-[0_0_40px_rgba(243,146,0,0.12),0_20px_60px_rgba(0,0,0,0.45)]"
-            : "border-slate-200 dark:border-white/10 dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
-        }`}
+        onClick={onClick}
+        className={cn(
+          "relative rounded-3xl overflow-hidden h-full border bg-white/80 dark:bg-slate-900/60 backdrop-blur-2xl transition-all duration-300 group flex flex-col p-8 sm:p-9 cursor-pointer justify-between min-h-[480px]",
+          hasAssessmentResult
+            ? isTop
+              ? "border-[#F39200]/30 shadow-[0_20px_50px_rgba(0,0,0,0.05)] dark:shadow-[0_0_40px_rgba(243,146,0,0.12),0_20px_60px_rgba(0,0,0,0.45)]"
+              : "border-slate-200/80 dark:border-white/5 shadow-[0_15px_40px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
+            : "border-slate-200/50 dark:border-white/5 opacity-60 shadow-sm"
+        )}
         style={{
           rotateX: cardRotateX,
           scale: cardScale,
         }}
-        whileHover={{
-          scale: 1.04,
+        whileHover={hasAssessmentResult ? {
+          y: -8,
           borderColor: `${career.color}50`,
-          boxShadow: `0 0 50px ${career.color}25, 0 30px 80px rgba(0,0,0,0.6)`,
+          boxShadow: `0 20px 40px rgba(0,0,0,0.06), 0 0 50px ${career.color}15`,
+        } : {
+          y: -4,
+          borderColor: "rgba(243,146,0,0.2)",
+          boxShadow: "0 10px 20px rgba(0,0,0,0.04)",
         }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
         {/* Card BG texture */}
         <div
-          className="absolute inset-0 opacity-[0.04] dark:opacity-20 pointer-events-none"
+          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.12] pointer-events-none"
           style={{
             backgroundImage: `url(${CARD_BG_URL})`,
             backgroundSize: "cover",
@@ -104,121 +223,185 @@ function CareerCard({ career, index }: { career: typeof careers[0]; index: numbe
 
         {/* Top accent line */}
         <div
-          className="absolute top-0 left-0 right-0 h-px"
-          style={{ background: `linear-gradient(90deg, transparent, ${career.color}60, transparent)` }}
+          className="absolute top-0 left-0 right-0 h-[3px]"
+          style={{
+            background: hasAssessmentResult
+              ? `linear-gradient(90deg, transparent, ${career.color}, transparent)`
+              : `linear-gradient(90deg, transparent, rgba(148,163,184,0.15), transparent)`
+          }}
         />
 
-        <div className="relative p-7">
-          {/* Header row */}
-          <div className="flex items-start justify-between mb-5">
-            <div className="flex items-center gap-3">
-              {/* Rank badge */}
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center font-syne font-extrabold text-sm"
-                style={{
-                  background: `${career.color}15`,
-                  border: `1.5px solid ${career.color}40`,
-                  color: career.color,
-                  boxShadow: `0 0 12px ${career.color}25`,
-                }}
-              >
-                #{career.rank}
+        {!hasAssessmentResult ? (
+          /* LOCKED / PENDING STATE */
+          <div className="flex flex-col items-center justify-center text-center py-12 my-auto w-full">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200/60 dark:border-white/10 flex items-center justify-center mb-6 shadow-sm">
+              <Lock className="size-5 text-slate-500 dark:text-slate-400" />
+            </div>
+            
+            <h3 className="text-slate-800 dark:text-white text-lg font-extrabold tracking-tight mb-2">
+              {thai ? "รอการประเมิน (Pending Assessment)" : "Pending Assessment"}
+            </h3>
+            
+            <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm max-w-[220px] leading-relaxed mb-8 font-medium">
+              {thai ? "ทำแบบประเมินเพื่อปลดล็อกผลลัพธ์รายบุคคล" : "Complete the assessment to unlock personalized results"}
+            </p>
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push("/assessment");
+              }}
+              className="inline-flex items-center justify-center gap-2 py-3 px-6 rounded-2xl bg-linear-to-r from-[#F39200] to-[#FFB54D] text-[#1a1100] text-xs font-black shadow-md hover:shadow-lg transition-all duration-300 active:scale-95 shrink-0"
+            >
+              <span>{thai ? "ทำแบบทดสอบตอนนี้ →" : "Take Assessment Now →"}</span>
+            </button>
+          </div>
+        ) : (
+          /* FILLED STATE */
+          <>
+            <div>
+              {/* Header row */}
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <div className="flex items-start gap-3.5">
+                  {/* Rank badge */}
+                  <div
+                    className="w-10 h-10 rounded-2xl flex items-center justify-center font-syne font-black text-sm shrink-0 border"
+                    style={{
+                      background: `${career.color}12`,
+                      borderColor: `${career.color}35`,
+                      color: career.color,
+                      boxShadow: `0 0 12px ${career.color}15`,
+                    }}
+                  >
+                    #{career.rank}
+                  </div>
+                  <div className="min-w-0">
+                    <span className="inline-flex bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider mb-1.5">
+                      {career.department || "-"}
+                    </span>
+                    <h3 className="text-slate-800 dark:text-white text-xl sm:text-2xl leading-snug font-extrabold tracking-tight font-syne text-balance">
+                      {career.title || "-"}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Match score display */}
+                <div className="flex flex-col items-end shrink-0">
+                  <div className="font-syne font-black text-3xl sm:text-4xl bg-linear-to-r from-[#F39200] to-orange-400 bg-clip-text text-transparent">
+                    {career.match !== null && career.match !== undefined ? `${career.match}%` : "-"}
+                  </div>
+                  <div className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-widest mt-0.5">
+                    {thai ? "คะแนนจับคู่" : "Match Score"}
+                  </div>
+                </div>
               </div>
-              <div className={thai ? "font-thai" : ""}>
-                <p className="text-xs text-muted-foreground tracking-wide">{career.department}</p>
-                <h3 className="text-foreground text-xl leading-tight font-bold font-syne">{career.title}</h3>
+
+              {/* Match progress bar */}
+              <div className="mb-6">
+                <div className="h-1.5 rounded-full bg-slate-100 dark:bg-white/5 overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{
+                      background: `linear-gradient(90deg, ${career.color}80, ${career.color})`
+                    }}
+                    initial={{ width: "0%" }}
+                    animate={inView ? { width: `${career.match || 0}%` } : { width: "0%" }}
+                    transition={{ duration: 1.2, delay: 0.3 + index * 0.12, ease: "easeOut" }}
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <p className={cn(
+                "text-sm mb-6 font-medium text-balance min-h-[64px] text-slate-600 dark:text-slate-350",
+                thai ? "font-thai leading-relaxed" : "font-dm leading-relaxed"
+              )}>
+                {thai 
+                  ? getCareerDescription(career.title.toLowerCase().includes("data scientist") ? "DT18" : career.title.toLowerCase().includes("cloud") ? "DT26" : "DT31", career.title, career.department, true) 
+                  : career.description || "-"
+                }
+              </p>
+
+              {/* Skills Badges */}
+              <div className="flex flex-wrap gap-2 mb-6 min-h-[32px]">
+                {career.skills && career.skills.length > 0 ? (
+                  career.skills.map((skill: string) => (
+                    <span
+                      key={skill}
+                      className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-50 dark:bg-white/2 border border-slate-200/50 dark:border-white/5 text-slate-500 dark:text-slate-400 transition-all duration-300 hover:bg-slate-100 dark:hover:bg-white/8"
+                    >
+                      {skill}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-xs text-slate-400">-</span>
+                )}
               </div>
             </div>
 
-            {/* Match score */}
-            <div className="flex flex-col items-end">
-              <div
-                className="font-syne font-extrabold text-3xl"
-                style={{ color: career.color }}
-              >
-                {career.match}%
+            {/* Compartmentalized Stats & CTA */}
+            <div>
+              {/* 3-Column Compartment Metrics Grid */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center border-t border-slate-100 dark:border-white/5 pt-6">
+                {/* 1. Gaps */}
+                <div className="bg-slate-50 dark:bg-white/1 p-2.5 rounded-2xl border border-slate-200/40 dark:border-white/3 flex flex-col justify-center items-center min-h-[60px]">
+                  <span className="text-[10px] font-semibold text-slate-400 dark:text-white/30 flex items-center justify-center gap-1 leading-normal shrink-0">
+                    <Target className="size-3 text-brand-orange" />
+                    {thai ? "ทักษะที่ขาด" : "Skills Gap"}
+                  </span>
+                  <span className="block mt-1 font-syne text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 leading-none">
+                    {gapDisplay}
+                  </span>
+                </div>
+                {/* 2. Salary */}
+                <div className="bg-slate-50 dark:bg-white/1 p-2.5 rounded-2xl border border-slate-200/40 dark:border-white/3 flex flex-col justify-center items-center min-h-[60px]">
+                  <span className="text-[10px] font-semibold text-slate-400 dark:text-white/30 flex items-center justify-center gap-1 leading-normal shrink-0">
+                    <DollarSign className="size-3 text-slate-400 dark:text-white/40" />
+                    {thai ? "เงินเดือนแรกเข้า" : "Salary Range"}
+                  </span>
+                  <span className="block mt-1 font-syne text-[10px] sm:text-xs font-extrabold text-slate-700 dark:text-slate-300 leading-none truncate max-w-full">
+                    {salaryDisplay}
+                  </span>
+                </div>
+                {/* 3. Trend */}
+                <div className="bg-slate-50 dark:bg-white/1 p-2.5 rounded-2xl border border-slate-200/40 dark:border-white/3 flex flex-col justify-center items-center min-h-[60px]">
+                  <span className="text-[10px] font-semibold text-slate-400 dark:text-white/30 flex items-center justify-center gap-1 leading-normal shrink-0">
+                    <TrendingUp className="size-3 text-emerald-500" />
+                    {thai ? "การเติบโต" : "Demand"}
+                  </span>
+                  <span className="block mt-1 font-syne text-xs sm:text-sm font-extrabold text-emerald-500 leading-none">
+                    {demandDisplay}
+                  </span>
+                </div>
               </div>
-              <div className={`text-xs text-muted-foreground ${thai ? "font-thai" : "font-dm"}`}>{t.results.matchScore}</div>
-            </div>
-          </div>
 
-          {/* Match bar */}
-          <div className="mb-5">
-            <div className="h-1.5 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
-              <motion.div
-                className="h-full rounded-full"
-                style={{ background: `linear-gradient(90deg, ${career.color}80, ${career.color})` }}
-                initial={{ width: "0%" }}
-                animate={inView ? { width: `${career.match}%` } : {}}
-                transition={{ duration: 1.2, delay: 0.5 + index * 0.15, ease: "easeOut" }}
-              />
+              {/* Action CTA Button */}
+              <div className="mt-6">
+                <button
+                  className="w-full py-3.5 px-4 rounded-2xl text-center text-xs font-black transition-all duration-300 flex items-center justify-center gap-2 group-hover:scale-[1.01] active:scale-[0.99] shadow-sm select-none bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white border border-slate-200/50 dark:border-white/5 hover:bg-slate-200 dark:hover:bg-white/10"
+                >
+                  <span>{thai ? "วิเคราะห์และวางแผนแผนการเรียน" : "Analyze & Plan Learning Roadmap"}</span>
+                  <ChevronRight className="size-3.5 group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
+                </button>
+              </div>
             </div>
-          </div>
-
-          {/* Description */}
-          <p className={`text-sm text-muted-foreground mb-5 ${thai ? "font-thai leading-loose" : "font-dm leading-relaxed"}`}>
-            {career.rank === 1 
-              ? (thai ? "ออกแบบและพัฒนาโมเดล ML เพื่อสกัดข้อมูลเชิงลึก ขับเคลื่อนการตัดสินใจขององค์กรด้วยข้อมูล" : career.description)
-              : career.rank === 2
-              ? (thai ? "ออกแบบสถาปัตยกรรมคลาวด์ที่ยืดหยุ่นและปลอดภัย ขับเคลื่อนโครงสร้างพื้นฐานดิจิทัล" : career.description)
-              : (thai ? "เฝ้าระวัง ตรวจจับ และตอบสนองต่อภัยคุกคามความปลอดภัย ติดตั้งกลยุทธ์การป้องกันและตรวจสอบการปฏิบัติตามเกณฑ์ความปลอดภัยมาตรฐาน" : career.description)
-            }
-          </p>
-
-          {/* Skills */}
-          <div className="flex flex-wrap gap-2 mb-5">
-            {career.skills.map((skill) => (
-              <span
-                key={skill}
-                className="px-3 py-1 rounded-full text-xs font-mono"
-                style={{
-                  background: `${career.color}08`,
-                  border: `1px solid ${career.color}20`,
-                  color: `${career.color}CC`,
-                }}
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-
-          {/* Footer stats */}
-          <div className={`flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/10 ${thai ? "font-thai" : "font-dm"}`}>
-            <div className="flex items-center gap-1.5">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M7 1v12M1 7h12" stroke={career.color} strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
-              </svg>
-              <span className="text-xs text-muted-foreground">{career.gaps} {t.results.skillGaps}</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-xs text-muted-foreground font-mono">{career.salary}</span>
-              <span
-                className="text-xs flex items-center gap-1"
-                style={{ color: "#4ADE80" }}
-              >
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                  <path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                {thai ? career.trend.replace("demand", t.results.skillGaps === "ทักษะที่ต้องพัฒนา" ? "ความต้องการตลาด" : "demand") : career.trend}
-              </span>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </motion.div>
 
-      {/* Top 1 crown indicator */}
+      {/* Top 1 badge */}
       {isTop && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.6 }}
-          className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-syne font-bold tracking-wider text-[#050A14]"
+          transition={{ delay: 0.5 }}
+          className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full px-3.5 py-1 font-syne text-[10px] font-black uppercase tracking-[0.18em] text-[#1a1100] shadow-md shadow-[#F39200]/15"
           style={{
             background: "linear-gradient(135deg, #F39200, #FFB84D)",
-            boxShadow: "0 0 20px rgba(243,146,0,0.5)",
           }}
         >
-          ★ TOP MATCH
+          <Star className="size-3 fill-current" strokeWidth={2.5} aria-hidden />
+          TOP MATCH
         </motion.div>
       )}
     </motion.div>
@@ -230,9 +413,72 @@ export default function ResultsSection() {
   const titleInView = useInView(titleRef, { once: true, margin: "-60px" });
   const { t, lang } = useLanguage();
   const thai = lang === "th";
+  const router = useRouter();
+
+  const [hasAssessmentResult, setHasAssessmentResult] = useState(false);
+  const [userCareers, setUserCareers] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("caria_top10");
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.top10_careers && parsed.top10_careers.length > 0) {
+            setHasAssessmentResult(true);
+            
+            // Map parsed careers to the schema used in ResultsSection
+            const mapped = parsed.top10_careers.slice(0, 3).map((c: any, index: number) => {
+              const colors = ["#F39200", "#1E90FF", "#A78BFA"];
+              const isDT = c.program === 'DT';
+              const salary = isDT ? '฿35K–65K' : '฿25K–45K';
+              
+              let demand = '+10% YoY';
+              if (c.match_percentage >= 92) demand = '+22% YoY';
+              else if (c.match_percentage >= 85) demand = '+16% YoY';
+              else if (c.match_percentage >= 75) demand = '+12% YoY';
+
+              // Decode strengths
+              const strengths = c.top_strengths ? c.top_strengths.map((s: string) => cleanTagName(s, lang === 'th')) : [];
+              const fallbackSkills = isDT 
+                ? ["Programming", "Software Architecture", "Data Viz"]
+                : ["Creative Design", "Branding", "UI/UX Layout"];
+              
+              return {
+                rank: c.rank || (index + 1),
+                title: c.career_name,
+                match: Math.round(c.match_percentage),
+                department: c.career_group,
+                skills: strengths.length > 0 ? strengths.slice(0, 3) : fallbackSkills,
+                gaps: c.top_gaps ? c.top_gaps.length : 3,
+                salary: salary,
+                trend: demand,
+                trendUp: true,
+                color: colors[index % colors.length],
+                description: getCareerDescription(c.career_id, c.career_name, c.career_group, lang === 'th')
+              };
+            });
+            setUserCareers(mapped);
+          }
+        } catch (e) {
+          console.error("Error parsing caria_top10 in ResultsSection", e);
+        }
+      }
+    }
+  }, [lang]);
+
+  const displayedCareers = hasAssessmentResult ? userCareers : defaultCareers;
+
+  const handleCardClick = () => {
+    if (hasAssessmentResult) {
+      router.push("/dashboard");
+    } else {
+      router.push("/assessment");
+    }
+  };
 
   return (
-    <section id="results" className="py-24 relative overflow-hidden bg-slate-50 dark:bg-[#0a0f1c]">
+    <section id="results" className="py-24 relative overflow-hidden bg-slate-50 dark:bg-[#050A14]">
       {/* Background gradient */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -251,23 +497,29 @@ export default function ResultsSection() {
           className="text-center mb-20"
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#F39200]/20 bg-[#F39200]/5 mb-5">
-            <div className="w-2 h-2 rounded-full bg-[#F39200]" />
-            <span className={`text-xs text-[#F39200] ${thai ? "font-thai" : "font-dm tracking-widest uppercase"}`}>
+            <div className="w-2 h-2 rounded-full bg-[#F39200] animate-pulse" />
+            <span className={`text-xs text-[#F39200] ${thai ? "font-thai font-semibold" : "font-dm tracking-widest uppercase"}`}>
               {t.results.eyebrow}
             </span>
           </div>
           <h2 className={`font-extrabold text-4xl lg:text-5xl text-foreground mb-4 ${thai ? "font-thai leading-snug" : "font-syne"}`}>
             {t.results.title}
           </h2>
-          <p className={`text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto ${thai ? "font-thai leading-loose" : "font-dm leading-relaxed"}`}>
+          <p className={`text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed ${thai ? "font-thai" : "font-dm"}`}>
             {t.results.subtitle}
           </p>
         </motion.div>
 
         {/* Career Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          {careers.map((career, i) => (
-            <CareerCard key={career.rank} career={career} index={i} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch mb-16">
+          {displayedCareers.map((career, i) => (
+            <CareerCard 
+              key={career.rank} 
+              career={career} 
+              index={i} 
+              hasAssessmentResult={hasAssessmentResult}
+              onClick={handleCardClick}
+            />
           ))}
         </div>
 

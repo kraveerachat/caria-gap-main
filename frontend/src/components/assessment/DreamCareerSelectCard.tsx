@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Search, Sparkles, PlayCircle, ExternalLink, ChevronRight, Briefcase } from "lucide-react";
+import { Search, Sparkles, ExternalLink, ChevronRight, Briefcase, Code2, Palette, Video } from "lucide-react";
 import mockCareers from "@/lib/mock_careers.json";
 import { CAREER_THAI_NAMES } from "@/lib/career-translations";
 
@@ -131,7 +131,7 @@ export function DreamCareerSelectCard({ onContinue, lang }: DreamCareerSelectCar
         <div className="relative">
           <input
             type="text"
-            placeholder={thai ? "🔍 พิมพ์ชื่ออาชีพเพื่อค้นหา (เช่น Software Developer, Graphic...)" : "🔍 Type to search career (e.g. Software Developer, Graphic...)"}
+            placeholder={thai ? "พิมพ์ชื่ออาชีพเพื่อค้นหา เช่น Software Developer, Graphic" : "Type to search a career, e.g. Software Developer, Graphic Designer"}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -168,14 +168,15 @@ export function DreamCareerSelectCard({ onContinue, lang }: DreamCareerSelectCar
             {/* DT Program Group */}
             {dtCareers.length > 0 && (
               <div>
-                <div className="sticky top-0 px-4 py-2 text-[10px] font-bold text-blue-500 bg-blue-500/10 dark:bg-blue-950/40 uppercase tracking-wider backdrop-blur-md">
-                  💻 Digital Technology (DT) - {dtCareers.length} {thai ? "อาชีพ" : "Careers"}
+                <div className="sticky top-0 flex items-center gap-1.5 bg-[#002F6C]/10 px-4 py-2 font-syne text-[10px] font-bold uppercase tracking-[0.18em] text-[#002F6C] backdrop-blur-md dark:bg-[#002F6C]/35 dark:text-[#9CC3FF]">
+                  <Code2 className="size-3" strokeWidth={2.5} aria-hidden />
+                  Digital Technology (DT) · {dtCareers.length} {thai ? "อาชีพ" : "Careers"}
                 </div>
                 {dtCareers.map((c) => (
                   <button
                     key={c.career_id}
                     onClick={() => handleSelect(c)}
-                    className="w-full text-left px-5 py-3 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors border-b border-slate-100 dark:border-white/[0.02]"
+                    className="w-full text-left px-5 py-3 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/4 transition-colors border-b border-slate-100 dark:border-white/2"
                   >
                     <span className="font-bold mr-2 text-slate-400 dark:text-slate-500">{c.career_id}</span>
                     <span className="font-semibold">{thai ? (CAREER_THAI_NAMES[c.career_id] || c.career_name) : c.career_name}</span>
@@ -187,14 +188,15 @@ export function DreamCareerSelectCard({ onContinue, lang }: DreamCareerSelectCar
             {/* DC Program Group */}
             {dcCareers.length > 0 && (
               <div>
-                <div className="sticky top-0 px-4 py-2 text-[10px] font-bold text-brand-orange bg-brand-orange/10 dark:bg-brand-orange/5 uppercase tracking-wider backdrop-blur-md">
-                  🎨 Digital Communication (DC) - {dcCareers.length} {thai ? "อาชีพ" : "Careers"}
+                <div className="sticky top-0 flex items-center gap-1.5 bg-brand-orange/10 px-4 py-2 font-syne text-[10px] font-bold uppercase tracking-[0.18em] text-brand-orange backdrop-blur-md dark:bg-brand-orange/15">
+                  <Palette className="size-3" strokeWidth={2.5} aria-hidden />
+                  Digital Communication (DC) · {dcCareers.length} {thai ? "อาชีพ" : "Careers"}
                 </div>
                 {dcCareers.map((c) => (
                   <button
                     key={c.career_id}
                     onClick={() => handleSelect(c)}
-                    className="w-full text-left px-5 py-3 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors border-b border-slate-100 dark:border-white/[0.02]"
+                    className="w-full text-left px-5 py-3 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/4 transition-colors border-b border-slate-100 dark:border-white/2"
                   >
                     <span className="font-bold mr-2 text-slate-400 dark:text-slate-500">{c.career_id}</span>
                     <span className="font-semibold">{thai ? (CAREER_THAI_NAMES[c.career_id] || c.career_name) : c.career_name}</span>
@@ -204,8 +206,11 @@ export function DreamCareerSelectCard({ onContinue, lang }: DreamCareerSelectCar
             )}
 
             {filteredCareers.length === 0 && (
-              <div className="px-5 py-6 text-center text-xs text-slate-400 dark:text-slate-500 font-bold">
-                {thai ? "❌ ไม่พบข้อมูลอาชีพที่ตรงกัน" : "❌ No matching careers found"}
+              <div className="flex flex-col items-center gap-2 px-5 py-6 text-center font-medium text-slate-400 dark:text-slate-500">
+                <Search className="size-4 opacity-60" strokeWidth={2} aria-hidden />
+                <span className="text-xs leading-relaxed">
+                  {thai ? "ไม่พบข้อมูลอาชีพที่ตรงกัน" : "No matching careers found"}
+                </span>
               </div>
             )}
           </div>
@@ -225,7 +230,7 @@ export function DreamCareerSelectCard({ onContinue, lang }: DreamCareerSelectCar
             <div className="mt-1.5 flex flex-wrap gap-2 items-center">
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border ${
                 selectedCareer.program === "DT"
-                  ? "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
+                  ? "bg-[#002F6C]/10 border-[#002F6C]/25 text-[#002F6C] dark:bg-[#002F6C]/35 dark:border-[#9CC3FF]/30 dark:text-[#9CC3FF]"
                   : "bg-brand-orange/10 border-brand-orange/20 text-brand-orange"
               }`}>
                 {selectedCareer.program === "DT" ? "Digital Technology (DT)" : "Digital Communication (DC)"}
@@ -240,11 +245,11 @@ export function DreamCareerSelectCard({ onContinue, lang }: DreamCareerSelectCar
             href={getCareerGroupVideoUrl(selectedCareer.career_group, selectedCareer.program)}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-all border border-red-500/20 hover:scale-[1.03] active:scale-95 shrink-0"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white/70 px-4 py-2.5 text-xs font-bold text-slate-700 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-brand-orange/40 hover:text-brand-orange active:scale-95 dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-200"
           >
-            <PlayCircle size={15} />
-            <span>{thai ? "🎥 ทำความรู้จักสายอาชีพนี้" : "🎥 Watch Career Video"}</span>
-            <ExternalLink size={10} />
+            <Video className="size-3.5" strokeWidth={2.5} aria-hidden />
+            <span>{thai ? "ทำความรู้จักสายอาชีพนี้" : "Watch Career Video"}</span>
+            <ExternalLink className="size-3" strokeWidth={2.5} aria-hidden />
           </a>
         </div>
       )}

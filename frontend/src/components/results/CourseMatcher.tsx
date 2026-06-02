@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SUT_COURSES, SutCourse } from "@/lib/sut-courses";
 import { DT_BRANCH, DC_BRANCH, CareerGroup } from "@/lib/careers-list";
-import { GraduationCap, Link2, BookMarked } from "lucide-react";
+import { GraduationCap, Link2, BookMarked, Crosshair, X } from "lucide-react";
 
 interface CourseMatcherProps {
   careerName: string;
@@ -99,13 +99,14 @@ export function CourseMatcher({ careerName, gaps, lang }: CourseMatcherProps) {
               return (
                 <span
                   key={idx}
-                  className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-all ${
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-all duration-300 ${
                     isCurrent
-                      ? "bg-brand-orange/10 border-brand-orange text-brand-orange shadow-sm font-bold"
-                      : "bg-muted/40 dark:bg-white/[0.02] border-border/50 dark:border-white/5 text-muted-foreground"
+                      ? "border-brand-orange bg-brand-orange/10 font-bold text-brand-orange shadow-sm"
+                      : "border-slate-200 bg-slate-50 text-slate-500 dark:border-white/10 dark:bg-white/2 dark:text-slate-400"
                   }`}
                 >
-                  {thai ? (c.nameTh || c.name) : c.name} {isCurrent && "🎯"}
+                  {isCurrent && <Crosshair className="size-3" strokeWidth={2.5} aria-hidden />}
+                  {thai ? (c.nameTh || c.name) : c.name}
                 </span>
               );
             })}
@@ -140,7 +141,7 @@ export function CourseMatcher({ careerName, gaps, lang }: CourseMatcherProps) {
               <div
                 key={course.course_id}
                 onClick={() => setSelectedCourse(course)}
-                className="p-4 rounded-xl border border-border/50 dark:border-white/5 bg-muted/30 dark:bg-white/[0.01] hover:bg-muted/50 dark:hover:bg-white/[0.03] transition-all hover:border-emerald-500/50 dark:hover:border-emerald-500/30 hover:shadow-md cursor-pointer flex flex-col justify-between select-none"
+                className="p-4 rounded-xl border border-border/50 dark:border-white/5 bg-muted/30 dark:bg-white/1 hover:bg-muted/50 dark:hover:bg-white/3 transition-all hover:border-emerald-500/50 dark:hover:border-emerald-500/30 hover:shadow-md cursor-pointer flex flex-col justify-between select-none"
               >
                 <div>
                   <div className="flex items-start justify-between mb-1.5">
@@ -178,7 +179,7 @@ export function CourseMatcher({ careerName, gaps, lang }: CourseMatcherProps) {
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 border border-dashed border-border dark:border-white/10 rounded-xl bg-muted/10 dark:bg-white/[0.01]">
+          <div className="text-center py-8 border border-dashed border-border dark:border-white/10 rounded-xl bg-muted/10 dark:bg-white/1">
             <BookMarked size={28} className="mx-auto text-muted-foreground/30 mb-2" />
             <p className="text-xs text-muted-foreground">
               {thai ? "ไม่มีรายวิชาที่ต้องเรียนเพิ่มเติมในส่วนนี้" : "No matching courses needed for your current level"}
@@ -209,10 +210,12 @@ export function CourseMatcher({ careerName, gaps, lang }: CourseMatcherProps) {
             >
               {/* Close Button */}
               <button
+                type="button"
                 onClick={() => setSelectedCourse(null)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-black/20 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-all"
+                aria-label="Close course details"
+                className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-full border border-slate-200 bg-white/50 text-slate-500 transition-all hover:text-slate-800 dark:border-white/10 dark:bg-black/20 dark:text-slate-400 dark:hover:text-white"
               >
-                ✕
+                <X className="size-4" strokeWidth={2.5} aria-hidden />
               </button>
 
               {/* Course Title */}

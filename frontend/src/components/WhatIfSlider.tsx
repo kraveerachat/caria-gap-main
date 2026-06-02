@@ -101,7 +101,7 @@ export default function WhatIfSlider({
                 'p-4 rounded-xl border transition-all duration-300 flex flex-col gap-3 select-none',
                 isClosed
                   ? 'bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/30 dark:border-emerald-500/20'
-                  : 'bg-muted/40 dark:bg-white/[0.01] border-border/50 dark:border-white/5 hover:border-brand-orange/30'
+                  : 'bg-muted/40 dark:bg-white/1 border-border/50 dark:border-white/5 hover:border-brand-orange/30'
               )}
             >
               <div className="flex items-center justify-between">

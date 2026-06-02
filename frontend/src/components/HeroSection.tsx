@@ -11,6 +11,7 @@ import dynamic from "next/dynamic";
 import { useLanguage } from "@/components/language-provider";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { Zap, X } from "lucide-react";
 import { DT_BRANCH, DC_BRANCH, getGroupSlug } from "@/lib/careers-list";
 import mockCareers from "@/lib/mock_careers.json";
 
@@ -19,7 +20,7 @@ const InteractiveCareerSphere = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-[380px] h-[380px] lg:w-[440px] lg:h-[440px] rounded-full bg-white/[0.01] border border-white/5 flex items-center justify-center">
+      <div className="w-[380px] h-[380px] lg:w-[440px] lg:h-[440px] rounded-full bg-white/1 border border-white/5 flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-[#F39200]/30 border-t-[#F39200] animate-spin" />
       </div>
     ),
@@ -360,10 +361,12 @@ export default function HeroSection() {
                   {panelTexts.title}
                 </span>
                 <button
+                  type="button"
                   onClick={() => setIsExploring(false)}
-                  className="w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-black/20 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
+                  aria-label={thai ? "ปิด" : "Close"}
+                  className="flex size-8 items-center justify-center rounded-full border border-slate-200 bg-white/50 text-slate-500 transition-colors hover:text-slate-800 dark:border-white/10 dark:bg-black/20 dark:text-slate-400 dark:hover:text-white"
                 >
-                  ✕
+                  <X className="size-4" strokeWidth={2.5} aria-hidden />
                 </button>
               </div>
 
@@ -445,17 +448,17 @@ export default function HeroSection() {
 
               <Link
                 href={`/assessment?career=${getCareerIdForAssessment(selectedCareer || activeGroupObj?.careers[0]?.name || "", activeBranch)}`}
-                className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-xs shadow-md transition-all duration-300 mt-4 border border-transparent ${
+                className={`mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-transparent px-5 py-3 text-xs font-bold shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 ${
                   activeBranch === "DT"
-                    ? "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/30"
+                    ? "bg-[#002F6C] text-white hover:bg-[#0a3f80] hover:shadow-lg hover:shadow-[#002F6C]/30"
                     : "bg-[#F39200] text-[#050A14] hover:bg-[#d88200] hover:shadow-lg hover:shadow-brand-orange/30"
                 }`}
               >
-                <span className={thai ? "font-thai font-bold text-[10px] text-center" : "font-syne font-bold text-[10px] text-center"}>
-                  {thai 
-                    ? `🔥 พิสูจน์ DNA ของคุณว่าเหมาะกับสาย ${selectedGroup} หรือไม่? (Start Assessment)` 
-                    : `🔥 Prove if you fit the ${selectedGroup} path? (Start Assessment)`
-                  }
+                <Zap className="size-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
+                <span className={thai ? "font-thai text-[10px] font-bold leading-relaxed" : "font-syne text-[10px] font-bold"}>
+                  {thai
+                    ? `พิสูจน์ DNA ของคุณว่าเหมาะกับสาย ${selectedGroup} หรือไม่? (Start Assessment)`
+                    : `Prove if you fit the ${selectedGroup} path (Start Assessment)`}
                 </span>
               </Link>
 
@@ -474,7 +477,7 @@ export default function HeroSection() {
                       className={`rounded-xl border transition-all duration-300 overflow-hidden ${
                         isExpanded
                           ? "bg-slate-50 dark:bg-white/5 border-slate-300 dark:border-white/20 shadow-md"
-                          : "bg-transparent border-slate-200/50 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/[0.02] cursor-pointer"
+                          : "bg-transparent border-slate-200/50 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/2 cursor-pointer"
                       }`}
                       onClick={() => setSelectedCareer(isExpanded ? "" : career.name)}
                     >
@@ -537,7 +540,7 @@ export default function HeroSection() {
         >
           <span className="text-xs font-dm text-slate-400 dark:text-white/30 tracking-widest uppercase">Scroll</span>
           <motion.div
-            className="w-px h-8 bg-gradient-to-b from-slate-400 dark:from-white/30 to-transparent"
+            className="w-px h-8 bg-linear-to-b from-slate-400 dark:from-white/30 to-transparent"
             animate={{ scaleY: [1, 0.5, 1], opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           />

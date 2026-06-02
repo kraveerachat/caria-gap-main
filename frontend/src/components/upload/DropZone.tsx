@@ -121,7 +121,7 @@ export function DropZone({ onFileSelect, className }: DropZoneProps) {
       
       {/* Decorative background animation */}
       {!file && (
-        <div className="absolute inset-0 z-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] animate-shimmer pointer-events-none" />
+        <div className="absolute inset-0 z-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.03)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%,100%_100%] animate-shimmer pointer-events-none" />
       )}
     </div>
     </div>

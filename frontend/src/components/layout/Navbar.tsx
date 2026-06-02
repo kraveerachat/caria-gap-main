@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from "motion/react"
-import { Check, ArrowRight, Trash2 } from 'lucide-react';
+import { Check, ArrowRight } from 'lucide-react';
 import { STEPS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { Logo } from "@/components/logo"
@@ -39,7 +39,7 @@ export default function Navbar() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="sticky top-0 z-50 w-full border-b border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#070c19]/90 backdrop-blur-md px-6 py-4 shadow-sm"
+      className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/70 px-6 py-4 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60"
     >
       <div className="mx-auto flex max-w-6xl w-full items-center justify-between text-slate-900 dark:text-slate-100">
         <Link href="/" className="pl-2">
@@ -104,8 +104,9 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Actions (Language, Theme, Reset, Start) */}
+        {/* Actions (Insights, Language, Theme, Reset, Start) */}
         <div className="flex items-center gap-2">
+
           <LanguageToggle />
           <ThemeToggle onTop={false} />
           {pathname.startsWith("/career/") ? (
@@ -116,7 +117,7 @@ export default function Navbar() {
                   alert("บันทึกแผนการเรียนสำเร็จ! ระบบกำลังนำคุณกลับไปยังหน้าผลลัพธ์อาชีพ...");
                   window.location.href = `/dashboard`;
                 }}
-                className="group hidden items-center gap-2 rounded-full bg-brand-orange px-5 py-2.5 text-sm font-semibold text-brand-orange-foreground shadow-[0_10px_30px_-8px_rgba(243,146,0,0.6)] transition-transform duration-300 hover:scale-[1.04] active:scale-95 sm:inline-flex"
+                className="group hidden items-center gap-2 rounded-full bg-brand-orange px-5 py-2.5 text-sm font-semibold text-brand-orange-foreground shadow-[0_10px_30px_-8px_rgba(243,146,0,0.6)] transition-all duration-300 hover:scale-[1.02] active:scale-95 sm:inline-flex"
               >
                 <span>บันทึกแผนการเรียน (Save Roadmap)</span>
               </button>
@@ -126,23 +127,9 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm("คุณต้องการลบข้อมูลส่วนบุคคล (Assessment Results) ทั้งหมดหรือไม่?")) {
-                    localStorage.clear();
-                    window.location.href = "/";
-                  }
-                }}
-                className="group hidden items-center gap-2 rounded-full border border-danger/50 bg-danger/10 px-4 py-2.5 text-sm font-semibold text-danger transition-transform duration-300 hover:scale-[1.04] active:scale-95 sm:inline-flex"
-                title="ลบข้อมูลส่วนบุคคล"
-              >
-                <Trash2 className="size-4" />
-                <span className="hidden lg:inline">ลบข้อมูล</span>
-              </button>
               <Link
                 href="/assessment"
-                className="group hidden items-center gap-2 rounded-full bg-brand-orange px-5 py-2.5 text-sm font-semibold text-brand-orange-foreground shadow-[0_10px_30px_-8px_rgba(243,146,0,0.6)] transition-transform duration-300 hover:scale-[1.04] active:scale-95 sm:inline-flex"
+                className="group hidden items-center gap-2 rounded-full bg-brand-orange px-5 py-2.5 text-sm font-semibold text-brand-orange-foreground shadow-[0_10px_30px_-8px_rgba(243,146,0,0.6)] transition-all duration-300 hover:scale-[1.02] active:scale-95 sm:inline-flex"
               >
                 {t.nav.start}
                 <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />

@@ -8,6 +8,7 @@ import { useTheme } from "next-themes";
 import * as THREE from "three";
 import { DT_BRANCH, DC_BRANCH, CareerGroup, CareerItem } from "@/lib/careers-list";
 import { useLanguage } from "@/components/language-provider";
+import { Lightbulb } from "lucide-react";
 
 const RADIUS = 2.5;
 const COLOR_ORANGE = new THREE.Color("#F39200"); // SUT Orange
@@ -489,10 +490,11 @@ export default function InteractiveCareerSphere({
 
       {/* Interactive tip overlay for landing */}
       {!isExploring && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none text-center hidden md:block">
-          <div className="px-4 py-2 rounded-full border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#070b14]/90 backdrop-blur-md shadow-md animate-bounce">
-            <span className={`text-[10px] md:text-xs font-medium text-slate-500 dark:text-slate-400 ${thai ? "font-thai" : ""}`}>
-              {thai ? "💡 คลิกที่กลุ่มอาชีพบนลูกบอลเพื่อเจาะลึกวิชาเรียน" : "💡 Click on any career label to explore details"}
+        <div className="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 pointer-events-none text-center md:block">
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-4 py-2 shadow-md backdrop-blur-xl animate-bounce dark:border-white/10 dark:bg-slate-900/60">
+            <Lightbulb className="size-3.5 text-brand-orange" strokeWidth={2.25} aria-hidden />
+            <span className={`text-[10px] font-medium text-slate-600 dark:text-slate-300 md:text-xs ${thai ? "font-thai leading-relaxed" : ""}`}>
+              {thai ? "คลิกที่กลุ่มอาชีพบนลูกบอลเพื่อเจาะลึกวิชาเรียน" : "Click any career label to explore details"}
             </span>
           </div>
         </div>

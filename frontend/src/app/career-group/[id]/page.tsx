@@ -9,6 +9,7 @@ import { DT_BRANCH, DC_BRANCH, getGroupSlug, CareerGroup } from "@/lib/careers-l
 import { getRequiredCoursesForCareer, SutCourse } from "@/lib/sut-courses";
 import { useLanguage } from "@/components/language-provider";
 import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 
 export default function CareerGroupPage() {
   const params = useParams();
@@ -222,10 +223,12 @@ export default function CareerGroupPage() {
             >
               {/* Close Button */}
               <button
+                type="button"
                 onClick={() => setSelectedCourse(null)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-black/20 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-all"
+                aria-label="Close course details"
+                className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-full border border-slate-200 bg-white/50 text-slate-500 transition-all hover:text-slate-800 dark:border-white/10 dark:bg-black/20 dark:text-slate-400 dark:hover:text-white"
               >
-                ✕
+                <X className="size-4" strokeWidth={2.5} aria-hidden />
               </button>
 
               {/* Course Title */}

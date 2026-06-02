@@ -45,15 +45,15 @@ const CustomTooltip = ({ active, payload }: any) => {
       <div className="rounded-xl p-4 text-sm shadow-xl bg-card border border-border/80 backdrop-blur-md text-foreground">
         <p className="font-bold mb-3 border-b border-border/60 pb-2">{data.subject}</p>
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-blue-500">🔵</span>
-            <span className="text-muted-foreground">Career Required:</span>
-            <span className="font-semibold ml-auto">{data.career}</span>
+          <div className="flex items-center gap-2.5">
+            <span className="inline-block size-2.5 shrink-0 rounded-full bg-[#002F6C] shadow-[0_0_6px_rgba(0,47,108,0.6)]" aria-hidden />
+            <span className="font-medium text-slate-500 dark:text-slate-400">Career Required:</span>
+            <span className="ml-auto font-bold text-slate-900 dark:text-white">{data.career}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-brand-orange">🟠</span>
-            <span className="text-muted-foreground">Your Profile:</span>
-            <span className="font-semibold ml-auto">{data.student}</span>
+          <div className="flex items-center gap-2.5">
+            <span className="inline-block size-2.5 shrink-0 rounded-full bg-brand-orange shadow-[0_0_6px_rgba(243,146,0,0.7)]" aria-hidden />
+            <span className="font-medium text-slate-500 dark:text-slate-400">Your Profile:</span>
+            <span className="ml-auto font-bold text-slate-900 dark:text-white">{data.student}</span>
           </div>
         </div>
       </div>
@@ -264,7 +264,7 @@ export function PriorityGapsList({ gaps }: PriorityGapsListProps) {
           <motion.li
             key={item.skill}
             variants={itemVariants}
-            className="group relative rounded-xl p-4 bg-muted/40 dark:bg-white/[0.02] border border-border/50 dark:border-white/5 transition-all duration-300 hover:scale-[1.01] hover:bg-muted/60 dark:hover:bg-white/[0.04]"
+            className="group relative rounded-xl p-4 bg-muted/40 dark:bg-white/2 border border-border/50 dark:border-white/5 transition-all duration-300 hover:scale-[1.01] hover:bg-muted/60 dark:hover:bg-white/4"
           >
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-semibold text-foreground tracking-wide">{item.skill}</span>

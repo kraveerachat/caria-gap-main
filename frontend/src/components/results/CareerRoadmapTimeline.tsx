@@ -198,8 +198,8 @@ export function CareerRoadmapTimeline() {
       className="relative w-full mt-24 pt-20 border-t border-slate-200/80 dark:border-white/5 transition-all duration-500"
     >
       {/* Background decoration flares */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-orange/[0.03] dark:bg-brand-orange/[0.05] blur-[100px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/[0.03] dark:bg-blue-500/[0.05] blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-orange/3 dark:bg-brand-orange/5 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/3 dark:bg-blue-500/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="relative z-10">
         
@@ -218,7 +218,7 @@ export function CareerRoadmapTimeline() {
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             {thai ? "เลือกเส้นทางดิจิทัลของคุณกับหลักสูตร" : "Design Your Digital Path with"}{" "}
-            <span className="bg-gradient-to-r from-brand-orange to-amber-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-brand-orange to-amber-500 bg-clip-text text-transparent">
               DIGITECH มทส.
             </span>
           </h2>
@@ -248,7 +248,7 @@ export function CareerRoadmapTimeline() {
                 priority
               />
               {/* Soft overlay gradient on the image */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none" />
               
               <div className="absolute bottom-6 left-6 right-6">
                 <span className="inline-block rounded bg-brand-orange text-brand-orange-foreground font-bold px-2 py-0.5 text-[9px] uppercase tracking-wider mb-2">
@@ -397,7 +397,7 @@ export function CareerRoadmapTimeline() {
                     sizes="(max-w-768px) 100vw, 25vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-linear-to-t from-slate-950/40 to-transparent pointer-events-none" />
                 </div>
 
                 {/* Card Content */}
