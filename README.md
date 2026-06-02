@@ -106,6 +106,43 @@ pnpm (Package Manager)
 
 ---
 
+📜 คำสั่งที่ใช้บ่อย (Frontend Scripts)
+รันคำสั่งเหล่านี้ภายในโฟลเดอร์ `frontend/` ด้วย `pnpm`:
+
+| คำสั่ง | การทำงาน |
+| --- | --- |
+| `pnpm install` | ติดตั้ง dependencies ทั้งหมด (อ่านจาก `pnpm-lock.yaml`) |
+| `pnpm dev` | รันเซิร์ฟเวอร์โหมดพัฒนาที่ `http://localhost:3000` |
+| `pnpm build` | สร้าง production build (ตรวจ type + lint ครบทุก route) |
+| `pnpm start` | รัน production build ที่ build ไว้แล้ว |
+| `pnpm lint` | ตรวจสอบโค้ดด้วย ESLint |
+
+> ⚠️ Frontend ใช้ **pnpm เท่านั้น** — อย่ารัน `npm install` ในโฟลเดอร์นี้ เพราะ npm จะ prune แพ็กเกจที่ pnpm จัดการอยู่ออก และทำให้ build พัง
+
+---
+
+📚 เทคโนโลยีและแพ็กเกจหลัก (Frontend Tech Stack)
+
+- **Framework & ภาษา:** Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS v4
+- **ฟอนต์ (Typography):** `geist` (Geist Sans/Mono สำหรับเนื้อหาและโค้ด), Syne (ฟอนต์ Display สำหรับหัวข้อ โหลดผ่าน `next/font/google`), IBM Plex Sans Thai (ภาษาไทย)
+- **3D & การแสดงผลข้อมูล:** `three`, `@react-three/fiber`, `@react-three/drei`, `@react-three/postprocessing`, `recharts`
+- **แอนิเมชัน:** `framer-motion` / `motion`
+- **UI Components (สไตล์ shadcn):** `@radix-ui/*` (dialog, dropdown-menu, select, tabs, tooltip ฯลฯ), `cmdk`, `vaul`, `sonner`, `input-otp`, `embla-carousel-react`, `react-day-picker`, `react-hook-form`
+- **Utilities & สไตล์:** `class-variance-authority`, `tailwind-merge`, `clsx`, `lucide-react` (ไอคอน), `tw-animate-css`, `next-themes` (สลับธีม Dark/Light)
+- **Analytics:** `@vercel/analytics`
+
+### 🆕 แพ็กเกจที่เพิ่ม/ประกาศเพิ่มในรอบอัปเดตนี้
+
+ประกาศแพ็กเกจต่อไปนี้ลงใน `package.json` เพื่อเสริมระบบฟอนต์/UI ให้สมบูรณ์ และให้ติดตั้งซ้ำบนเครื่องใหม่ได้ (reproducible):
+
+- `geist` — เปิดใช้งานฟอนต์ Geist ทั้งระบบ (เดิมโค้ดอ้างถึง `font-syne` / `font-sans` แต่ฟอนต์ไม่เคยถูกโหลดจริง จึง fallback เป็น system sans)
+- `tw-animate-css` — ยูทิลิตี้แอนิเมชันที่ `globals.css` เรียกใช้ (`@import 'tw-animate-css'`)
+- ชุด `@radix-ui/*`, `motion`, `@vercel/analytics`, `cmdk`, `vaul`, `sonner`, `input-otp`, `react-hook-form`, `react-day-picker`, `embla-carousel-react`, `class-variance-authority` — เดิมถูกเรียกใช้ในโค้ดแต่ไม่ได้ประกาศไว้ใน `package.json` (ติดตั้งค้างอยู่ใน `node_modules` เฉยๆ) จึงประกาศให้ครบ เพื่อให้ `pnpm install` บนเครื่องใหม่ทำงานได้ทันทีโดยไม่พัง
+
+> Syne ถูกตั้งค่าผ่าน `next/font/google` ใน `app/layout.tsx` และเชื่อมเข้ากับ Tailwind ผ่าน token `--font-syne` ใน `globals.css` ทำให้คลาส `font-syne` / `font-sans` / `font-mono` ทั่วทั้งโปรเจกต์แสดงผลด้วยฟอนต์ที่ตั้งใจไว้
+
+---
+
 📦 โครงสร้างโปรเจกต์ที่สำคัญ (Key Folder Structure)
 
 ```text
