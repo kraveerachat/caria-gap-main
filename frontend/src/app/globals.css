@@ -86,8 +86,9 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-syne: var(--font-syne-src), 'Syne', ui-sans-serif, system-ui, sans-serif;
   --color-brand-orange: var(--brand-orange);
   --color-brand-orange-foreground: var(--brand-orange-foreground);
   --color-brand-blue: var(--brand-blue);
@@ -145,6 +146,9 @@
 
 @utility font-thai {
   font-family: 'IBM Plex Sans Thai', var(--font-sans), system-ui, sans-serif;
+  /* Thai vowels and tone marks need extra vertical space; default to relaxed
+     so any block tagged font-thai is safe from clipping. */
+  line-height: 1.625;
 }
 
 @utility glass {
@@ -179,6 +183,31 @@
 
 .text-balance { text-wrap: balance; }
 .perspective-1000 { perspective: 1000px; }
+
+/* Infinite logo marquee (Industry Demand section) */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.marquee-track { animation: marquee-left 42s linear infinite; will-change: transform; }
+.marquee-track-rev { animation: marquee-right 42s linear infinite; will-change: transform; }
+.marquee:hover .marquee-track,
+.marquee:hover .marquee-track-rev { animation-play-state: paused; }
+
+/* Pulsing SUT-orange glow for the master CTA */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 22px rgba(243, 146, 0, 0.35); }
+  50% { box-shadow: 0 0 40px rgba(243, 146, 0, 0.6); }
+}
+.animate-glow-pulse { animation: glow-pulse 2.8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track, .marquee-track-rev, .animate-glow-pulse { animation: none; }
+}
 
 .caria-slider {
   -webkit-appearance: none;
