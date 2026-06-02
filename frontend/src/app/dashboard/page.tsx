@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CareerCard from "@/components/results/CareerCard";
@@ -12,10 +13,13 @@ import { MOCK_TOP10 } from "@/lib/mockData";
 import type { Top10Response, CareerResult } from "@/types";
 import { useLanguage } from "@/components/language-provider";
 import { useMockUser } from "@/lib/mock-auth";
+import Link from "next/link";
 import { AuthButtons } from "@/components/auth/AuthButtons";
-import { CheckCircle2, Lock, Sparkles, AlertCircle, ArrowRight } from "lucide-react";
+import { CheckCircle2, Lock, Sparkles, AlertCircle, ArrowRight, LineChart, Target, Trophy, Heart, SearchX, Rocket } from "lucide-react";
 import { CAREER_THAI_NAMES } from "@/lib/career-translations";
 import mockCareers from "@/lib/mock_careers.json";
+import CurriculumTrackFunnel from "@/components/dashboard/CurriculumTrackFunnel";
+import { getTrackForCareer } from "@/lib/sut-tracks";
 
 // Module-level cache to persist data across React Strict Mode double-mount in development
 // and prevent timing-based bugs when navigating to Dashboard.
@@ -204,33 +208,62 @@ function DashboardContent() {
     : topAiCareerName;
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-thai relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#050A14] text-foreground font-thai relative overflow-hidden">
       <Navbar />
 
-      {/* Background */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-brand-orange/15 blur-[130px]" />
-        <div className="absolute bottom-20 right-0 h-[400px] w-[400px] rounded-full bg-[#2563EB]/10 blur-[110px]" />
+      {/* Ambient background — SUT Navy + Orange, kept subtle */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-brand-orange/10 blur-[130px] dark:bg-brand-orange/15" />
+        <div className="absolute bottom-20 right-0 h-[400px] w-[400px] rounded-full bg-[#002F6C]/10 blur-[110px] dark:bg-[#002F6C]/25" />
       </div>
 
       <main className="relative z-10 mx-auto max-w-7xl px-6 pt-28 pb-20">
         {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold md:text-5xl">
-            <span className="mr-3">🎯</span>
-            <span className="bg-gradient-to-r from-brand-orange to-orange-400 bg-clip-text text-transparent">
-              {thai ? "อาชีพที่เหมาะกับคุณ (Recommended Careers)" : "Recommended Careers"}
-            </span>
-          </h1>
-          <p className="mt-3 text-lg text-muted-foreground">
-            {thai 
-              ? "ผลลัพธ์จากการวิเคราะห์สมรรถนะ 66 มิติ กับ 78 อาชีพดิจิทัล" 
-              : "Results of mapping 66 competency dimensions against 78 digital careers"}
-          </p>
-          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm text-muted-foreground backdrop-blur-sm">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            User: {userId}
+        <div className="mb-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-slate-200 dark:border-white/10 pb-8">
+          <div>
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-brand-orange/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-orange">
+              <Target className="size-3" strokeWidth={2.5} />
+              {thai ? "ผลการประเมิน" : "Assessment Results"}
+            </div>
+            <h1 className="font-syne text-4xl font-bold tracking-tight text-slate-900 dark:text-white md:text-5xl text-balance leading-tight">
+              {thai ? "อาชีพที่เหมาะกับคุณ" : "Recommended Careers"}
+            </h1>
+            <p className="mt-3 max-w-2xl text-base font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+              {thai
+                ? "ผลลัพธ์จากการวิเคราะห์สมรรถนะ 66 มิติ กับ 78 อาชีพดิจิทัล"
+                : "Results of mapping 66 competency dimensions against 78 digital careers."}
+            </p>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-4 py-1.5 text-xs font-medium text-slate-600 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-300">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden />
+              <span>User: <strong className="font-bold text-slate-900 dark:text-white">{userId}</strong></span>
+            </div>
           </div>
+
+          {/* Premium relocated Insights CTA */}
+          <Link
+            href={`/analytics?user=${userId}`}
+            className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-brand-orange/30 bg-white/60 p-4 text-left shadow-sm backdrop-blur-md transition-all hover:scale-[1.02] hover:border-brand-orange/60 hover:shadow-lg hover:shadow-brand-orange/5 dark:bg-white/2 dark:border-white/10 dark:hover:border-brand-orange/40 md:w-80 shrink-0 select-none active:scale-[0.98]"
+          >
+            {/* Subtle glow background */}
+            <span className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-brand-orange/10 blur-xl transition-all duration-300 group-hover:scale-150" />
+            
+            <div className="flex items-center gap-3.5 z-10">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-orange/15 border border-brand-orange/30 text-brand-orange shadow-inner">
+                <LineChart className="size-5 transition-transform duration-300 group-hover:scale-110" strokeWidth={2.25} />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-800 dark:text-white text-[13.5px] leading-tight font-thai">
+                  {thai ? "สถิติเชิงลึก (Insights)" : "Deep Market Insights"}
+                </h4>
+                <p className="text-[11px] text-muted-foreground leading-normal mt-0.5 max-w-[180px] font-thai">
+                  {thai ? "สำรวจอุปสงค์อุปทาน และทักษะดิจิทัลที่ขาดแคลน" : "Explore skills shortage & market demand"}
+                </p>
+              </div>
+            </div>
+            <div className="flex size-7 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-400 transition-colors group-hover:bg-brand-orange group-hover:text-white shrink-0 z-10">
+              <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" strokeWidth={2.5} />
+            </div>
+          </Link>
         </div>
 
         {/* Dream Career Comparison Banner */}
@@ -250,7 +283,7 @@ function DashboardContent() {
           if (isTop3) {
             // Condition A: ติด Top 3 (High Match)
             return (
-              <div className="mb-10 rounded-3xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent p-6 md:p-8 shadow-lg shadow-emerald-500/5 backdrop-blur-md animate-in fade-in duration-500">
+              <div className="mb-10 rounded-3xl border border-emerald-500/20 bg-linear-to-r from-emerald-500/10 via-teal-500/5 to-transparent p-6 md:p-8 shadow-lg shadow-emerald-500/5 backdrop-blur-md animate-in fade-in duration-500">
                 <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="flex flex-col gap-5 md:flex-row md:items-center">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500">
@@ -276,10 +309,11 @@ function DashboardContent() {
                   </div>
                   <button
                     onClick={() => router.push(`/career/${selectedDreamCareer.id}?user=${userId}`)}
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-all shadow-md shrink-0 active:scale-95 hover:scale-105"
+                    className="inline-flex shrink-0 items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-xs font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:bg-emerald-700 active:scale-95"
                   >
-                    <span>{thai ? `🚀 แผนการเรียนสู่ ${dreamCareerLabel.split(" (")[0]}` : `🚀 Roadmap to ${dreamCareerLabel.split(" (")[0]}`}</span>
-                    <ArrowRight size={14} />
+                    <Rocket className="size-3.5" strokeWidth={2.5} />
+                    <span className="leading-relaxed">{thai ? `แผนการเรียนสู่ ${dreamCareerLabel.split(" (")[0]}` : `Roadmap to ${dreamCareerLabel.split(" (")[0]}`}</span>
+                    <ArrowRight className="size-3.5" strokeWidth={2.5} />
                   </button>
                 </div>
               </div>
@@ -287,7 +321,7 @@ function DashboardContent() {
           } else if (isTop10) {
             // Condition B: ติดอันดับ 4-10 (Potential Match)
             return (
-              <div className="mb-10 rounded-3xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent p-6 md:p-8 shadow-lg shadow-amber-500/5 backdrop-blur-md animate-in fade-in duration-500">
+              <div className="mb-10 rounded-3xl border border-amber-500/20 bg-linear-to-r from-amber-500/10 via-orange-500/5 to-transparent p-6 md:p-8 shadow-lg shadow-amber-500/5 backdrop-blur-md animate-in fade-in duration-500">
                 <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="flex flex-col gap-5 md:flex-row md:items-center">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-500">
@@ -313,10 +347,11 @@ function DashboardContent() {
                   </div>
                   <button
                     onClick={() => router.push(`/career/${selectedDreamCareer.id}?user=${userId}`)}
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white transition-all shadow-md shrink-0 active:scale-95 hover:scale-105"
+                    className="inline-flex shrink-0 items-center gap-2 rounded-full bg-amber-500 px-5 py-3 text-xs font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:bg-amber-600 active:scale-95"
                   >
-                    <span>{thai ? `🚀 แผนการเรียนสู่ ${dreamCareerLabel.split(" (")[0]}` : `🚀 Roadmap to ${dreamCareerLabel.split(" (")[0]}`}</span>
-                    <ArrowRight size={14} />
+                    <Rocket className="size-3.5" strokeWidth={2.5} />
+                    <span className="leading-relaxed">{thai ? `แผนการเรียนสู่ ${dreamCareerLabel.split(" (")[0]}` : `Roadmap to ${dreamCareerLabel.split(" (")[0]}`}</span>
+                    <ArrowRight className="size-3.5" strokeWidth={2.5} />
                   </button>
                 </div>
               </div>
@@ -324,7 +359,7 @@ function DashboardContent() {
           } else {
             // Condition C: ไม่ติด Top 10 เลย (Mismatch / Reality Check)
             return (
-              <div className="mb-10 rounded-3xl border border-red-500/20 bg-gradient-to-r from-red-500/10 via-rose-500/5 to-transparent p-6 md:p-8 shadow-lg shadow-red-500/5 backdrop-blur-md animate-in fade-in duration-500">
+              <div className="mb-10 rounded-3xl border border-red-500/20 bg-linear-to-r from-red-500/10 via-rose-500/5 to-transparent p-6 md:p-8 shadow-lg shadow-red-500/5 backdrop-blur-md animate-in fade-in duration-500">
                 <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="flex flex-col gap-5 md:flex-row md:items-center">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-red-500/15 border border-red-500/30 text-red-500">
@@ -350,10 +385,11 @@ function DashboardContent() {
                   </div>
                   <button
                     onClick={() => router.push(`/career/${selectedDreamCareer.id}?user=${userId}`)}
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold bg-brand-orange text-white hover:bg-brand-orange/90 hover:scale-105 transition-all shadow-md shrink-0 active:scale-95"
+                    className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand-orange px-5 py-3 text-xs font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:bg-brand-orange/90 active:scale-95"
                   >
-                    <span>{thai ? `🚀 แผนการเรียนสู่ ${dreamCareerLabel.split(" (")[0]}` : `🚀 Roadmap to ${dreamCareerLabel.split(" (")[0]}`}</span>
-                    <ArrowRight size={14} />
+                    <Rocket className="size-3.5" strokeWidth={2.5} />
+                    <span className="leading-relaxed">{thai ? `แผนการเรียนสู่ ${dreamCareerLabel.split(" (")[0]}` : `Roadmap to ${dreamCareerLabel.split(" (")[0]}`}</span>
+                    <ArrowRight className="size-3.5" strokeWidth={2.5} />
                   </button>
                 </div>
               </div>
@@ -365,14 +401,16 @@ function DashboardContent() {
 
         {/* Selected Dream Career (If not in Top 10) */}
         {!dreamCareerLoading && dreamCareerData && (
-          <div className="mb-10 p-6 rounded-3xl border border-brand-orange/15 bg-brand-orange/[0.02] border-dashed animate-in fade-in duration-500">
-            <h3 className="mb-4 flex items-center gap-2 text-md font-bold text-foreground">
-              <span className="text-brand-orange">💭</span> {thai ? "อาชีพในฝันที่คุณเลือก (Your Selected Dream Career)" : "Your Selected Dream Career"}
+          <div className="mb-10 p-6 rounded-3xl border border-brand-orange/15 bg-brand-orange/2 border-dashed animate-in fade-in duration-500">
+            <h3 className="mb-4 flex items-center gap-2 text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
+              <Heart className="size-4 text-brand-orange" strokeWidth={2.25} aria-hidden />
+              {thai ? "อาชีพในฝันที่คุณเลือก (Your Selected Dream Career)" : "Your Selected Dream Career"}
             </h3>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <CareerCard
                 career={dreamCareerData}
                 isTopRank={false}
+                track={getTrackForCareer(dreamCareerData)}
                 onClick={() => handleCareerClick(dreamCareerData)}
                 className="border-brand-orange/30 shadow-lg shadow-brand-orange/5 hover:border-brand-orange/60 hover:shadow-brand-orange/10 dark:hover:shadow-brand-orange/20 bg-white/80 dark:bg-[#070b14]/50 backdrop-blur-md"
               />
@@ -380,23 +418,74 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Top 3 */}
-        <div className="mb-6">
-          <h2 className="mb-6 flex items-center gap-2 text-2xl font-bold text-foreground">
-            <span className="text-brand-orange">🏆</span> {thai ? "Top 3 อาชีพแนะนำ (Top 3 Recommended)" : "Top 3 Recommended Careers"}
-          </h2>
-          <div className="grid gap-6 md:grid-cols-3">
-            {top3.map((career) => (
-              <CareerCard
-                key={career.career_id}
-                career={career}
-                isTopRank={true}
-                onClick={() => handleCareerClick(career)}
-                className="transition-transform duration-300 hover:scale-[1.02]"
-              />
-            ))}
+        {/* Top Matches Section */}
+        <div className="mb-12">
+          {/* Eyebrow badge from the design image */}
+          <div className="flex justify-center mb-3">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500 dark:border-amber-500/30">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
+              <span>{thai ? "ปัญญาด้านอาชีพ" : "Career Intelligence"}</span>
+            </div>
           </div>
+          
+          <div className="text-center mb-8">
+            <h2 className="font-syne text-3xl font-black tracking-tight leading-normal text-slate-900 dark:text-white sm:text-4xl">
+              {thai ? "อาชีพที่ตรงกับคุณมากที่สุด" : "Top Career Matches"}
+            </h2>
+            <p className="mt-2.5 mx-auto max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
+              {thai 
+                ? "เส้นทางที่จัดอันดับอย่างแม่นยำจากโปรไฟล์สมรรถนะของคุณและสัญญาณความต้องการของตลาดแบบเรียลไทม์" 
+                : "Paths precisely ranked based on your competency profile and real-time market demand signals."}
+            </p>
+          </div>
+          
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.15
+                }
+              }
+            }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          >
+            {/* Card #1 (Top Match) spans 2 columns */}
+            {top3[0] && (
+              <CareerCard
+                career={top3[0]}
+                isTopRank={true}
+                isHero={true}
+                track={getTrackForCareer(top3[0])}
+                onClick={() => handleCareerClick(top3[0])}
+                className="h-full"
+              />
+            )}
+            
+            {/* Cards #2 and #3 stack vertically in the remaining 1 column */}
+            <div className="flex flex-col gap-6">
+              {top3.slice(1, 3).map((career) => (
+                <CareerCard
+                  key={career.career_id}
+                  career={career}
+                  isTopRank={true}
+                  isHero={false}
+                  track={getTrackForCareer(career)}
+                  onClick={() => handleCareerClick(career)}
+                  className="flex-1"
+                />
+              ))}
+            </div>
+          </motion.div>
         </div>
+
+        {/* SUT Curriculum Track funnel — drill-down detail (Screen 2) */}
+        {careers.length > 0 && (
+          <CurriculumTrackFunnel careers={careers} userId={userId} />
+        )}
 
         {/* Login hook — appears once Top 3 are revealed (guest → save & unlock) */}
         {careers.length > 0 && (
@@ -411,7 +500,7 @@ function DashboardContent() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-3xl border border-brand-orange/30 bg-gradient-to-br from-brand-orange/10 to-[#2563EB]/5 p-6 md:p-8">
+              <div className="overflow-hidden rounded-3xl border border-brand-orange/30 bg-linear-to-br from-brand-orange/10 to-[#2563EB]/5 p-6 md:p-8">
                 <div className="flex flex-col gap-6 md:flex-row md:items-center">
                   <div className="flex-1">
                     <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-brand-orange/30 bg-brand-orange/10 px-3 py-1 text-[11px] font-bold text-brand-orange">
@@ -450,8 +539,9 @@ function DashboardContent() {
                   key={career.career_id}
                   career={career}
                   isTopRank={false}
+                  track={getTrackForCareer(career)}
                   onClick={() => handleCareerClick(career)}
-                  className="transition-transform duration-300 hover:scale-[1.01]"
+                  className="transition-all duration-300 hover:scale-[1.02]"
                 />
               ))}
             </div>
@@ -469,14 +559,19 @@ function DashboardContent() {
 
         {/* Empty State */}
         {careers.length === 0 && (
-          <div className="mt-20 text-center">
-            <div className="text-6xl">🤔</div>
-            <p className="mt-4 text-xl text-muted-foreground">{thai ? "ไม่พบข้อมูลอาชีพ" : "No career matches found"}</p>
+          <div className="mt-20 flex flex-col items-center text-center">
+            <div className="flex size-16 items-center justify-center rounded-2xl border border-slate-200 bg-white/70 text-slate-400 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-500">
+              <SearchX className="size-7" strokeWidth={1.75} aria-hidden />
+            </div>
+            <p className="mt-5 text-lg font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+              {thai ? "ไม่พบข้อมูลอาชีพ" : "No career matches found"}
+            </p>
             <button
               onClick={() => router.push("/assessment")}
-              className="mt-6 rounded-xl bg-brand-orange px-6 py-3 font-bold text-brand-orange-foreground transition-all hover:scale-105"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-sm font-bold text-brand-orange-foreground shadow-[0_10px_30px_-8px_rgba(243,146,0,0.6)] transition-all duration-300 hover:scale-[1.02] active:scale-95"
             >
               {thai ? "กลับไปประเมินใหม่" : "Retake Assessment"}
+              <ArrowRight className="size-4" strokeWidth={2.5} aria-hidden />
             </button>
           </div>
         )}
