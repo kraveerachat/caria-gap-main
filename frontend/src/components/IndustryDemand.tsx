@@ -6,10 +6,11 @@
  * carousel and the company zig-zag now live on that dedicated route, so the
  * landing stays short.
  *
- * Logos load from /public/companies/{global,thai}/. Until a file is present each
- * slot renders a clean monochrome wordmark, so the wall never shows a broken
- * image and upgrades to artwork automatically when assets are added. Each unique
- * src is probed once (module cache) so duplicated marquee copies don't re-request.
+ * Logos load from /public/companies/{global,thai}/. Only paths listed in
+ * AVAILABLE_LOGOS are requested; every other slot renders a clean monochrome
+ * wordmark and is never fetched, so the wall shows no broken images and makes
+ * no 404 requests for absent artwork. Listed logos are probed once (module
+ * cache) so duplicated marquee copies don't re-request.
  */
 "use client";
 
@@ -18,17 +19,41 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useLanguage } from "@/components/language-provider";
 
-type Company = { name: string; src: string };
+type Company = { name: string; src?: string };
 
-const GLOBAL_COMPANIES: Company[] = [
+// Logo files that actually exist under /public/companies. Anything not listed
+// here renders a wordmark and is NEVER requested, so the marquee no longer
+// probes absent files (those probes were the /companies/**.svg 404s). To
+// upgrade a wordmark to artwork: drop the SVG in the folder, then add its path.
+const AVAILABLE_LOGOS = new Set<string>([
+  "/companies/global/google.svg",
+  "/companies/global/microsoft.svg",
+  "/companies/global/meta.svg",
+  "/companies/global/nvidia.svg",
+  "/companies/global/netflix.svg",
+  "/companies/global/oracle.svg",
+  "/companies/global/adobe.svg",
+  "/companies/global/salesforce.svg",
+  "/companies/global/spotify.svg",
+  "/companies/global/ibm.svg",
+]);
+
+function withLogos(region: "global" | "thai", names: string[]): Company[] {
+  return names.map((name) => {
+    const path = `/companies/${region}/${name.toLowerCase()}.svg`;
+    return { name, src: AVAILABLE_LOGOS.has(path) ? path : undefined };
+  });
+}
+
+const GLOBAL_COMPANIES: Company[] = withLogos("global", [
   "Google", "Microsoft", "Amazon", "Meta", "NVIDIA", "Apple",
   "Netflix", "Oracle", "Adobe", "Salesforce", "Spotify", "IBM",
-].map((name) => ({ name, src: `/companies/global/${name.toLowerCase()}.svg` }));
+]);
 
-const THAI_COMPANIES: Company[] = [
+const THAI_COMPANIES: Company[] = withLogos("thai", [
   "SCB", "KBank", "PTT", "AIS", "True", "SCG",
   "Agoda", "LINE", "Bitkub", "KBTG", "Sertis", "CP",
-].map((name) => ({ name, src: `/companies/thai/${name.toLowerCase()}.svg` }));
+]);
 
 const EDGE_MASK =
   "linear-gradient(to right, transparent, #000 6%, #000 94%, transparent)";
@@ -49,9 +74,13 @@ function probeLogo(src: string): Promise<boolean> {
   return pending;
 }
 
-function useLogoLoaded(src: string) {
+function useLogoLoaded(src?: string) {
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
+    if (!src) {
+      setLoaded(false);
+      return;
+    }
     let active = true;
     probeLogo(src).then((ok) => {
       if (active) setLoaded(ok);
@@ -72,7 +101,7 @@ function Logo({ name, src, hidden = false }: Company & { hidden?: boolean }) {
       aria-hidden={hidden || undefined}
       className="group/logo flex h-12 w-32 shrink-0 items-center justify-center opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"
     >
-      {loaded ? (
+      {src && loaded ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt={hidden ? "" : name} loading="lazy" className="max-h-8 max-w-full object-contain" />
       ) : (
