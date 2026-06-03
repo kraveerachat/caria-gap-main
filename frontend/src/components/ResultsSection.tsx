@@ -270,7 +270,7 @@ function CareerCard({
               className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-orange px-5 py-3.5 text-center text-[13px] font-bold leading-snug text-brand-orange-foreground shadow-md transition-transform duration-300 hover:scale-[1.01] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100"
             >
               {thai
-                ? "🔒 ล็อกอยู่: ทำแบบทดสอบ Hybrid 3 นาทีเพื่อปลดล็อกผลลัพธ์ (Take Assessment to Unlock)"
+                ? "🔒 ทำแบบทดสอบเพื่อปลดล็อค"
                 : "🔒 Locked: Take the 3-min Hybrid assessment to unlock results"}
             </button>
           </div>
@@ -523,7 +523,7 @@ export default function ResultsSection() {
           <h2 className={`font-extrabold text-4xl lg:text-5xl text-foreground mb-4 ${thai ? "font-thai leading-snug" : "font-syne"}`}>
             {t.results.title}
           </h2>
-          <p className={`text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed ${thai ? "font-thai" : "font-dm"}`}>
+          <p className={`text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed text-balance ${thai ? "font-thai" : "font-dm"}`}>
             {t.results.subtitle}
           </p>
         </motion.div>
