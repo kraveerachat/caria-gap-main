@@ -80,7 +80,7 @@ export function AssessmentMockup() {
           {/* Grand CTA */}
           <div className="mt-8 flex justify-center">
             <Link
-              href="/assessment"
+              href="/gateway"
               className={`group inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange px-10 py-4 text-center text-lg font-bold text-brand-orange-foreground shadow-[0_18px_44px_-12px_rgba(243,146,0,0.6)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_22px_56px_-12px_rgba(243,146,0,0.8)] active:scale-95 sm:w-auto ${thai ? "font-thai leading-relaxed" : ""}`}
             >
               {thai ? "เริ่มทำแบบทดสอบ (Start Assessment)" : "Start Assessment"}
