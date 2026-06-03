@@ -19,6 +19,7 @@ import { CheckCircle2, Lock, Sparkles, AlertCircle, ArrowRight, LineChart, Targe
 import { CAREER_THAI_NAMES } from "@/lib/career-translations";
 import mockCareers from "@/lib/mock_careers.json";
 import CurriculumTrackFunnel from "@/components/dashboard/CurriculumTrackFunnel";
+import NextSteps from "@/components/dashboard/NextSteps";
 import { getTrackForCareer } from "@/lib/sut-tracks";
 
 // Module-level cache to persist data across React Strict Mode double-mount in development
@@ -80,6 +81,19 @@ function DashboardContent() {
     }
     load();
   }, [userId, router]);
+
+  // Persist the latest result durably (the `caria_top10` handoff key is consumed
+  // and removed on load) so the Profile page can read it back anytime.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (data && (data.top10_careers?.length ?? 0) > 0) {
+      try {
+        localStorage.setItem("caria_last_result", JSON.stringify(data));
+      } catch {
+        /* storage full / unavailable — non-critical */
+      }
+    }
+  }, [data]);
 
   const [dreamCareerData, setDreamCareerData] = useState<CareerResult | null>(null);
   const [dreamCareerLoading, setDreamCareerLoading] = useState(false);
@@ -302,9 +316,9 @@ function DashboardContent() {
                       {thai ? "ยอดเยี่ยม! ทักษะของคุณมาถูกทางแล้ว" : "Excellent! Your skills are on the right track"}
                     </h3>
                     <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium max-w-3xl">
-                      {thai 
-                        ? `อาชีพในฝัน ${dreamCareerLabel} ของคุณตรงกับผลประเมิน AI ในอันดับที่ ${dreamRank} กดดู Gap Analysis เพื่ออุดรอยรั่วและไปให้ถึงเป้าหมายได้เลย โดยคลิกปุ่ม "Skill Gap Analysis" ที่การ์ดด้านล่าง`
-                        : `Your dream career "${dreamCareerLabel}" matches the AI recommendation at rank #${dreamRank}. Click Gap Analysis to close gaps and reach your goal by clicking the "Skill Gap Analysis" button in the card below.`}
+                      {thai
+                        ? `อาชีพในฝัน “${dreamCareerLabel}” ติด Top ${dreamRank} ของระบบ${dreamRank === 1 ? " และเป็นอันดับ 1 ที่แนะนำ" : ` ตามหลังตัวเต็ง “${topAiCareerLabel}” มาติดๆ`} ปิด Gap อีกไม่กี่จุดก็พร้อมยื่นสมัครได้เลย`
+                        : `Your dream "${dreamCareerLabel}" sits in the system's top ${dreamRank}${dreamRank === 1 ? " as the #1 pick" : `, just behind the top match "${topAiCareerLabel}"`}. Close a few gaps and you are ready to apply.`}
                     </p>
                   </div>
                   <button
@@ -340,9 +354,9 @@ function DashboardContent() {
                       {thai ? "เป็นไปได้สูง! แต่ยังมีทักษะที่ต้องเน้นเพิ่ม" : "Highly Possible! But more skills are needed"}
                     </h3>
                     <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium max-w-3xl">
-                      {thai 
-                        ? `อาชีพในฝัน ${dreamCareerLabel} ของคุณอยู่ในอันดับที่ ${dreamRank} ของผลประเมิน คุณมีพื้นฐานที่ดี แต่ควรดูรายวิชาแนะนำเพื่อดันตัวเองขึ้นไปติด Top 3 โดยคลิกปุ่ม "Skill Gap Analysis" ที่การ์ดด้านล่าง`
-                        : `Your dream career "${dreamCareerLabel}" ranks at #${dreamRank} in our recommendation list. You have a solid baseline, but should view recommended courses to push yourself into the Top 3 by clicking the "Skill Gap Analysis" button in the card below.`}
+                      {thai
+                        ? `“${dreamCareerLabel}” อยู่อันดับ #${dreamRank} ส่วนตัวเต็งของระบบคือ “${topAiCareerLabel}” เพิ่มทักษะที่ยังขาดเพื่อดันตัวเองขึ้น Top 3`
+                        : `"${dreamCareerLabel}" ranks #${dreamRank}; the system's top match is "${topAiCareerLabel}". Level up the missing skills to break into the top 3.`}
                     </p>
                   </div>
                   <button
@@ -378,9 +392,9 @@ function DashboardContent() {
                       {thai ? "AI พบเส้นทางอื่นที่อาจเหมาะกับคุณมากกว่าในตอนนี้" : "AI found other paths that might fit you better right now"}
                     </h3>
                     <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium max-w-3xl">
-                      {thai 
-                        ? `ปัจจุบันอาชีพ ${dreamCareerLabel} ยังไม่ติด Top 10 จากทักษะของคุณ (AI แนะนำ ${topAiCareerLabel} เป็นอันดับแรก) แต่ไม่ต้องห่วง! คุณสามารถใช้ระบบ Simulator จำลองการอัปสกิลเพื่อดูว่าต้องเรียนอะไรเพิ่มบ้าง โดยคลิกปุ่ม "Skill Gap Analysis" ที่การ์ดด้านล่าง`
-                        : `Currently the career "${dreamCareerLabel}" is not in the Top 10 based on your skills (AI recommends "${topAiCareerLabel}" first). But don't worry! You can use the Simulator to model upskilling paths by clicking the "Skill Gap Analysis" button in the card below.`}
+                      {thai
+                        ? `ตอนนี้ “${dreamCareerLabel}” ยังไม่ติด Top 10 ระบบแนะนำ “${topAiCareerLabel}” เป็นอันดับ 1 ลองจำลองการอัปสกิลเพื่อดูเส้นทางไปให้ถึงเป้าหมาย`
+                        : `"${dreamCareerLabel}" is not in your top 10 yet; the system's #1 is "${topAiCareerLabel}". Simulate an upskill path to see how to get there.`}
                     </p>
                   </div>
                   <button
@@ -485,6 +499,11 @@ function DashboardContent() {
         {/* SUT Curriculum Track funnel — drill-down detail (Screen 2) */}
         {careers.length > 0 && (
           <CurriculumTrackFunnel careers={careers} userId={userId} />
+        )}
+
+        {/* Next Steps — download CARIA report + Fast-Track application (B2B lead-gen) */}
+        {careers.length > 0 && (
+          <NextSteps careers={careers} userId={userId} />
         )}
 
         {/* Login hook — appears once Top 3 are revealed (guest → save & unlock) */}

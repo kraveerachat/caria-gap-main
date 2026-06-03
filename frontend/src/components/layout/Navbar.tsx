@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from "motion/react"
-import { Check, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight, UserRound } from 'lucide-react';
 import { STEPS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { Logo } from "@/components/logo"
@@ -107,6 +107,18 @@ export default function Navbar() {
         {/* Actions (Insights, Language, Theme, Reset, Start) */}
         <div className="flex items-center gap-2">
 
+          <Link
+            href="/profile"
+            aria-label="Profile"
+            className={cn(
+              "flex size-9 items-center justify-center rounded-full border text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10",
+              pathname.startsWith("/profile")
+                ? "border-brand-orange/40 bg-brand-orange/10 text-brand-orange dark:text-brand-orange"
+                : "border-transparent",
+            )}
+          >
+            <UserRound className="size-[18px]" strokeWidth={2} />
+          </Link>
           <LanguageToggle />
           <ThemeToggle onTop={false} />
           {pathname.startsWith("/career/") ? (

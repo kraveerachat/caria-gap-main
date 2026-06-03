@@ -148,3 +148,25 @@ class SimulateResponse(BaseModel):
     simulated_top3: List[str]
     ranking_changes: List[RankingChange]
     simulated_top10: List[CareerResult]
+
+
+# --------------------------------------------------------------------------- #
+# Admissions — Fast-Track Application (B2B lead-gen funnel)
+# --------------------------------------------------------------------------- #
+class FastTrackApplyPayload(BaseModel):
+    """JSON part of the multipart Fast-Track application."""
+
+    user_id: str = Field(..., examples=["demo_ton"])
+    mes_score: float = Field(..., ge=0, le=100, description="Match Evaluation Score, 0-100")
+    target_track: str = Field(..., description="SUT curriculum track the lead applies to")
+
+
+class AdmissionApplyResponse(BaseModel):
+    status: str = Field("received", examples=["received"])
+    lead_id: str
+    user_id: str
+    target_track: str
+    mes_score: float
+    transcript_attached: bool
+    caria_report_attached: bool
+    message: str

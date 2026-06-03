@@ -40,6 +40,17 @@ export interface SubmitPayload {
 
 const simulateDelay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
+export interface FastTrackApplyResult {
+  status: string;
+  lead_id: string;
+  user_id: string;
+  target_track: string;
+  mes_score: number;
+  transcript_attached: boolean;
+  caria_report_attached: boolean;
+  message: string;
+}
+
 export const api = {
   submitAssessment: async (payload: SubmitPayload) => {
     console.log("Submitting assessment payload:", payload);
@@ -76,6 +87,41 @@ export const api = {
       console.warn("API Offline, using Mock Data", error);
       // showToast("Offline Mode Active", "info");
       return MOCK_GAP_ANALYSIS;
+    }
+  },
+
+  applyFastTrack: async (form: FormData): Promise<FastTrackApplyResult> => {
+    // multipart/form-data — do NOT set Content-Type so the browser appends the
+    // multipart boundary itself.
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/admissions/apply`, {
+        method: "POST",
+        body: form,
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`API Error ${res.status}: ${errorText}`);
+      }
+      return (await res.json()) as FastTrackApplyResult;
+    } catch (error) {
+      // Network-level failure (backend offline): degrade to a mock acceptance so
+      // the lead-gen flow still demos end-to-end, mirroring the rest of the app.
+      if (error instanceof TypeError) {
+        console.warn("API Offline — Fast-Track application mocked locally", error);
+        await simulateDelay(900);
+        const userId = (form.get("payload") && JSON.parse(String(form.get("payload"))).user_id) || "demo";
+        return {
+          status: "received",
+          lead_id: `LEAD_OFFLINE_${Date.now().toString(36).toUpperCase()}`,
+          user_id: userId,
+          target_track: "—",
+          mes_score: 0,
+          transcript_attached: !!form.get("transcript"),
+          caria_report_attached: true,
+          message: "บันทึกใบสมัครในโหมดออฟไลน์เรียบร้อย (Offline mock)",
+        };
+      }
+      throw error;
     }
   },
 

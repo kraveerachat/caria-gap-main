@@ -1,2 +1,7 @@
+# Build-script decisions for dependencies with install scripts (pnpm v11).
+# false = acknowledge the postinstall script but skip running it. core-js only
+# prints a funding banner; unrs-resolver falls back to its JS/WASM resolver when
+# its native binary build is skipped. Neither is needed for `next build`.
 allowBuilds:
-  unrs-resolver: set this to true or false
+  core-js: false
+  unrs-resolver: false

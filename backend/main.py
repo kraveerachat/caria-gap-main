@@ -18,7 +18,8 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from models import database as db
-from routers import assessment, gap_analysis, recommendations, simulate
+from models import admissions_store
+from routers import admissions, assessment, gap_analysis, recommendations, simulate
 
 app = FastAPI(
     title="CARIA-GAP API",
@@ -75,12 +76,15 @@ app.include_router(assessment.router)
 app.include_router(recommendations.router)
 app.include_router(gap_analysis.router)
 app.include_router(simulate.router)
+app.include_router(admissions.router)
 
 
 @app.on_event("startup")
 def _startup() -> None:
     # Pre-cache demo personas so the API is pitch-ready immediately.
     db.seed_personas()
+    # Ensure the Lead_Candidates table + uploads dir exist before first apply.
+    admissions_store.init_db()
 
 
 @app.get("/health", tags=["meta"])

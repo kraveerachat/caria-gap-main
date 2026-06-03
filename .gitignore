@@ -41,6 +41,10 @@ Thumbs.db
 .agents/
 .impeccable/
 
+# Backend runtime store (Lead_Candidates + Fast-Track uploads)
+backend/data/leads.sqlite3
+backend/data/uploads/
+
 # Scratch
 test.png
 download_logos.py
