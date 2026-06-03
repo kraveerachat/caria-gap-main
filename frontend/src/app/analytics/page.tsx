@@ -1,15 +1,16 @@
 /**
- * CARIA-GAP Analytics & Insights — B2B Data Monetization surface
+ * CARIA-GAP Insights — student-facing, 100% free.
  *
- * Two registers, one page:
- *  - Public Insights (free):  aggregate market signal in a 2x2 glassmorphism grid.
- *  - Enterprise Analytics:    locked deep-dive (radar + table) behind a premium paywall.
+ * One scrollable dashboard that merges the student's Personal insights (their own
+ * matched careers, competency radar, and top skill gaps) with Public market
+ * signals (skills in demand, trending careers, demand vs supply). No paywall:
+ * the faculty curriculum & skill-gap analytics are inlined at the foot of the page.
  */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   BarChart,
   Bar,
@@ -25,28 +26,37 @@ import {
   Line,
   Legend,
   RadarChart,
+  Radar,
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  Radar,
 } from "recharts";
 import {
-  Lock,
   TrendingUp,
   Users,
   Sparkles,
   ShieldCheck,
-  ArrowUpRight,
-  Globe2,
+  ArrowRight,
   Building2,
+  GraduationCap,
+  Target,
+  FileSearch,
+  ChevronDown,
 } from "lucide-react";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import DrilldownRadar from "@/components/dashboard/DrilldownRadar";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
+import { useLanguage } from "@/components/language-provider";
+import { competencyLabel } from "@/lib/competencies";
+import { getTrackForCareer, getMes, getTrackReadiness } from "@/lib/sut-tracks";
+import { CAREER_THAI_NAMES } from "@/lib/career-translations";
+import type { CareerResult, GapItem, RadarData, Top10Response } from "@/types";
 
 /* ------------------------------------------------------------------ */
-/*  Mock data — Public Insights                                        */
+/*  Public market mock data — logical for a tech student               */
 /* ------------------------------------------------------------------ */
 
 const TOP_SKILLS_LACKING = [
@@ -74,37 +84,6 @@ const DEMAND_VS_SUPPLY = [
   { month: "มิ.ย.", demand: 2110, supply: 1090 },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  Mock data — Enterprise Analytics (locked)                          */
-/* ------------------------------------------------------------------ */
-
-const COMPETENCY_RADAR = [
-  { axis: "Technical Skill", SUT: 84, KMITL: 79, CU: 88, KU: 71 },
-  { axis: "Communication", SUT: 73, KMITL: 68, CU: 81, KU: 76 },
-  { axis: "Problem Solving", SUT: 81, KMITL: 77, CU: 86, KU: 74 },
-  { axis: "Leadership", SUT: 69, KMITL: 64, CU: 78, KU: 72 },
-  { axis: "Adaptability", SUT: 78, KMITL: 75, CU: 82, KU: 70 },
-  { axis: "Creativity", SUT: 76, KMITL: 81, CU: 79, KU: 73 },
-];
-
-const ENTERPRISE_TABLE = [
-  { id: "COH-2026", year: "ปี 4 (Senior)", major: "Computer Engineering", gap: "Cloud / DevOps", readiness: 94 },
-  { id: "COH-2027", year: "ปี 3 (Junior)", major: "Information Technology", gap: "Data Engineering", readiness: 91 },
-  { id: "COH-2028", year: "ปี 2 (Sophomore)", major: "Computer Science", gap: "AI & Machine Learning", readiness: 89 },
-  { id: "COH-2026", year: "ปี 4 (Senior)", major: "Digital Media", gap: "Product Thinking", readiness: 87 },
-  { id: "COH-2027", year: "ปี 3 (Junior)", major: "Electrical Engineering", gap: "Cybersecurity", readiness: 85 },
-];
-
-const TABS = [
-  { id: "public", labelTh: "Public Insights", labelEn: "ฟรี", icon: Globe2 },
-  { id: "enterprise", labelTh: "University Intelligence", labelEn: "B2B", icon: Building2 },
-] as const;
-type TabId = (typeof TABS)[number]["id"];
-
-/* ------------------------------------------------------------------ */
-/*  Shared tooltip styling                                             */
-/* ------------------------------------------------------------------ */
-
 const tooltipStyle = {
   background: "rgba(13, 23, 38, 0.92)",
   border: "1px solid rgba(255,255,255,0.08)",
@@ -120,13 +99,13 @@ const tooltipStyle = {
 /* ================================================================== */
 
 export default function AnalyticsPage() {
-  const [tab, setTab] = useState<TabId>("public");
+  const { lang } = useLanguage();
+  const thai = lang === "th";
 
   return (
     <div className="font-thai relative flex min-h-screen flex-col overflow-hidden bg-[#f4f7fc] text-slate-900 dark:bg-[#030712] dark:text-slate-100">
       <Navbar />
 
-      {/* Ambient glows — SUT Orange + Navy Blue, dual register */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute -top-40 left-1/4 h-[520px] w-[520px] rounded-full bg-[#F39200]/12 blur-[140px] dark:bg-[#F39200]/18" />
         <div className="absolute top-1/3 -right-32 h-[460px] w-[460px] rounded-full bg-[#1E90FF]/10 blur-[130px] dark:bg-[#1E90FF]/16" />
@@ -135,103 +114,45 @@ export default function AnalyticsPage() {
 
       <main className="relative z-10 mx-auto w-full max-w-7xl flex-1 px-5 pt-24 pb-20 sm:px-6 md:pt-28">
         {/* Header */}
-        <header className="mb-8 flex flex-col gap-4 sm:mb-10">
+        <header className="mb-8 flex flex-col gap-3 sm:mb-10">
           <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.22em] text-slate-500 dark:text-white/50">
             <Sparkles className="size-3.5 text-[#F39200]" strokeWidth={2.25} />
-            CARIA · Analytics &amp; Insights
+            CARIA · Insights
           </div>
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <h1 className="font-syne text-3xl font-extrabold leading-[1.05] tracking-tight text-balance sm:text-4xl md:text-[2.75rem]">
-                สถิติเชิงลึก
-                <span className="ml-2 bg-linear-to-r from-[#F39200] via-[#FFB54D] to-[#1E90FF] bg-clip-text text-transparent">
-                  Insights
-                </span>
+                {thai ? "สถิติเชิงลึกของคุณ" : "Your Insights"}
               </h1>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-white/60 sm:text-[15px]">
-                สำรวจสัญญาณตลาดแรงงานดิจิทัลแบบเปิด หรือเข้าถึงระบบวิเคราะห์สมรรถนะของนักศึกษารายสาขาวิชาเพื่อยกระดับหลักสูตรของมหาวิทยาลัย
+                {thai
+                  ? "ดูผลวิเคราะห์สมรรถนะของคุณควบคู่กับสัญญาณตลาดแรงงานดิจิทัล ใช้งานได้ฟรีทั้งหมดสำหรับนักศึกษา"
+                  : "Your competency results alongside live digital job-market signals. Free for students, all of it."}
               </p>
             </div>
-
-            {/* Tab switcher — pill segmented control */}
-            <div
-              role="tablist"
-              aria-label="มุมมองข้อมูล"
-              className="relative inline-flex w-full rounded-full border border-slate-200/80 bg-white/80 p-1 shadow-[0_8px_30px_-12px_rgba(0,16,40,0.18)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60 dark:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.6)] sm:w-auto"
-            >
-              {TABS.map((t) => {
-                const active = tab === t.id;
-                const Icon = t.icon;
-                return (
-                  <button
-                    key={t.id}
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => setTab(t.id)}
-                    className={cn(
-                      "relative z-10 flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-colors duration-300 sm:flex-none sm:px-5 sm:text-sm",
-                      active
-                        ? "text-[#1a1100] dark:text-[#1a1100]"
-                        : "text-slate-600 hover:text-slate-900 dark:text-white/60 dark:hover:text-white",
-                    )}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="tab-pill"
-                        className="absolute inset-0 -z-10 rounded-full bg-linear-to-r from-[#F39200] to-[#FFB54D] shadow-[0_8px_26px_-8px_rgba(243,146,0,0.7)]"
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                    <Icon className="size-3.5" strokeWidth={2.25} />
-                    <span className="whitespace-nowrap">{t.labelTh}</span>
-                    <span
-                      className={cn(
-                        "rounded-full px-1.5 py-px font-syne text-[9px] uppercase tracking-[0.14em]",
-                        active
-                          ? "bg-[#1a1100]/15 text-[#1a1100]"
-                          : "bg-slate-200/70 text-slate-500 dark:bg-white/10 dark:text-white/50",
-                      )}
-                    >
-                      {t.labelEn}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              <ShieldCheck className="size-3.5" strokeWidth={2.5} />
+              {thai ? "ฟรี 100% สำหรับนักศึกษา" : "100% free for students"}
+            </span>
           </div>
         </header>
 
-        <AnimatePresence mode="wait">
-          {tab === "public" ? (
-            <motion.section
-              key="public"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              aria-labelledby="public-heading"
-            >
-              <h2 id="public-heading" className="sr-only">
-                Public Insights
-              </h2>
-              <PublicInsights />
-            </motion.section>
-          ) : (
-            <motion.section
-              key="enterprise"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              aria-labelledby="enterprise-heading"
-            >
-              <h2 id="enterprise-heading" className="sr-only">
-                Enterprise Analytics
-              </h2>
-              <EnterpriseAnalytics />
-            </motion.section>
-          )}
-        </AnimatePresence>
+        {/* Personal insights */}
+        <PersonalInsights thai={thai} />
+
+        {/* Public market insights */}
+        <section aria-labelledby="market-heading" className="mt-12">
+          <div className="mb-5 flex items-center gap-2.5">
+            <Target className="size-5 text-[#1E90FF]" strokeWidth={2.25} aria-hidden />
+            <h2 id="market-heading" className="font-syne text-xl font-bold tracking-tight">
+              {thai ? "ภาพรวมตลาดแรงงานดิจิทัล" : "Digital Job Market"}
+            </h2>
+          </div>
+          <PublicInsights />
+        </section>
+
+        {/* Faculty & curriculum analytics — university module, inline (no handoff) */}
+        <FacultyCurriculumAnalytics thai={thai} />
       </main>
 
       <Footer />
@@ -240,26 +161,192 @@ export default function AnalyticsPage() {
 }
 
 /* ================================================================== */
-/*  Public Insights — 2x2 glassmorphism grid                           */
+/*  Personal Insights — the student's own data                         */
+/* ================================================================== */
+
+function PersonalInsights({ thai }: { thai: boolean }) {
+  const [result, setResult] = useState<Top10Response | null>(null);
+  const [radar, setRadar] = useState<RadarData | null>(null);
+  const [gaps, setGaps] = useState<GapItem[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let active = true;
+    let parsed: Top10Response | null = null;
+    try {
+      const raw = localStorage.getItem("caria_last_result");
+      if (raw) parsed = JSON.parse(raw) as Top10Response;
+    } catch {
+      /* ignore corrupt payload */
+    }
+    setResult(parsed);
+
+    const top = parsed?.top10_careers?.[0];
+    if (parsed && top) {
+      api
+        .getGapAnalysis(parsed.user_id, top.career_id)
+        .then((res) => {
+          if (!active) return;
+          setRadar(res.radar_data);
+          setGaps([...res.gaps].sort((a, b) => b.gap_score - a.gap_score).slice(0, 5));
+        })
+        .catch(() => {})
+        .finally(() => active && setLoaded(true));
+    } else {
+      setLoaded(true);
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const careers = result?.top10_careers ?? [];
+  const top = careers[0];
+
+  // Empty state: not a paywall, just an invitation to take the assessment.
+  if (loaded && (!result || careers.length === 0)) {
+    return (
+      <section className="flex flex-col items-center rounded-3xl border border-dashed border-slate-300/70 bg-white/50 px-6 py-14 text-center backdrop-blur-md dark:border-white/10 dark:bg-white/3">
+        <div className="flex size-16 items-center justify-center rounded-2xl border border-slate-200 bg-white/70 text-slate-400 dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-500">
+          <FileSearch className="size-7" strokeWidth={1.75} aria-hidden />
+        </div>
+        <h2 className="mt-5 text-lg font-bold text-slate-800 dark:text-white">
+          {thai ? "ยังไม่มีผลวิเคราะห์ส่วนตัว" : "No personal insights yet"}
+        </h2>
+        <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+          {thai
+            ? "ทำแบบประเมิน Hybrid 3 นาที เพื่อปลดล็อกเรดาร์สมรรถนะและช่องว่างทักษะของคุณ ด้านล่างยังดูภาพรวมตลาดได้ฟรี"
+            : "Take the 3-minute hybrid assessment to unlock your competency radar and skill gaps. Market insights below are free to browse."}
+        </p>
+        <Link
+          href="/assessment"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand-orange px-6 py-3 text-sm font-bold text-brand-orange-foreground shadow-md transition-transform hover:scale-[1.02] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100"
+        >
+          {thai ? "เริ่มทำแบบประเมิน" : "Start assessment"}
+          <ArrowRight className="size-4" strokeWidth={2.5} aria-hidden />
+        </Link>
+      </section>
+    );
+  }
+
+  const track = top ? getTrackForCareer(top) : null;
+  const mes = top ? getMes(top) : 0;
+  const readiness = getTrackReadiness(mes);
+
+  return (
+    <section aria-labelledby="personal-heading">
+      <div className="mb-5 flex items-center gap-2.5">
+        <GraduationCap className="size-5 text-brand-orange" strokeWidth={2.25} aria-hidden />
+        <h2 id="personal-heading" className="font-syne text-xl font-bold tracking-tight">
+          {thai ? "ผลวิเคราะห์ของคุณ" : "Your Results"}
+        </h2>
+        {top && (
+          <span
+            className="ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold"
+            style={{ background: `${readiness.color}1f`, color: readiness.color }}
+          >
+            {mes} MES · {thai ? readiness.labelTh : readiness.labelEn}
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-5 lg:gap-6">
+        {/* Radar */}
+        <div className="lg:col-span-3">
+          {radar ? (
+            <DrilldownRadar radarData={radar} accent={track?.accent ?? "#F39200"} />
+          ) : (
+            <div className="flex h-[420px] animate-pulse items-center justify-center rounded-2xl border border-border/60 bg-card/40">
+              <span className="text-sm text-muted-foreground">{thai ? "กำลังโหลดเรดาร์..." : "Loading radar..."}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Top skill gaps + matched careers */}
+        <div className="flex flex-col gap-5 lg:col-span-2">
+          <div className="rounded-2xl border border-slate-200 bg-white/80 p-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+              <Target className="size-4 text-rose-500" strokeWidth={2.25} aria-hidden />
+              {thai ? "ช่องว่างทักษะสูงสุด 5 อันดับ" : "Your Top 5 Skill Gaps"}
+            </h3>
+            {gaps.length > 0 ? (
+              <ul className="flex flex-col gap-3">
+                {gaps.map((g) => {
+                  const pct = Math.max(0, Math.min(100, Math.round(g.gap_score)));
+                  return (
+                    <li key={g.competency_id}>
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <span className="truncate text-[13px] font-medium text-slate-700 dark:text-slate-200">
+                          {competencyLabel(g.competency_id, thai)}
+                        </span>
+                        <span className="shrink-0 font-mono text-xs font-bold tabular-nums text-rose-500">-{pct}</span>
+                      </div>
+                      <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
+                        <div className="h-full rounded-full bg-rose-500/80" style={{ width: `${pct}%` }} />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <div className="space-y-2.5" aria-hidden>
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-6 animate-pulse rounded bg-slate-100 dark:bg-white/5" />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white/80 p-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60">
+            <h3 className="mb-3 text-sm font-bold text-slate-900 dark:text-white">
+              {thai ? "อาชีพที่ตรงกับคุณ" : "Your Matched Careers"}
+            </h3>
+            <ul className="flex flex-col gap-2">
+              {careers.slice(0, 5).map((c, i) => (
+                <li key={c.career_id} className="flex items-center gap-2.5">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-slate-100 font-mono text-[11px] font-bold text-slate-500 dark:bg-white/10 dark:text-slate-300">
+                    {i + 1}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-slate-800 dark:text-slate-100">
+                    {CAREER_THAI_NAMES[c.career_id] || c.career_name}
+                  </span>
+                  <span className="shrink-0 font-mono text-xs font-bold tabular-nums text-brand-orange">
+                    {Math.round(c.match_percentage)}%
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href={`/dashboard?user=${result?.user_id ?? ""}`}
+              className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-brand-orange transition-colors hover:text-brand-orange/80"
+            >
+              {thai ? "ไปที่แดชบอร์ดและดาวน์โหลด PDF" : "Open dashboard & download PDF"}
+              <ArrowRight className="size-3.5" strokeWidth={2.5} aria-hidden />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ================================================================== */
+/*  Public Insights — 2x2 market grid                                  */
 /* ================================================================== */
 
 function PublicInsights() {
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
-      {/* (1) Bar — Top 5 Digital Skills Lacking */}
       <GlassCard
         title="ทักษะดิจิทัลที่ขาดแคลนสูงสุด 5 อันดับ"
-        subtitle="Top 5 Digital Skills Lacking in Graduates · n = 8,450 ผู้ประเมิน"
+        subtitle="Top 5 Digital Skills Lacking · n = 8,450 ผู้ประเมิน"
         accent="#F39200"
         icon={<TrendingUp className="size-4" strokeWidth={2.25} />}
       >
         <div className="h-[260px] w-full sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={TOP_SKILLS_LACKING}
-              layout="vertical"
-              margin={{ top: 8, right: 24, bottom: 0, left: 0 }}
-            >
+            <BarChart data={TOP_SKILLS_LACKING} layout="vertical" margin={{ top: 8, right: 24, bottom: 0, left: 0 }}>
               <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" />
               <XAxis
                 type="number"
@@ -277,11 +364,7 @@ function PublicInsights() {
                 className="text-slate-700 dark:text-white/80"
                 width={120}
               />
-              <Tooltip
-                cursor={{ fill: "rgba(243,146,0,0.06)" }}
-                contentStyle={tooltipStyle}
-                formatter={(v: number) => [`${v}% gap`, "Skill gap"]}
-              />
+              <Tooltip cursor={{ fill: "rgba(243,146,0,0.06)" }} contentStyle={tooltipStyle} formatter={(v: number) => [`${v}% gap`, "Skill gap"]} />
               <Bar dataKey="gap" radius={[0, 6, 6, 0]} barSize={18}>
                 {TOP_SKILLS_LACKING.map((d) => (
                   <Cell key={d.skill} fill={d.fill} />
@@ -292,47 +375,27 @@ function PublicInsights() {
         </div>
       </GlassCard>
 
-      {/* (2) Pie — Trending Career Paths */}
       <GlassCard
         title="เส้นทางอาชีพที่มาแรง"
-        subtitle="Trending Career Paths · สัดส่วนความสนใจของผู้สำเร็จการศึกษา"
+        subtitle="Trending Career Paths · สัดส่วนความสนใจ"
         accent="#1E90FF"
         icon={<Sparkles className="size-4" strokeWidth={2.25} />}
       >
         <div className="h-[260px] w-full sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie
-                data={TRENDING_CAREERS}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius={58}
-                outerRadius={92}
-                paddingAngle={3}
-                stroke="none"
-              >
+              <Pie data={TRENDING_CAREERS} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={58} outerRadius={92} paddingAngle={3} stroke="none">
                 {TRENDING_CAREERS.map((d) => (
                   <Cell key={d.name} fill={d.color} />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={tooltipStyle}
-                formatter={(v: number, name: string) => [`${v}%`, name]}
-              />
-              <Legend
-                verticalAlign="bottom"
-                iconType="circle"
-                iconSize={8}
-                wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
-              />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: number, name: string) => [`${v}%`, name]} />
+              <Legend verticalAlign="bottom" iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </GlassCard>
 
-      {/* (3) Line — Demand vs Supply */}
       <GlassCard
         title="อุปสงค์ vs อุปทาน บุคลากรสายเทคโนโลยี"
         subtitle="Demand vs Supply of Tech Talent · 6 เดือนล่าสุด"
@@ -353,51 +416,20 @@ function PublicInsights() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 4" stroke="rgba(148,163,184,0.18)" vertical={false} />
-              <XAxis
-                dataKey="month"
-                stroke="currentColor"
-                tick={{ fontSize: 10, fill: "currentColor" }}
-                className="text-slate-500 dark:text-white/50"
-              />
-              <YAxis
-                stroke="currentColor"
-                tick={{ fontSize: 10, fill: "currentColor" }}
-                className="text-slate-500 dark:text-white/50"
-              />
+              <XAxis dataKey="month" stroke="currentColor" tick={{ fontSize: 10, fill: "currentColor" }} className="text-slate-500 dark:text-white/50" />
+              <YAxis stroke="currentColor" tick={{ fontSize: 10, fill: "currentColor" }} className="text-slate-500 dark:text-white/50" />
               <Tooltip contentStyle={tooltipStyle} />
-              <Legend
-                iconType="plainline"
-                iconSize={18}
-                wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="demand"
-                name="ความต้องการตลาด (Demand)"
-                stroke="url(#demandGrad)"
-                strokeWidth={2.5}
-                dot={{ r: 3, strokeWidth: 0, fill: "#F39200" }}
-                activeDot={{ r: 5 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="supply"
-                name="บัณฑิตที่ผลิต (Supply)"
-                stroke="url(#supplyGrad)"
-                strokeWidth={2.5}
-                strokeDasharray="6 4"
-                dot={{ r: 3, strokeWidth: 0, fill: "#1E90FF" }}
-                activeDot={{ r: 5 }}
-              />
+              <Legend iconType="plainline" iconSize={18} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+              <Line type="monotone" dataKey="demand" name="ความต้องการตลาด (Demand)" stroke="url(#demandGrad)" strokeWidth={2.5} dot={{ r: 3, strokeWidth: 0, fill: "#F39200" }} activeDot={{ r: 5 }} />
+              <Line type="monotone" dataKey="supply" name="บัณฑิตที่ผลิต (Supply)" stroke="url(#supplyGrad)" strokeWidth={2.5} strokeDasharray="6 4" dot={{ r: 3, strokeWidth: 0, fill: "#1E90FF" }} activeDot={{ r: 5 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </GlassCard>
 
-      {/* (4) Summary tile — keeps the 2x2 rhythm without a 4th chart */}
       <GlassCard
         title="ภาพรวมตลาดแรงงานดิจิทัล"
-        subtitle="Macro snapshot · อัปเดตล่าสุด มิ.ย. 2026"
+        subtitle="Macro snapshot · อัปเดต มิ.ย. 2026"
         accent="#A78BFA"
         icon={<Users className="size-4" strokeWidth={2.25} />}
       >
@@ -410,7 +442,7 @@ function PublicInsights() {
           </dl>
           <div className="rounded-xl border border-slate-200/70 bg-white/60 p-4 text-xs leading-relaxed text-slate-600 backdrop-blur-md dark:border-white/10 dark:bg-white/3 dark:text-white/60">
             <ShieldCheck className="mb-1.5 inline size-3.5 text-[#34D399]" strokeWidth={2.25} />{" "}
-            <strong className="text-slate-800 dark:text-white/85">ข้อมูลสาธารณะ:</strong> รวมจากการประเมินใน CARIA-GAP แบบ aggregate ไม่ระบุตัวตน เพื่อการศึกษาและวางแผนหลักสูตร
+            <strong className="text-slate-800 dark:text-white/85">ข้อมูลสาธารณะ:</strong> รวมจากการประเมินใน CARIA-GAP แบบ aggregate ไม่ระบุตัวตน
           </div>
         </div>
       </GlassCard>
@@ -419,129 +451,305 @@ function PublicInsights() {
 }
 
 /* ================================================================== */
-/*  Enterprise Analytics — locked / paywalled                          */
+/*  Curriculum coverage & evolution — inline university module          */
 /* ================================================================== */
 
-function EnterpriseAnalytics() {
-  return (
-    <div className="relative">
-      {/* === Underlying "real" content — visible but blurred behind the lock === */}
-      <div
-        aria-hidden
-        className="grid grid-cols-1 gap-5 lg:grid-cols-5 lg:gap-6"
-        // The content stays in the DOM (real layout, real depth) but is non-interactive.
-        // The blur overlay above does the rest of the work.
-        style={{ pointerEvents: "none", userSelect: "none" }}
-      >
-        {/* Radar deep-dive — competency by university */}
-        <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60 lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-syne text-base font-bold">Competency Radar</h3>
-              <p className="text-[11px] text-slate-500 dark:text-white/50">
-                Deep-dive · จำแนกตามมหาวิทยาลัย / คณะ
-              </p>
-            </div>
-            <span className="rounded-full bg-[#F39200]/10 px-2 py-0.5 font-syne text-[9px] uppercase tracking-[0.18em] text-[#F39200]">
-              Pro
-            </span>
-          </div>
-          <div className="h-[320px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={COMPETENCY_RADAR} outerRadius="78%">
-                <PolarGrid stroke="rgba(148,163,184,0.25)" />
-                <PolarAngleAxis
-                  dataKey="axis"
-                  tick={{ fontSize: 10, fill: "currentColor" }}
-                  className="text-slate-700 dark:text-white/75"
-                />
-                <PolarRadiusAxis
-                  angle={30}
-                  domain={[0, 100]}
-                  tick={{ fontSize: 9, fill: "currentColor" }}
-                  className="text-slate-400 dark:text-white/40"
-                />
-                <Radar name="SUT" dataKey="SUT" stroke="#F39200" fill="#F39200" fillOpacity={0.35} />
-                <Radar name="KMITL" dataKey="KMITL" stroke="#1E90FF" fill="#1E90FF" fillOpacity={0.2} />
-                <Radar name="CU" dataKey="CU" stroke="#A78BFA" fill="#A78BFA" fillOpacity={0.18} />
-                <Radar name="KU" dataKey="KU" stroke="#34D399" fill="#34D399" fillOpacity={0.16} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-                <Tooltip contentStyle={tooltipStyle} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+type Faculty = "DT" | "DC";
 
-        {/* Enterprise cohort table */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60 lg:col-span-3">
-          <div className="flex items-center justify-between border-b border-slate-200/80 px-6 py-4 dark:border-white/10">
-            <div>
-              <h3 className="font-syne text-base font-bold">Curriculum Performance Analytics</h3>
-              <p className="text-[11px] text-slate-500 dark:text-white/50">
-                วิเคราะห์สมรรถนะของกลุ่มนักศึกษา (Cohorts) รายปีการศึกษาและสาขาวิชา
-              </p>
-            </div>
-            <span className="hidden rounded-full bg-[#1E90FF]/10 px-2 py-0.5 font-syne text-[9px] uppercase tracking-[0.18em] text-[#1E90FF] sm:inline">
-              Live
-            </span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="bg-slate-100/70 text-[10px] uppercase tracking-[0.14em] text-slate-500 dark:bg-white/4 dark:text-white/50">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">ID</th>
-                  <th className="px-4 py-3 font-semibold">ชั้นปี (Year)</th>
-                  <th className="px-4 py-3 font-semibold">สาขาวิชา (Major)</th>
-                  <th className="px-4 py-3 font-semibold">ทักษะที่ขาด (Top Gap)</th>
-                  <th className="px-4 py-3 text-right font-semibold">ความพร้อมสู่ตลาดงาน (Readiness %)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200/70 dark:divide-white/6">
-                {ENTERPRISE_TABLE.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-50/60 dark:hover:bg-white/2">
-                    <td className="px-4 py-3 font-mono text-[11px] text-slate-500 dark:text-white/50">
-                      {row.id}
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-slate-800 dark:text-white/85">
-                      {row.year}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-white/65">{row.major}</td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-white/75">{row.gap}</td>
-                    <td className="px-4 py-3 text-right">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F39200]/10 px-2 py-0.5 font-syne text-[11px] font-bold text-[#F39200]">
-                        {row.readiness}%
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {/* Filter bar mock — visual depth only */}
-          <div className="flex flex-wrap items-center gap-2 border-t border-slate-200/80 bg-slate-50/60 px-6 py-3 dark:border-white/10 dark:bg-white/2">
-            {["Cloud", "AI/ML", "Data", "Cybersec", "Product"].map((t) => (
-              <span
-                key={t}
-                className="rounded-full border border-slate-200 bg-white/80 px-2.5 py-0.5 text-[10px] font-medium text-slate-600 dark:border-white/10 dark:bg-white/4 dark:text-white/65"
-              >
-                {t}
-              </span>
-            ))}
-            <span className="ml-auto text-[10px] text-slate-500 dark:text-white/45">
-              showing 5 cohorts of 12 majors
-            </span>
-          </div>
-        </div>
+const FACULTY_META: Record<Faculty, { th: string; en: string; accent: string }> = {
+  DT: { th: "เทคโนโลยีดิจิทัล (DT)", en: "Digital Technology (DT)", accent: "#F39200" },
+  DC: { th: "นิเทศศาสตร์ดิจิทัล (DC)", en: "Digital Communication (DC)", accent: "#1E90FF" },
+};
+
+/* Workforce readiness by academic year — positive progression, Year 1 → Year 4. */
+const YEAR_READINESS: Record<Faculty, [number, number, number, number]> = {
+  DT: [40, 53, 67, 78],
+  DC: [44, 56, 69, 80],
+};
+
+/* Radar axes per faculty: 2026 market demand vs the SUT curriculum coverage
+   delivered by graduation (Year 4). Short labels keep the polar axis legible on
+   mobile; the full name surfaces in the tooltip. */
+const RADAR_AXES: Record<
+  Faculty,
+  { short: string; th: string; en: string; market: number; curriculum: number }[]
+> = {
+  DT: [
+    { short: "Cloud", th: "คลาวด์คอมพิวติ้ง", en: "Cloud Computing", market: 96, curriculum: 70 },
+    { short: "Data", th: "วิศวกรรมข้อมูล", en: "Data Engineering", market: 92, curriculum: 80 },
+    { short: "AI/ML", th: "AI / ML", en: "AI / ML", market: 98, curriculum: 58 },
+    { short: "Cyber", th: "ความมั่นคงไซเบอร์", en: "Cybersecurity", market: 88, curriculum: 66 },
+    { short: "Arch", th: "สถาปัตยกรรมซอฟต์แวร์", en: "Software Architecture", market: 90, curriculum: 82 },
+  ],
+  DC: [
+    { short: "Content", th: "กลยุทธ์คอนเทนต์", en: "Content Strategy", market: 90, curriculum: 76 },
+    { short: "Motion", th: "โมชัน / วิดีโอ", en: "Motion / Video", market: 86, curriculum: 72 },
+    { short: "UX", th: "UX Research", en: "UX Research", market: 93, curriculum: 64 },
+    { short: "Brand", th: "แบรนด์ & โซเชียล", en: "Brand & Social", market: 88, curriculum: 78 },
+    { short: "Game", th: "เกม / 3D", en: "Game / 3D", market: 84, curriculum: 60 },
+  ],
+};
+
+/* AI recommendation hook — faculty-aware mock (the B2B teaser). */
+const AI_INSIGHT: Record<Faculty, { th: string; en: string }> = {
+  DT: {
+    th: "พบช่องว่าง 15% ในกลุ่มทักษะ AI/ML ของนักศึกษาชั้นปีที่ 3 ระบบแนะนำให้พิจารณาเพิ่มโมดูล 'Applied Prompt Engineering' ในรายวิชาเทคโนโลยีสมัยใหม่ เพื่อยกระดับอัตราการได้งาน (Employability) เป็น 90%+",
+    en: "A 15% gap shows in the AI/ML cluster for Year 3 students. The system suggests adding an 'Applied Prompt Engineering' module to the modern-technology course to lift employability toward 90%+.",
+  },
+  DC: {
+    th: "พบช่องว่าง 18% ในกลุ่มทักษะ UX Research ของนักศึกษาชั้นปีที่ 3 ระบบแนะนำให้เพิ่มเวิร์กช็อป 'Generative UX & User Testing' ในรายวิชาออกแบบสื่อ เพื่อยกระดับอัตราการได้งาน (Employability) เป็น 90%+",
+    en: "An 18% gap shows in the UX Research cluster for Year 3 students. The system suggests adding a 'Generative UX & User Testing' workshop to the media-design course to lift employability toward 90%+.",
+  },
+};
+
+function FacultyCurriculumAnalytics({ thai }: { thai: boolean }) {
+  const reduce = useReducedMotion();
+  const [faculty, setFaculty] = useState<Faculty>("DT");
+  const [year, setYear] = useState(3); // default to juniors
+
+  const readinessByYear = YEAR_READINESS[faculty];
+  const selectedReadiness = readinessByYear[year - 1];
+  const gradReadiness = readinessByYear[3]; // Year 4 = full curriculum delivery
+  const accent = FACULTY_META[faculty].accent;
+
+  // SUT polygon = full curriculum coverage scaled by how far the cohort has
+  // progressed; its gap to the (fixed) 2026 market polygon shrinks year on year.
+  const radarData = useMemo(
+    () =>
+      RADAR_AXES[faculty].map((a) => ({
+        axis: a.short,
+        full: thai ? a.th : a.en,
+        market: a.market,
+        sut: Math.round((a.curriculum * selectedReadiness) / gradReadiness),
+      })),
+    [faculty, thai, selectedReadiness, gradReadiness],
+  );
+
+  const fullByShort = useMemo(() => {
+    const m: Record<string, string> = {};
+    RADAR_AXES[faculty].forEach((a) => (m[a.short] = thai ? a.th : a.en));
+    return m;
+  }, [faculty, thai]);
+
+  return (
+    <section aria-labelledby="curriculum-heading" className="mt-12">
+      <div className="mb-5">
+        <h2
+          id="curriculum-heading"
+          className="font-syne text-lg font-bold leading-snug tracking-tight text-balance text-slate-800 dark:text-slate-200 sm:text-xl"
+        >
+          {thai ? (
+            <>
+              📊 ความครอบคลุมและพัฒนาการของหลักสูตร{" "}
+              <span className="font-medium text-slate-500 dark:text-slate-400">(Curriculum Coverage &amp; Evolution)</span>
+            </>
+          ) : (
+            <>
+              📊 Curriculum coverage &amp; evolution{" "}
+              <span className="font-medium text-slate-500 dark:text-slate-400">(SUT)</span>
+            </>
+          )}
+        </h2>
       </div>
 
-      {/* === The paywall overlay === */}
-      <PremiumLockOverlay />
-    </div>
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-[0_10px_40px_-20px_rgba(0,16,40,0.18)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60 dark:shadow-[0_10px_40px_-20px_rgba(0,0,0,0.7)] sm:p-7"
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-24 h-60 w-60 rounded-full opacity-20 blur-3xl transition-colors duration-500"
+          style={{ background: accent }}
+        />
+
+        <div className="relative grid gap-6 lg:grid-cols-12 lg:gap-8">
+          {/* Controls */}
+          <div className="flex flex-col gap-5 lg:col-span-4">
+            {/* Faculty selector */}
+            <div>
+              <label
+                htmlFor="faculty-select"
+                className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400"
+              >
+                <Building2 className="size-3.5 text-[#1E90FF]" strokeWidth={2.5} aria-hidden />
+                {thai ? "เลือกคณะ / สาขา" : "Faculty / major"}
+              </label>
+              <div className="relative">
+                <select
+                  id="faculty-select"
+                  value={faculty}
+                  onChange={(e) => setFaculty(e.target.value as Faculty)}
+                  className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white/70 pl-4 pr-10 text-sm font-semibold text-slate-800 outline-none transition-colors focus:border-[#1E90FF]/50 focus:ring-2 focus:ring-[#1E90FF]/20 dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
+                >
+                  <option value="DT">{thai ? FACULTY_META.DT.th : FACULTY_META.DT.en}</option>
+                  <option value="DC">{thai ? FACULTY_META.DC.th : FACULTY_META.DC.en}</option>
+                </select>
+                <ChevronDown
+                  className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+                  strokeWidth={2.25}
+                  aria-hidden
+                />
+              </div>
+            </div>
+
+            {/* Workforce-readiness progression by academic year */}
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                {thai ? "ความพร้อมสู่ตลาดแรงงาน" : "Workforce readiness"}
+              </p>
+              <p className="mb-2.5 mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                {thai ? "พัฒนาการความพร้อมของนักศึกษาตลอดหลักสูตร" : "Student readiness growth across the programme"}
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {[1, 2, 3, 4].map((y) => {
+                  const selected = year === y;
+                  return (
+                    <button
+                      key={y}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setYear(y)}
+                      className={cn(
+                        "flex flex-col items-start gap-0.5 rounded-2xl border p-3 text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E90FF] motion-reduce:transition-none",
+                        selected
+                          ? "border-[#1E90FF]/50 bg-[#1E90FF]/10 shadow-sm dark:bg-[#1E90FF]/15"
+                          : "border-slate-200 bg-white/60 hover:border-[#1E90FF]/35 hover:bg-white/80 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "text-[11px] font-bold uppercase tracking-wide",
+                          selected ? "text-[#1E90FF] dark:text-[#7FB0FF]" : "text-slate-500 dark:text-slate-400",
+                        )}
+                      >
+                        {thai ? `ปี ${y}` : `Year ${y}`}
+                      </span>
+                      <span className="font-syne text-2xl font-extrabold tabular-nums text-slate-800 dark:text-slate-100">
+                        {readinessByYear[y - 1]}%
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Selected-cohort readout */}
+            <div className="rounded-2xl border border-slate-200/70 bg-white/60 p-4 backdrop-blur-md dark:border-white/10 dark:bg-white/3">
+              <div className="flex items-center gap-1.5">
+                <TrendingUp className="size-4 text-emerald-500" strokeWidth={2.5} aria-hidden />
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  {thai ? `ความพร้อมของนักศึกษาปี ${year}` : `Year ${year} cohort readiness`}
+                </span>
+              </div>
+              <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <span className="font-syne text-3xl font-extrabold tabular-nums text-slate-900 dark:text-white">
+                  {selectedReadiness}%
+                </span>
+                {year > 1 && (
+                  <span className="text-xs font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
+                    ▲ +{selectedReadiness - readinessByYear[year - 2]} {thai ? "จากปีก่อน" : "vs prev. year"}
+                  </span>
+                )}
+              </div>
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                {thai
+                  ? "คำนวณจากผลรวม CARIA MES แบบ aggregate ไม่ระบุตัวตน เทียบกับความต้องการตลาดเทคปี 2026"
+                  : "Aggregated, anonymized CARIA MES output, benchmarked against 2026 tech-market demand."}
+              </p>
+            </div>
+          </div>
+
+          {/* Radar — curriculum coverage vs market demand */}
+          <div className="lg:col-span-8">
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                  {thai ? "ความครอบคลุมของหลักสูตร เทียบกับ ตลาดโลก 2026" : "Curriculum coverage vs market demand (2026)"}
+                </h3>
+                <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                  {`${thai ? FACULTY_META[faculty].th : FACULTY_META[faculty].en} · ${
+                    thai ? `ปี ${year}` : `Year ${year}`
+                  } · Curriculum vs Market Demand`}
+                </p>
+              </div>
+              <div className="flex items-center gap-3 text-[11px] font-semibold">
+                <span className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                  <span className="size-3 rounded-sm border-2 border-dashed border-[#1E90FF]" aria-hidden />
+                  {thai ? "ตลาดโลก 2026" : "Market 2026"}
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                  <span className="size-3 rounded-sm bg-[#F39200]" aria-hidden />
+                  {thai ? "หลักสูตร SUT" : "SUT Curriculum"}
+                </span>
+              </div>
+            </div>
+
+            <div className="h-[300px] w-full sm:h-[360px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={radarData} outerRadius="70%" margin={{ top: 10, right: 18, bottom: 6, left: 18 }}>
+                  <PolarGrid stroke="rgba(148,163,184,0.22)" />
+                  <PolarAngleAxis
+                    dataKey="axis"
+                    tick={{ fontSize: 11, fill: "currentColor" }}
+                    className="text-slate-600 dark:text-slate-300"
+                  />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
+                  <Radar
+                    name={thai ? "ตลาดโลก 2026" : "Market 2026"}
+                    dataKey="market"
+                    stroke="#1E90FF"
+                    strokeWidth={2}
+                    strokeDasharray="5 4"
+                    fill="#1E90FF"
+                    fillOpacity={0.06}
+                    isAnimationActive={!reduce}
+                  />
+                  <Radar
+                    name={thai ? "หลักสูตร SUT" : "SUT Curriculum"}
+                    dataKey="sut"
+                    stroke="#F39200"
+                    strokeWidth={2.5}
+                    fill="#F39200"
+                    fillOpacity={0.32}
+                    isAnimationActive={!reduce}
+                  />
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    cursor={false}
+                    labelFormatter={(label) => fullByShort[label as string] ?? String(label)}
+                    formatter={(v: number, name: string) => [`${v}%`, name]}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* AI recommendation — the B2B hook */}
+            <div className="relative mt-5 overflow-hidden rounded-2xl border border-[#A78BFA]/25 bg-linear-to-br from-[#F39200]/[0.07] via-transparent to-[#1E90FF]/[0.07] p-4 backdrop-blur-md sm:p-5">
+              <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#A78BFA]/15 blur-3xl" />
+              <div className="relative flex items-start gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#A78BFA]/15 text-[#A78BFA]">
+                  <Sparkles className="size-4" strokeWidth={2.25} aria-hidden />
+                </span>
+                <div className="min-w-0">
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">💡 AI Curriculum Recommendation</h4>
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">
+                    {thai ? AI_INSIGHT[faculty].th : AI_INSIGHT[faculty].en}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </section>
   );
 }
 
 /* ================================================================== */
-/*  Glassmorphism Card                                                 */
+/*  Shared cards                                                       */
 /* ================================================================== */
 
 function GlassCard({
@@ -560,11 +768,11 @@ function GlassCard({
   return (
     <motion.article
       initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-[0_10px_40px_-20px_rgba(0,16,40,0.18)] backdrop-blur-xl transition-shadow duration-300 hover:shadow-[0_18px_60px_-22px_rgba(0,16,40,0.28)] dark:border-white/10 dark:bg-slate-900/60 dark:shadow-[0_10px_40px_-20px_rgba(0,0,0,0.7)] sm:p-6"
     >
-      {/* Accent corner glow */}
       <span
         aria-hidden
         className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full opacity-25 blur-3xl transition-opacity duration-500 group-hover:opacity-40"
@@ -572,15 +780,10 @@ function GlassCard({
       />
       <header className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-syne text-[15px] font-bold leading-tight text-slate-900 dark:text-white sm:text-base">
-            {title}
-          </h3>
+          <h3 className="font-syne text-[15px] font-bold leading-tight text-slate-900 dark:text-white sm:text-base">{title}</h3>
           <p className="mt-1 text-[11px] text-slate-500 dark:text-white/55">{subtitle}</p>
         </div>
-        <div
-          className="flex size-8 shrink-0 items-center justify-center rounded-xl text-white"
-          style={{ background: accent, boxShadow: `0 6px 18px -8px ${accent}` }}
-        >
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: accent, boxShadow: `0 6px 18px -8px ${accent}` }}>
           {icon}
         </div>
       </header>
@@ -589,15 +792,7 @@ function GlassCard({
   );
 }
 
-function Stat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: "orange" | "blue" | "green" | "purple";
-}) {
+function Stat({ label, value, tone }: { label: string; value: string; tone: "orange" | "blue" | "green" | "purple" }) {
   const tones = {
     orange: "text-[#F39200]",
     blue: "text-[#1E90FF]",
@@ -606,114 +801,8 @@ function Stat({
   } as const;
   return (
     <div className="rounded-xl border border-slate-200/70 bg-white/60 p-3 backdrop-blur-md dark:border-white/10 dark:bg-white/3">
-      <dt className="text-[10px] uppercase tracking-[0.14em] text-slate-500 dark:text-white/45">
-        {label}
-      </dt>
-      <dd className={cn("mt-1 font-syne text-xl font-extrabold tracking-tight sm:text-2xl", tones[tone])}>
-        {value}
-      </dd>
+      <dt className="text-[10px] uppercase tracking-[0.14em] text-slate-500 dark:text-white/45">{label}</dt>
+      <dd className={cn("mt-1 font-syne text-xl font-extrabold tracking-tight sm:text-2xl", tones[tone])}>{value}</dd>
     </div>
-  );
-}
-
-/* ================================================================== */
-/*  Premium Lock Overlay                                               */
-/* ================================================================== */
-
-function PremiumLockOverlay() {
-  return (
-    <motion.div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="lock-title"
-      aria-describedby="lock-subtitle"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-      className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-white/40 px-4 backdrop-blur-xl dark:bg-[#030712]/55"
-    >
-      {/* Soft glow ring behind the modal */}
-      <div
-        aria-hidden
-        className="absolute h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle,rgba(243,146,0,0.35),rgba(243,146,0,0)_65%)] blur-2xl sm:h-[560px] sm:w-[560px]"
-      />
-
-      <motion.div
-        initial={{ opacity: 0, y: 16, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
-        className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/30 bg-white/80 p-6 text-center shadow-[0_30px_80px_-30px_rgba(243,146,0,0.45)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/75 dark:shadow-[0_30px_80px_-30px_rgba(243,146,0,0.55)] sm:p-8"
-      >
-        {/* Top eyebrow */}
-        <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-[#F39200]/40 bg-[#F39200]/10 px-3 py-1 font-syne text-[10px] font-bold uppercase tracking-[0.22em] text-[#F39200]">
-          <Sparkles className="size-3" strokeWidth={2.5} />
-          Premium · Higher Ed
-        </div>
-
-        {/* Glowing lock */}
-        <div className="relative mx-auto mb-6 flex size-20 items-center justify-center sm:size-24">
-          {/* Halo */}
-          <span
-            aria-hidden
-            className="absolute inset-0 animate-pulse-glow rounded-full bg-[radial-gradient(circle,rgba(243,146,0,0.55),rgba(243,146,0,0)_70%)] blur-xl"
-          />
-          {/* Disc */}
-          <span
-            aria-hidden
-            className="absolute inset-2 rounded-full bg-linear-to-br from-[#FFB54D] via-[#F39200] to-[#B86E00] shadow-[inset_0_-8px_22px_rgba(0,0,0,0.35),0_18px_44px_-10px_rgba(243,146,0,0.7)]"
-          />
-          <Lock className="relative size-10 text-[#1a1100] sm:size-12" strokeWidth={2.25} />
-        </div>
-
-        <h3
-          id="lock-title"
-          className="font-syne text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-[28px]"
-        >
-          CARIA for Higher Education
-        </h3>
-        <p
-          id="lock-subtitle"
-          className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-slate-600 text-balance dark:text-white/65 sm:text-[15px]"
-        >
-          ระบบแดชบอร์ดอัจฉริยะสำหรับผู้บริหารและคณาจารย์ วิเคราะห์ช่องว่างทักษะ (Competency Gap) ของนักศึกษาแบบเรียลไทม์ เพื่อยกระดับหลักสูตรให้ตอบโจทย์ตลาดแรงงาน (Data-Driven Curriculum)
-        </p>
-
-        {/* Feature row */}
-        <ul className="mx-auto mt-5 grid max-w-sm grid-cols-3 gap-2 text-[10px] font-medium text-slate-500 dark:text-white/55">
-          {[
-            "Curriculum Gap Analysis",
-            "Student Employability Tracker",
-            "Export Data for TQF",
-          ].map((f) => (
-            <li
-              key={f}
-              className="rounded-lg border border-slate-200/70 bg-white/70 px-2 py-1.5 backdrop-blur-md dark:border-white/10 dark:bg-white/4"
-            >
-              {f}
-            </li>
-          ))}
-        </ul>
-
-        {/* CTA — premium glowing button */}
-        <Link
-          href="/b2b-portal"
-          className="group/cta relative mt-7 inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-linear-to-r from-[#F39200] via-[#FFB54D] to-[#F39200] bg-size-[200%_100%] px-6 py-3.5 font-syne text-sm font-bold text-[#1a1100] shadow-[0_18px_44px_-12px_rgba(243,146,0,0.75)] transition-[background-position,transform,box-shadow] duration-500 hover:-translate-y-0.5 hover:bg-position-[100%_0] hover:shadow-[0_22px_56px_-12px_rgba(243,146,0,0.9)] active:translate-y-0 sm:w-auto sm:text-[15px]"
-        >
-          <span>ติดต่อทีมขาย</span>
-          <span className="opacity-70">·</span>
-          <span>Contact Sales to Upgrade</span>
-          <ArrowUpRight className="size-4 transition-transform duration-300 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" strokeWidth={2.5} />
-          {/* Sheen */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 -skew-x-12 bg-white/30 blur-md transition-transform duration-700 group-hover/cta:translate-x-[420%]"
-          />
-        </Link>
-
-        <p className="mt-4 text-[10px] text-slate-500 dark:text-white/45">
-          เริ่มต้นการสาธิตฟรี - ใช้งานโดยคณบดีและฝ่ายวิชาการชั้นนำ
-        </p>
-      </motion.div>
-    </motion.div>
   );
 }

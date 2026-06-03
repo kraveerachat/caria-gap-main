@@ -11,7 +11,7 @@ import dynamic from "next/dynamic";
 import { useLanguage } from "@/components/language-provider";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { Zap, X } from "lucide-react";
+import { X, Target, BookOpen } from "lucide-react";
 import { DT_BRANCH, DC_BRANCH, getGroupSlug } from "@/lib/careers-list";
 import mockCareers from "@/lib/mock_careers.json";
 
@@ -446,21 +446,32 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              <Link
-                href={`/assessment?career=${getCareerIdForAssessment(selectedCareer || activeGroupObj?.careers[0]?.name || "", activeBranch)}`}
-                className={`mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-transparent px-5 py-3 text-xs font-bold shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 ${
-                  activeBranch === "DT"
-                    ? "bg-[#002F6C] text-white hover:bg-[#0a3f80] hover:shadow-lg hover:shadow-[#002F6C]/30"
-                    : "bg-[#F39200] text-[#050A14] hover:bg-[#d88200] hover:shadow-lg hover:shadow-brand-orange/30"
-                }`}
-              >
-                <Zap className="size-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
-                <span className={thai ? "font-thai text-[10px] font-bold leading-relaxed" : "font-syne text-[10px] font-bold"}>
-                  {thai
-                    ? `พิสูจน์ DNA ของคุณว่าเหมาะกับสาย ${selectedGroup} หรือไม่? (Start Assessment)`
-                    : `Prove if you fit the ${selectedGroup} path (Start Assessment)`}
-                </span>
-              </Link>
+              {/* Card footer — secondary curriculum link + dominant assessment CTA.
+                 Stacks on narrow widths (primary on top); side-by-side on sm+
+                 (curriculum left, the wider orange CTA on the right). */}
+              <div className="mt-4 flex flex-col gap-2.5 sm:flex-row sm:items-stretch">
+                {/* Secondary (ghost/outline): the selected track's SUT curriculum */}
+                <Link
+                  href={`/career-group/${getGroupSlug(selectedGroup || activeGroupObj?.name || "")}`}
+                  className="order-2 inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-transparent px-4 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:border-brand-orange/40 hover:bg-slate-100 hover:text-brand-orange dark:border-white/15 dark:text-slate-200 dark:hover:bg-white/5 sm:order-1 sm:flex-1"
+                >
+                  <BookOpen className="size-4 shrink-0" strokeWidth={2.25} aria-hidden />
+                  <span className={thai ? "font-thai" : "font-syne"}>
+                    {thai ? "ดูแผนการเรียน" : "View Curriculum"}
+                  </span>
+                </Link>
+
+                {/* Primary (brand orange, dominant): trigger the assessment flow */}
+                <Link
+                  href={`/assessment?career=${getCareerIdForAssessment(selectedCareer || activeGroupObj?.careers[0]?.name || "", activeBranch)}`}
+                  className="order-1 inline-flex items-center justify-center gap-2 rounded-full bg-brand-orange px-5 py-3.5 text-sm font-bold text-brand-orange-foreground shadow-md shadow-brand-orange/25 transition-all duration-300 hover:scale-[1.02] hover:bg-[#ff9e0d] hover:shadow-lg hover:shadow-brand-orange/35 active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100 sm:order-2 sm:flex-[1.6]"
+                >
+                  <Target className="size-4 shrink-0" strokeWidth={2.5} aria-hidden />
+                  <span className={thai ? "font-thai" : "font-syne"}>
+                    {thai ? "เริ่มทำแบบประเมิน" : "Start assessment"}
+                  </span>
+                </Link>
+              </div>
 
               {/* List Header */}
               <div className={`text-[10px] text-slate-400 dark:text-white/40 uppercase font-bold tracking-wider mt-6 ${thai ? "font-thai" : ""}`}>

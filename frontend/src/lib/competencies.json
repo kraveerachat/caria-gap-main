@@ -1,0 +1,398 @@
+[
+{
+"id": "S01_Active_Learning",
+"domain": "skill",
+"label_en": "Active Learning",
+"label_th": "การเรียนรู้เชิงรุก"
+},
+{
+"id": "S02_Active_Listening",
+"domain": "skill",
+"label_en": "Active Listening",
+"label_th": "การฟังอย่างตั้งใจ"
+},
+{
+"id": "S03_Complex_Problem_Solving",
+"domain": "skill",
+"label_en": "Complex Problem Solving",
+"label_th": "การแก้ปัญหาซับซ้อน"
+},
+{
+"id": "S04_Coordination",
+"domain": "skill",
+"label_en": "Coordination",
+"label_th": "การประสานงาน"
+},
+{
+"id": "S05_Critical_Thinking",
+"domain": "skill",
+"label_en": "Critical Thinking",
+"label_th": "การคิดเชิงวิพากษ์"
+},
+{
+"id": "S06_Equipment_Maintenance",
+"domain": "skill",
+"label_en": "Equipment Maintenance",
+"label_th": "การบำรุงรักษาอุปกรณ์"
+},
+{
+"id": "S07_Equipment_Selection",
+"domain": "skill",
+"label_en": "Equipment Selection",
+"label_th": "การเลือกอุปกรณ์"
+},
+{
+"id": "S08_Installation",
+"domain": "skill",
+"label_en": "Installation",
+"label_th": "การติดตั้ง"
+},
+{
+"id": "S09_Instructing",
+"domain": "skill",
+"label_en": "Instructing",
+"label_th": "การสอน/ถ่ายทอด"
+},
+{
+"id": "S10_Judgment_and_Decision_Making",
+"domain": "skill",
+"label_en": "Judgment and Decision Making",
+"label_th": "การตัดสินใจ"
+},
+{
+"id": "S11_Learning_Strategies",
+"domain": "skill",
+"label_en": "Learning Strategies",
+"label_th": "กลยุทธ์การเรียนรู้"
+},
+{
+"id": "S12_Management_of_Financial_Resources",
+"domain": "skill",
+"label_en": "Management of Financial Resources",
+"label_th": "การบริหารทรัพยากรการเงิน"
+},
+{
+"id": "S13_Management_of_Personnel_Resources",
+"domain": "skill",
+"label_en": "Management of Personnel Resources",
+"label_th": "การบริหารบุคลากร"
+},
+{
+"id": "S14_Mathematics",
+"domain": "skill",
+"label_en": "Mathematics",
+"label_th": "คณิตศาสตร์ (ทักษะ)"
+},
+{
+"id": "S15_Monitoring",
+"domain": "skill",
+"label_en": "Monitoring",
+"label_th": "การติดตามตรวจสอบ"
+},
+{
+"id": "S16_Negotiation",
+"domain": "skill",
+"label_en": "Negotiation",
+"label_th": "การเจรจาต่อรอง"
+},
+{
+"id": "S17_Operation_and_Control",
+"domain": "skill",
+"label_en": "Operation and Control",
+"label_th": "การควบคุมการทำงาน"
+},
+{
+"id": "S18_Operations_Analysis",
+"domain": "skill",
+"label_en": "Operations Analysis",
+"label_th": "การวิเคราะห์การปฏิบัติงาน"
+},
+{
+"id": "S19_Persuasion",
+"domain": "skill",
+"label_en": "Persuasion",
+"label_th": "การโน้มน้าว"
+},
+{
+"id": "S20_Programming",
+"domain": "skill",
+"label_en": "Programming",
+"label_th": "การเขียนโปรแกรม"
+},
+{
+"id": "S21_Reading_Comprehension",
+"domain": "skill",
+"label_en": "Reading Comprehension",
+"label_th": "การอ่านจับใจความ"
+},
+{
+"id": "S22_Planning",
+"domain": "skill",
+"label_en": "Planning",
+"label_th": "การวางแผน"
+},
+{
+"id": "S23_Social_Perceptiveness",
+"domain": "skill",
+"label_en": "Social Perceptiveness",
+"label_th": "การรับรู้ทางสังคม"
+},
+{
+"id": "S24_Speaking",
+"domain": "skill",
+"label_en": "Speaking",
+"label_th": "การพูด"
+},
+{
+"id": "S25_Systems_Analysis",
+"domain": "skill",
+"label_en": "Systems Analysis",
+"label_th": "การวิเคราะห์ระบบ"
+},
+{
+"id": "S26_Systems_Design",
+"domain": "skill",
+"label_en": "Systems Design",
+"label_th": "การออกแบบระบบ"
+},
+{
+"id": "S27_Technology_Design",
+"domain": "skill",
+"label_en": "Technology Design",
+"label_th": "การออกแบบเทคโนโลยี"
+},
+{
+"id": "S28_Troubleshooting",
+"domain": "skill",
+"label_en": "Troubleshooting",
+"label_th": "การแก้ไขปัญหาเฉพาะหน้า"
+},
+{
+"id": "S29_Writing",
+"domain": "skill",
+"label_en": "Writing",
+"label_th": "การเขียน"
+},
+{
+"id": "S30_Time_Management",
+"domain": "skill",
+"label_en": "Time Management",
+"label_th": "การบริหารเวลา"
+},
+{
+"id": "S31_Quality_Control_Analysis",
+"domain": "skill",
+"label_en": "Quality Control Analysis",
+"label_th": "การวิเคราะห์ควบคุมคุณภาพ"
+},
+{
+"id": "A01_Artistic",
+"domain": "attitude",
+"label_en": "Artistic",
+"label_th": "ศิลปะ (RIASEC)"
+},
+{
+"id": "A02_Conventional",
+"domain": "attitude",
+"label_en": "Conventional",
+"label_th": "ระเบียบแบบแผน (RIASEC)"
+},
+{
+"id": "A03_Enterprising",
+"domain": "attitude",
+"label_en": "Enterprising",
+"label_th": "การประกอบการ (RIASEC)"
+},
+{
+"id": "A04_Investigative",
+"domain": "attitude",
+"label_en": "Investigative",
+"label_th": "การสืบค้น (RIASEC)"
+},
+{
+"id": "A05_Realistic",
+"domain": "attitude",
+"label_en": "Realistic",
+"label_th": "ปฏิบัตินิยม (RIASEC)"
+},
+{
+"id": "A06_Social",
+"domain": "attitude",
+"label_en": "Social",
+"label_th": "สังคม (RIASEC)"
+},
+{
+"id": "K01_Administration_and_Management",
+"domain": "knowledge",
+"label_en": "Administration and Management",
+"label_th": "การบริหารจัดการ"
+},
+{
+"id": "K02_Building_and_Construction",
+"domain": "knowledge",
+"label_en": "Building and Construction",
+"label_th": "การก่อสร้าง"
+},
+{
+"id": "K03_Clerical",
+"domain": "knowledge",
+"label_en": "Clerical",
+"label_th": "งานธุรการ"
+},
+{
+"id": "K04_Communications_and_Media",
+"domain": "knowledge",
+"label_en": "Communications and Media",
+"label_th": "การสื่อสารและสื่อ"
+},
+{
+"id": "K05_Computers_and_Electronics",
+"domain": "knowledge",
+"label_en": "Computers and Electronics",
+"label_th": "คอมพิวเตอร์และอิเล็กทรอนิกส์"
+},
+{
+"id": "K06_Customer_and_Personal_Service",
+"domain": "knowledge",
+"label_en": "Customer and Personal Service",
+"label_th": "บริการลูกค้า"
+},
+{
+"id": "K07_Design",
+"domain": "knowledge",
+"label_en": "Design",
+"label_th": "การออกแบบ"
+},
+{
+"id": "K08_Economics_and_Accounting",
+"domain": "knowledge",
+"label_en": "Economics and Accounting",
+"label_th": "เศรษฐศาสตร์และบัญชี"
+},
+{
+"id": "K09_Education_and_Training",
+"domain": "knowledge",
+"label_en": "Education and Training",
+"label_th": "การศึกษาและฝึกอบรม"
+},
+{
+"id": "K10_Engineering_and_Technology",
+"domain": "knowledge",
+"label_en": "Engineering and Technology",
+"label_th": "วิศวกรรมและเทคโนโลยี"
+},
+{
+"id": "K11_English_Language",
+"domain": "knowledge",
+"label_en": "English Language",
+"label_th": "ภาษาอังกฤษ"
+},
+{
+"id": "K12_Fine_Arts",
+"domain": "knowledge",
+"label_en": "Fine Arts",
+"label_th": "วิจิตรศิลป์"
+},
+{
+"id": "K13_Food_Production",
+"domain": "knowledge",
+"label_en": "Food Production",
+"label_th": "การผลิตอาหาร"
+},
+{
+"id": "K14_Geography",
+"domain": "knowledge",
+"label_en": "Geography",
+"label_th": "ภูมิศาสตร์"
+},
+{
+"id": "K15_History_and_Archeology",
+"domain": "knowledge",
+"label_en": "History and Archeology",
+"label_th": "ประวัติศาสตร์และโบราณคดี"
+},
+{
+"id": "K16_Law_and_Government",
+"domain": "knowledge",
+"label_en": "Law and Government",
+"label_th": "กฎหมายและการปกครอง"
+},
+{
+"id": "K17_Mathematics",
+"domain": "knowledge",
+"label_en": "Mathematics",
+"label_th": "คณิตศาสตร์ (ความรู้)"
+},
+{
+"id": "K18_Mechanical",
+"domain": "knowledge",
+"label_en": "Mechanical",
+"label_th": "เครื่องกล"
+},
+{
+"id": "K19_Medicine_and_Dentistry",
+"domain": "knowledge",
+"label_en": "Medicine and Dentistry",
+"label_th": "แพทย์และทันตกรรม"
+},
+{
+"id": "K20_Personnel_and_Human_Resources",
+"domain": "knowledge",
+"label_en": "Personnel and Human Resources",
+"label_th": "บุคคลและทรัพยากรมนุษย์"
+},
+{
+"id": "K21_Philosophy_and_Theology",
+"domain": "knowledge",
+"label_en": "Philosophy and Theology",
+"label_th": "ปรัชญาและเทววิทยา"
+},
+{
+"id": "K22_Physics",
+"domain": "knowledge",
+"label_en": "Physics",
+"label_th": "ฟิสิกส์"
+},
+{
+"id": "K23_Production_and_Processing",
+"domain": "knowledge",
+"label_en": "Production and Processing",
+"label_th": "การผลิตและแปรรูป"
+},
+{
+"id": "K24_Psychology",
+"domain": "knowledge",
+"label_en": "Psychology",
+"label_th": "จิตวิทยา"
+},
+{
+"id": "K25_Public_Safety_and_Security",
+"domain": "knowledge",
+"label_en": "Public Safety and Security",
+"label_th": "ความปลอดภัยสาธารณะ"
+},
+{
+"id": "K26_Sales_and_Marketing",
+"domain": "knowledge",
+"label_en": "Sales and Marketing",
+"label_th": "การขายและการตลาด"
+},
+{
+"id": "K27_Sociology_and_Anthropology",
+"domain": "knowledge",
+"label_en": "Sociology and Anthropology",
+"label_th": "สังคมวิทยาและมานุษยวิทยา"
+},
+{
+"id": "K28_Telecommunications",
+"domain": "knowledge",
+"label_en": "Telecommunications",
+"label_th": "โทรคมนาคม"
+},
+{
+"id": "K29_Transportation",
+"domain": "knowledge",
+"label_en": "Transportation",
+"label_th": "การขนส่ง"
+}
+]

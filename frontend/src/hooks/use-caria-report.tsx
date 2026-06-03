@@ -50,7 +50,7 @@ export function useCariaReport(careers: CareerResult[], userId: string) {
   const sheet: ReactNode =
     ready && top ? (
       <div aria-hidden className="pointer-events-none fixed left-[-10000px] top-0 z-[-1]">
-        <CariaReportSheet ref={reportRef} career={top} radar={radar as RadarData} userId={userId} />
+        <CariaReportSheet ref={reportRef} career={top} radar={radar as RadarData} userId={userId} careers={careers} />
       </div>
     ) : null;
 

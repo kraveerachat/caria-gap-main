@@ -232,28 +232,46 @@ function CareerCard({
         />
 
         {!hasAssessmentResult ? (
-          /* LOCKED / PENDING STATE */
-          <div className="flex flex-col items-center justify-center text-center py-12 my-auto w-full">
-            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200/60 dark:border-white/10 flex items-center justify-center mb-6 shadow-sm">
-              <Lock className="size-5 text-slate-500 dark:text-slate-400" />
+          /* LOCKED / PENDING STATE — prototype awaiting input */
+          <div className="flex h-full w-full flex-col py-2">
+            {/* Prototype badge */}
+            <div className="mb-5 flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/70 bg-slate-100/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
+                <span className="size-1.5 rounded-full bg-slate-400 dark:bg-slate-500" aria-hidden />
+                {thai ? "ตัวอย่าง · รอข้อมูล" : "Prototype · awaiting input"}
+              </span>
+              <div className="flex size-9 items-center justify-center rounded-xl bg-slate-100 text-slate-400 dark:bg-white/5 dark:text-slate-500">
+                <Lock className="size-4" strokeWidth={2.25} aria-hidden />
+              </div>
             </div>
-            
-            <h3 className="text-slate-800 dark:text-white text-lg font-extrabold tracking-tight mb-2">
-              {thai ? "รอการประเมิน (Pending Assessment)" : "Pending Assessment"}
-            </h3>
-            
-            <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm max-w-[220px] leading-relaxed mb-8 font-medium">
-              {thai ? "ทำแบบประเมินเพื่อปลดล็อกผลลัพธ์รายบุคคล" : "Complete the assessment to unlock personalized results"}
+
+            {/* Skeleton placeholders — signal "this fills after the assessment" */}
+            <div className="space-y-3" aria-hidden>
+              <div className="h-6 w-3/4 rounded-lg bg-slate-100 dark:bg-white/5" />
+              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-white/5" />
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="h-12 rounded-xl bg-slate-100 dark:bg-white/5" />
+                ))}
+              </div>
+            </div>
+
+            <p className="mt-5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              {thai
+                ? "การ์ดนี้จะแสดงอาชีพที่ตรงกับคุณ พร้อมคะแนนจับคู่และช่องว่างทักษะ หลังทำแบบประเมิน"
+                : "This card fills with your matched career, match score, and skill gaps after the assessment."}
             </p>
-            
+
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 router.push("/assessment");
               }}
-              className="inline-flex items-center justify-center gap-2 py-3 px-6 rounded-2xl bg-linear-to-r from-[#F39200] to-[#FFB54D] text-[#1a1100] text-xs font-black shadow-md hover:shadow-lg transition-all duration-300 active:scale-95 shrink-0"
+              className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-orange px-5 py-3.5 text-center text-[13px] font-bold leading-snug text-brand-orange-foreground shadow-md transition-transform duration-300 hover:scale-[1.01] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100"
             >
-              <span>{thai ? "ทำแบบทดสอบตอนนี้ →" : "Take Assessment Now →"}</span>
+              {thai
+                ? "🔒 ล็อกอยู่: ทำแบบทดสอบ Hybrid 3 นาทีเพื่อปลดล็อกผลลัพธ์ (Take Assessment to Unlock)"
+                : "🔒 Locked: Take the 3-min Hybrid assessment to unlock results"}
             </button>
           </div>
         ) : (

@@ -66,10 +66,12 @@ interface CariaReportSheetProps {
   career: CareerResult;
   radar: RadarData;
   userId: string;
+  /** Optional ranked careers to list in the report (top matches). */
+  careers?: CareerResult[];
 }
 
 const CariaReportSheet = forwardRef<HTMLDivElement, CariaReportSheetProps>(
-  function CariaReportSheet({ career, radar, userId }, ref) {
+  function CariaReportSheet({ career, radar, userId, careers }, ref) {
     const { lang } = useLanguage();
     const thai = lang === "th";
 
@@ -176,6 +178,33 @@ const CariaReportSheet = forwardRef<HTMLDivElement, CariaReportSheetProps>(
           </h2>
           <DrilldownRadar radarData={radar} accent={accent} />
         </section>
+
+        {/* Top career matches */}
+        {careers && careers.length > 0 && (
+          <section className="mt-6">
+            <h2 className="mb-3 font-syne text-base font-bold text-slate-900">
+              {thai ? "อาชีพที่ตรงกับคุณมากที่สุด" : "Top Career Matches"}
+            </h2>
+            <ol className="overflow-hidden rounded-2xl border border-slate-200">
+              {careers.slice(0, 5).map((c, i) => (
+                <li
+                  key={c.career_id}
+                  className={`flex items-center gap-3 px-4 py-2.5 ${i > 0 ? "border-t border-slate-100" : ""}`}
+                >
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-slate-100 font-mono text-[11px] font-bold text-slate-500">
+                    {i + 1}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-slate-800">
+                    {CAREER_THAI_NAMES[c.career_id] || c.career_name}
+                  </span>
+                  <span className="shrink-0 font-mono text-[13px] font-bold tabular-nums" style={{ color: accent }}>
+                    {Math.round(c.match_percentage)}%
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         {/* Domain summary */}
         <section className="mt-6">

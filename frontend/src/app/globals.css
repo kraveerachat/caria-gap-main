@@ -184,6 +184,15 @@
 .text-balance { text-wrap: balance; }
 .perspective-1000 { perspective: 1000px; }
 
+/* Hide scrollbars on horizontal carousels while keeping scroll/drag behavior */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Infinite logo marquee (Industry Demand section) */
 @keyframes marquee-left {
   from { transform: translateX(0); }
