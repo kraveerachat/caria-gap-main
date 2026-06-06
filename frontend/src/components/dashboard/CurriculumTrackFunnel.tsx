@@ -9,13 +9,13 @@
  */
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { GraduationCap, ArrowRight, Gauge, Clock, Layers } from "lucide-react";
 import DrilldownRadar from "@/components/dashboard/DrilldownRadar";
 import { useLanguage } from "@/components/language-provider";
-import { api } from "@/lib/api";
-import type { CareerResult, RadarData } from "@/types";
+import { useGapAnalysis } from "@/hooks/use-api";
+import type { CareerResult } from "@/types";
 import { getTrackForCareer, getTrackReadiness, getMes, readableOn } from "@/lib/sut-tracks";
 
 export default function CurriculumTrackFunnel({
@@ -30,27 +30,11 @@ export default function CurriculumTrackFunnel({
 
   const options = careers.slice(0, 5);
   const [selectedId, setSelectedId] = useState(options[0]?.career_id ?? "");
-  const [radar, setRadar] = useState<RadarData | null>(null);
-  const [loading, setLoading] = useState(true);
-
   const selected = options.find((c) => c.career_id === selectedId) ?? options[0];
 
-  useEffect(() => {
-    if (!selected) return;
-    let active = true;
-    setLoading(true);
-    api
-      .getGapAnalysis(userId, selected.career_id)
-      .then((res) => {
-        if (active) setRadar(res.radar_data);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [selected, userId]);
+  // Roadmap Phase 3: radar via React Query (same response shape as before).
+  const { data: gap, isLoading: loading } = useGapAnalysis(userId, selected?.career_id);
+  const radar = gap?.radar_data ?? null;
 
   if (!selected) return null;
 

@@ -10,6 +10,7 @@ import { OnboardingCard } from "@/components/assessment/OnboardingCard";
 import { DreamCareerSelectCard } from "@/components/assessment/DreamCareerSelectCard";
 import { GamifiedQuiz } from "@/components/assessment/GamifiedQuiz";
 import { api } from "@/lib/api";
+import { getAnonId } from "@/lib/anon-id";
 import { MOCK_TOP10 } from "@/lib/mockData";
 import mockCareers from "@/lib/mock_careers.json";
 
@@ -100,7 +101,8 @@ export default function AssessmentPage() {
     setIsSubmitting(true);
     try {
       const res = await api.submitAssessment({
-        user_id: `user_81_${Date.now()}`,
+        // Stable per-browser key so guest results stay claimable after sign-in.
+        user_id: getAnonId() || `user_81_${Date.now()}`,
         program: "Digital Technology",
         scores: compiledScores,
         input_method: "quiz_81",

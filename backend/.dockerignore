@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+# Runtime data — JSON datasets are kept (needed by the seeder); local DBs are not.
+data/*.sqlite3
+data/*.db
+data/uploads/
+.env

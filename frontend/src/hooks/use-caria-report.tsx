@@ -11,32 +11,19 @@
  */
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useRef, type ReactNode } from "react";
 import CariaReportSheet from "@/components/dashboard/CariaReportSheet";
-import { api } from "@/lib/api";
+import { useGapAnalysis } from "@/hooks/use-api";
 import { elementToPdfBlob } from "@/lib/caria-report";
 import type { CareerResult, RadarData } from "@/types";
 
 export function useCariaReport(careers: CareerResult[], userId: string) {
   const top = careers[0] as CareerResult | undefined;
-  const [radar, setRadar] = useState<RadarData | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!top) return;
-    let active = true;
-    api
-      .getGapAnalysis(userId, top.career_id)
-      .then((res) => {
-        if (active) setRadar(res.radar_data);
-      })
-      .catch(() => {
-        /* api layer already falls back to mock radar data when offline */
-      });
-    return () => {
-      active = false;
-    };
-  }, [top?.career_id, userId]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Roadmap Phase 3: radar via React Query (api layer still mocks in dev).
+  const { data: gap } = useGapAnalysis(userId, top?.career_id);
+  const radar = gap?.radar_data ?? null;
 
   const ready = !!radar && !!top;
 

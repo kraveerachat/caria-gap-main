@@ -5,10 +5,11 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Dict, List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 from core.algorithm import recommend_careers
 from core.gap_analyzer import analyze_gap
+from core.ratelimit import limiter
 from models import database as db
 from models.schemas import AssessmentSubmit, CareerResult, Top10Response
 
@@ -34,7 +35,8 @@ def build_top10(student_scores: Dict[str, float]) -> List[Dict]:
 
 
 @router.post("/submit", response_model=Top10Response)
-def submit_assessment(payload: AssessmentSubmit) -> Top10Response:
+@limiter.limit("20/minute")
+def submit_assessment(request: Request, payload: AssessmentSubmit) -> Top10Response:
     top10 = build_top10(payload.scores)
     timestamp = datetime.now(timezone.utc).isoformat()
     assessment_id = f"ASM_{payload.user_id}"

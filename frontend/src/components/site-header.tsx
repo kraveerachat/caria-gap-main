@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { motion } from "motion/react"
 import { ArrowRight, Menu, X, User } from "lucide-react"
 import Link from "next/link"
+import { useSession, signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -11,16 +12,18 @@ import { LanguageToggle } from "@/components/language-toggle"
 import { useLanguage } from "@/components/language-provider"
 
 const NAV = [
-  { key: "howItWorks", href: "/#how-it-works" },
-  { key: "assessment", href: "/#assessment" },
-  { key: "results", href: "/#results" },
-  { key: "simulator", href: "/#simulator" },
+  { key: "howItWorks", href: "/home#how-it-works" },
+  { key: "assessment", href: "/home#assessment" },
+  { key: "results", href: "/home#results" },
+  { key: "simulator", href: "/home#simulator" },
 ] as const
 
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const { t } = useLanguage()
+  const { data: session, status } = useSession()
+  const sessionUser = status === "authenticated" ? session?.user : null
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16)
@@ -44,7 +47,7 @@ export function SiteHeader() {
             : "border border-transparent text-slate-900 dark:text-slate-100",
         )}
       >
-        <Link href="/" className="pl-2">
+        <Link href="/home" className="pl-2">
           <Logo />
           <span className="sr-only">SUT-CARIA home</span>
         </Link>
@@ -69,8 +72,29 @@ export function SiteHeader() {
         <div className="flex items-center gap-2">
           <LanguageToggle />
           <ThemeToggle onTop={false} />
+          {sessionUser ? (
+            <div className="hidden items-center gap-2 sm:flex">
+              <span className="max-w-[9rem] truncate text-sm font-medium text-slate-700 dark:text-slate-200">
+                {sessionUser.name ?? "Account"}
+              </span>
+              <button
+                type="button"
+                onClick={() => signOut({ redirect: false })}
+                className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/signin"
+              className="hidden rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/5 dark:hover:text-white sm:inline-flex"
+            >
+              Sign in
+            </Link>
+          )}
           <Link
-            href="/gateway"
+            href="/assessment"
             className="group hidden items-center gap-2 rounded-full bg-brand-orange px-5 py-2.5 text-sm font-semibold text-brand-orange-foreground shadow-[0_10px_30px_-8px_rgba(243,146,0,0.6)] transition-transform duration-300 hover:scale-[1.04] active:scale-95 sm:inline-flex"
           >
             {t.nav.start}
@@ -119,12 +143,32 @@ export function SiteHeader() {
               </a>
             ))}
             <Link
-              href="/gateway"
+              href="/assessment"
               onClick={() => setOpen(false)}
               className="mt-1 inline-flex items-center justify-center gap-2 rounded-full bg-brand-orange px-5 py-3 text-sm font-semibold text-brand-orange-foreground"
             >
               {t.nav.start} <ArrowRight className="size-4" />
             </Link>
+            {sessionUser ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false)
+                  signOut({ redirect: false })
+                }}
+                className="mt-1 rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground/80 hover:bg-foreground/5"
+              >
+                Sign out ({sessionUser.name ?? "Account"})
+              </button>
+            ) : (
+              <Link
+                href="/signin"
+                onClick={() => setOpen(false)}
+                className="mt-1 rounded-2xl px-4 py-3 text-sm font-medium text-foreground/80 hover:bg-foreground/5"
+              >
+                Sign in
+              </Link>
+            )}
           </nav>
         </motion.div>
       )}

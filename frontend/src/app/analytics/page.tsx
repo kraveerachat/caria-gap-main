@@ -48,12 +48,12 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import DrilldownRadar from "@/components/dashboard/DrilldownRadar";
 import { cn } from "@/lib/utils";
-import { api } from "@/lib/api";
+import { useGapAnalysis } from "@/hooks/use-api";
 import { useLanguage } from "@/components/language-provider";
 import { competencyLabel } from "@/lib/competencies";
 import { getTrackForCareer, getMes, getTrackReadiness } from "@/lib/sut-tracks";
 import { CAREER_THAI_NAMES } from "@/lib/career-translations";
-import type { CareerResult, GapItem, RadarData, Top10Response } from "@/types";
+import type { CareerResult, Top10Response } from "@/types";
 
 /* ------------------------------------------------------------------ */
 /*  Public market mock data — logical for a tech student               */
@@ -165,44 +165,34 @@ export default function AnalyticsPage() {
 /* ================================================================== */
 
 function PersonalInsights({ thai }: { thai: boolean }) {
+  // Result comes from the localStorage handoff (read post-mount to avoid a
+  // hydration mismatch); the gap analysis for the top career goes through React
+  // Query (Roadmap Phase 3). Same data shapes as before.
   const [result, setResult] = useState<Top10Response | null>(null);
-  const [radar, setRadar] = useState<RadarData | null>(null);
-  const [gaps, setGaps] = useState<GapItem[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [resultLoaded, setResultLoaded] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    let active = true;
-    let parsed: Top10Response | null = null;
     try {
       const raw = localStorage.getItem("caria_last_result");
-      if (raw) parsed = JSON.parse(raw) as Top10Response;
+      setResult(raw ? (JSON.parse(raw) as Top10Response) : null);
     } catch {
-      /* ignore corrupt payload */
+      setResult(null);
     }
-    setResult(parsed);
-
-    const top = parsed?.top10_careers?.[0];
-    if (parsed && top) {
-      api
-        .getGapAnalysis(parsed.user_id, top.career_id)
-        .then((res) => {
-          if (!active) return;
-          setRadar(res.radar_data);
-          setGaps([...res.gaps].sort((a, b) => b.gap_score - a.gap_score).slice(0, 5));
-        })
-        .catch(() => {})
-        .finally(() => active && setLoaded(true));
-    } else {
-      setLoaded(true);
-    }
-    return () => {
-      active = false;
-    };
+    setResultLoaded(true);
   }, []);
 
   const careers = result?.top10_careers ?? [];
   const top = careers[0];
+
+  const { data: gap, isLoading: gapLoading } = useGapAnalysis(result?.user_id, top?.career_id);
+  const radar = gap?.radar_data ?? null;
+  const gaps = useMemo(
+    () => (gap ? [...gap.gaps].sort((a, b) => b.gap_score - a.gap_score).slice(0, 5) : []),
+    [gap],
+  );
+  // "Loaded" once the handoff is read and, if there's a career to analyze, its query settled.
+  const loaded = resultLoaded && (!top || !gapLoading);
 
   // Empty state: not a paywall, just an invitation to take the assessment.
   if (loaded && (!result || careers.length === 0)) {

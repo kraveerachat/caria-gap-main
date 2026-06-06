@@ -4,16 +4,47 @@ import type {
   GapAnalysisResponse,
   Top10Response,
 } from "@/types";
+import { getSession } from "next-auth/react";
 import { MOCK_TOP10, MOCK_GAP_ANALYSIS } from "./mockData";
 import { showToast } from "./utils";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
 
+/**
+ * Whether to fall back to bundled mock data when the API call fails. Explicit
+ * NEXT_PUBLIC_USE_MOCKS wins; otherwise mocks are on in development (keeps the
+ * offline demo working) and OFF in production (real failures surface as errors
+ * instead of silently serving fake data). Roadmap Phase 3.
+ */
+const USE_MOCKS =
+  typeof process.env.NEXT_PUBLIC_USE_MOCKS === "string"
+    ? process.env.NEXT_PUBLIC_USE_MOCKS === "true"
+    : process.env.NODE_ENV !== "production";
+
+/**
+ * Bearer header from the current NextAuth session, if any. The backend mints this
+ * token (verify-student / OAuth exchange) and validates it; guests have no session,
+ * so this returns {} and the request stays anonymous (existing behavior).
+ */
+async function authHeader(): Promise<Record<string, string>> {
+  try {
+    const session = await getSession();
+    const token = (session as { backendToken?: string } | null)?.backendToken;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(await authHeader()),
+      ...((init?.headers as Record<string, string>) || {}),
+    },
   });
   if (!res.ok) {
     const errorText = await res.text();
@@ -61,10 +92,8 @@ export const api = {
       });
     } catch (error) {
       console.error("Submission failed:", error);
-      // showToast("เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้ง", "error");
-      
+      if (!USE_MOCKS) throw error;
       console.warn("API Offline, using Mock Data", error);
-      // showToast("Offline Mode Active: Using mock data", "info");
       await simulateDelay(2000); // simulate 2s processing
       return MOCK_TOP10;
     }
@@ -74,8 +103,8 @@ export const api = {
     try {
       return await request<Top10Response>(`/api/v1/recommendations/${userId}`);
     } catch (error) {
+      if (!USE_MOCKS) throw error;
       console.warn("API Offline, using Mock Data", error);
-      // showToast("Offline Mode Active", "info");
       return MOCK_TOP10;
     }
   },
@@ -84,8 +113,8 @@ export const api = {
     try {
       return await request<GapAnalysisResponse>(`/api/v1/gap-analysis/${userId}/${careerId}`);
     } catch (error) {
+      if (!USE_MOCKS) throw error;
       console.warn("API Offline, using Mock Data", error);
-      // showToast("Offline Mode Active", "info");
       return MOCK_GAP_ANALYSIS;
     }
   },
@@ -96,6 +125,8 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/api/v1/admissions/apply`, {
         method: "POST",
+        // No Content-Type: the browser sets the multipart boundary itself.
+        headers: { ...(await authHeader()) },
         body: form,
       });
       if (!res.ok) {
@@ -106,7 +137,7 @@ export const api = {
     } catch (error) {
       // Network-level failure (backend offline): degrade to a mock acceptance so
       // the lead-gen flow still demos end-to-end, mirroring the rest of the app.
-      if (error instanceof TypeError) {
+      if (error instanceof TypeError && USE_MOCKS) {
         console.warn("API Offline — Fast-Track application mocked locally", error);
         await simulateDelay(900);
         const userId = (form.get("payload") && JSON.parse(String(form.get("payload"))).user_id) || "demo";
@@ -125,6 +156,15 @@ export const api = {
     }
   },
 
+  claimResults: async (anonId: string) => {
+    // Re-key the guest's anonymous assessments to the signed-in user. The bearer
+    // token is attached by request()'s authHeader(); a 401 just means not signed in.
+    return await request("/api/v1/results/claim", {
+      method: "POST",
+      body: JSON.stringify({ anon_id: anonId }),
+    });
+  },
+
   simulate: async (userId: string, modifiedScores: Record<string, number>) => {
     try {
       return await request(`/api/v1/simulate`, {
@@ -132,6 +172,7 @@ export const api = {
         body: JSON.stringify({ user_id: userId, modified_scores: modifiedScores }),
       });
     } catch (error) {
+      if (!USE_MOCKS) throw error;
       console.warn("API Offline, simulation bypassed", error);
       return { status: "offline_simulation_ok" };
     }

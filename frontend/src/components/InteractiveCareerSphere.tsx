@@ -41,14 +41,17 @@ const DC_DIRECTIONS: [number, number, number][] = [
 ];
 
 interface InteractiveCareerSphereProps {
-  isExploring: boolean;
-  setIsExploring: (val: boolean) => void;
-  activeBranch: "DT" | "DC";
-  setActiveBranch: (branch: "DT" | "DC") => void;
-  selectedGroup: string;
-  setSelectedGroup: (group: string) => void;
-  selectedCareer: string;
-  setSelectedCareer: (career: string) => void;
+  isExploring?: boolean;
+  setIsExploring?: (val: boolean) => void;
+  activeBranch?: "DT" | "DC";
+  setActiveBranch?: (branch: "DT" | "DC") => void;
+  selectedGroup?: string;
+  setSelectedGroup?: (group: string) => void;
+  selectedCareer?: string;
+  setSelectedCareer?: (career: string) => void;
+  /** Decorative mode: render only the wireframe sphere — no Html labels, no
+      toggle/tip, no bloom/controls. Used as a page background. */
+  isBackground?: boolean;
 }
 
 function getHemisphereDirections(count: number, branch: "DT" | "DC"): [number, number, number][] {
@@ -90,9 +93,10 @@ interface NexusProps {
   allGroups: (CareerGroup & { branch: "DT" | "DC" })[];
   lang: string;
   onNodeClick: (node: any) => void;
+  isBackground: boolean;
 }
 
-function Nexus({ light, activeBranch, viewMode, allGroups, lang, onNodeClick }: NexusProps) {
+function Nexus({ light, activeBranch, viewMode, allGroups, lang, onNodeClick, isBackground }: NexusProps) {
   const groupRef = useRef<THREE.Group>(null);
   const occluderRef = useRef<THREE.Mesh>(null);
   const prevBranchRef = useRef(activeBranch);
@@ -169,7 +173,7 @@ function Nexus({ light, activeBranch, viewMode, allGroups, lang, onNodeClick }: 
   }, [allGroups, lang, viewMode, activeBranch]);
 
   const { pointsGeo, linesGeo, dotTexture, labeledNodes } = useMemo(() => {
-    const ico = new THREE.IcosahedronGeometry(RADIUS, 4);
+    const ico = new THREE.IcosahedronGeometry(RADIUS, isBackground ? 3 : 4);
     const raw = ico.attributes.position.array as Float32Array;
     const rawCount = raw.length / 3;
 
@@ -287,7 +291,7 @@ function Nexus({ light, activeBranch, viewMode, allGroups, lang, onNodeClick }: 
     });
 
     return { pointsGeo: pGeo, linesGeo: lGeo, dotTexture: tex, labeledNodes: labeled };
-  }, [light, nodesData]);
+  }, [light, nodesData, isBackground]);
 
   // Smoothly damp rotation to face selected hemisphere, handle idle auto-rotation & scale breathing pulsation
   useFrame((state, delta) => {
@@ -298,6 +302,12 @@ function Nexus({ light, activeBranch, viewMode, allGroups, lang, onNodeClick }: 
       
       // 2. Gentle floating animation (y-axis sway)
       groupRef.current.position.y = Math.sin(state.clock.getElapsedTime() * 1.0) * 0.08;
+
+      // Decorative background: skip branch-facing logic, just spin slowly.
+      if (isBackground) {
+        groupRef.current.rotation.y += delta * 0.12;
+        return;
+      }
 
       // 3. Reset interaction timer when activeBranch toggles
       if (prevBranchRef.current !== activeBranch) {
@@ -361,8 +371,8 @@ function Nexus({ light, activeBranch, viewMode, allGroups, lang, onNodeClick }: 
         />
       </points>
 
-      {/* Text labels */}
-      {labeledNodes.map((node) => (
+      {/* Text labels (skipped in decorative background mode — no Html nodes) */}
+      {!isBackground && labeledNodes.map((node) => (
         <group key={node.label + node.fullName} position={node.position}>
           <mesh>
             <sphereGeometry args={[0.06, 16, 16]} />
@@ -404,14 +414,15 @@ function Nexus({ light, activeBranch, viewMode, allGroups, lang, onNodeClick }: 
 }
 
 export default function InteractiveCareerSphere({
-  isExploring,
-  setIsExploring,
-  activeBranch,
-  setActiveBranch,
-  selectedGroup,
-  setSelectedGroup,
-  selectedCareer,
-  setSelectedCareer,
+  isExploring = false,
+  setIsExploring = () => {},
+  activeBranch = "DT",
+  setActiveBranch = () => {},
+  selectedGroup = "",
+  setSelectedGroup = () => {},
+  selectedCareer = "",
+  setSelectedCareer = () => {},
+  isBackground = false,
 }: InteractiveCareerSphereProps) {
   const [mounted, setMounted] = useState(false);
   const { lang } = useLanguage();
@@ -459,7 +470,7 @@ export default function InteractiveCareerSphere({
       
       {/* Branch Toggle: DT vs DC (Positioned at top-right, shifted down and left) */}
       {/* Hidden when exploring to prevent duplicate controls */}
-      {!isExploring && (
+      {!isBackground && !isExploring && (
         <div className="absolute top-20 right-20 md:top-24 md:right-24 z-20 pointer-events-auto flex rounded-full border border-slate-200 dark:border-white/10 p-1 bg-white/60 dark:bg-black/40 backdrop-blur-md max-w-fit shadow-lg">
           <button
             onClick={() => {
@@ -489,7 +500,7 @@ export default function InteractiveCareerSphere({
       )}
 
       {/* Interactive tip overlay for landing */}
-      {!isExploring && (
+      {!isBackground && !isExploring && (
         <div className="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 pointer-events-none text-center md:block">
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-4 py-2 shadow-md backdrop-blur-xl animate-bounce dark:border-white/10 dark:bg-slate-900/60">
             <Lightbulb className="size-3.5 text-brand-orange" strokeWidth={2.25} aria-hidden />
@@ -505,7 +516,7 @@ export default function InteractiveCareerSphere({
         <Canvas
           camera={{ position: [0, 0, 6.2], fov: 55 }}
           gl={{ alpha: true, antialias: true }}
-          dpr={[1, 2]}
+          dpr={isBackground ? [1, 1.5] : [1, 2]}
           style={{ background: "transparent", overflow: "visible" }}
         >
           <Nexus
@@ -515,18 +526,19 @@ export default function InteractiveCareerSphere({
             allGroups={allGroups}
             lang={lang}
             onNodeClick={handleNodeClick}
+            isBackground={isBackground}
           />
 
           <OrbitControls
             enablePan={false}
             enableZoom={false}
-            enableRotate
+            enableRotate={!isBackground}
             enableDamping
             dampingFactor={0.05}
             rotateSpeed={0.4}
           />
 
-          {!light && (
+          {!light && !isBackground && (
             <EffectComposer enableNormalPass={false}>
               <Bloom intensity={0.9} luminanceThreshold={0.4} luminanceSmoothing={0.5} mipmapBlur />
             </EffectComposer>

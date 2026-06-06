@@ -14,7 +14,7 @@ export function SiteFooter() {
       title: t.footer.product,
       links: [
         { label: t.footer.howItWorks, href: "#how-it-works" },
-        { label: t.footer.assessment, href: "/gateway" },
+        { label: t.footer.assessment, href: "/assessment" },
         { label: t.footer.publicTrends, href: "/analytics" },
         { label: t.footer.b2bPortal, href: "/b2b-portal" },
       ]

@@ -5,3 +5,14 @@ pydantic>=2.6
 python-multipart>=0.0.9
 pytest>=8.0
 httpx>=0.27
+
+# --- Roadmap Phase 1: Postgres persistence ---
+sqlmodel>=0.0.16
+alembic>=1.13
+psycopg[binary]>=3.1
+
+# --- Roadmap Phase 2: auth (FastAPI validates NextAuth-issued JWTs) ---
+python-jose[cryptography]>=3.3
+
+# --- Roadmap Phase 4: rate limiting on sensitive endpoints ---
+slowapi>=0.1.9

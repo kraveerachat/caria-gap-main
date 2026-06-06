@@ -238,7 +238,7 @@ export default function HeroSection() {
                   {/* CTAs */}
                   <div className="flex flex-wrap gap-4 items-center pt-2">
                     <motion.a
-                      href="/gateway"
+                      href="/assessment"
                       className="flex items-center gap-2 px-8 py-4 rounded-full bg-[#F39200] text-[#050A14] font-syne font-bold text-base tracking-wide"
                       style={{ boxShadow: "0 0 30px rgba(243,146,0,0.4), 0 4px 20px rgba(0,0,0,0.3)" }}
                       whileHover={{ scale: 1.04, boxShadow: "0 0 45px rgba(243,146,0,0.6), 0 4px 24px rgba(0,0,0,0.4)" }}
@@ -463,7 +463,7 @@ export default function HeroSection() {
 
                 {/* Primary (brand orange, dominant): trigger the assessment flow */}
                 <Link
-                  href={`/gateway?career=${getCareerIdForAssessment(selectedCareer || activeGroupObj?.careers[0]?.name || "", activeBranch)}`}
+                  href={`/assessment?career=${getCareerIdForAssessment(selectedCareer || activeGroupObj?.careers[0]?.name || "", activeBranch)}`}
                   className="order-1 inline-flex items-center justify-center gap-2 rounded-full bg-brand-orange px-5 py-3.5 text-sm font-bold text-brand-orange-foreground shadow-md shadow-brand-orange/25 transition-all duration-300 hover:scale-[1.02] hover:bg-[#ff9e0d] hover:shadow-lg hover:shadow-brand-orange/35 active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100 sm:order-2 sm:flex-[1.6]"
                 >
                   <Target className="size-4 shrink-0" strokeWidth={2.5} aria-hidden />

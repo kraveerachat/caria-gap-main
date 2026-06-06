@@ -45,6 +45,9 @@ Thumbs.db
 backend/data/leads.sqlite3
 backend/data/uploads/
 
+# Local SQLite dev DB for the Phase 1 demo (use managed Postgres in real envs)
+backend/data/caria_dev.db
+
 # Scratch
 test.png
 download_logos.py

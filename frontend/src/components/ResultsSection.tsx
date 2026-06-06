@@ -265,7 +265,7 @@ function CareerCard({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                router.push("/gateway");
+                router.push("/assessment");
               }}
               className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-orange px-5 py-3.5 text-center text-[13px] font-bold leading-snug text-brand-orange-foreground shadow-md transition-transform duration-300 hover:scale-[1.01] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100"
             >
@@ -491,7 +491,7 @@ export default function ResultsSection() {
     if (hasAssessmentResult) {
       router.push("/dashboard");
     } else {
-      router.push("/gateway");
+      router.push("/assessment");
     }
   };
 

@@ -7,6 +7,8 @@ import { GeistMono } from 'geist/font/mono';
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
+import { AuthSessionProvider } from "@/components/auth-session-provider";
+import { QueryProvider } from "@/components/query-provider";
 import { Analytics } from '@vercel/analytics/next';
 
 // Display face for English headings/numbers (font-syne). Geist Sans/Mono carry
@@ -37,7 +39,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           disableTransitionOnChange
         >
           <LanguageProvider>
-            {children}
+            <AuthSessionProvider>
+              <QueryProvider>
+                {children}
+              </QueryProvider>
+            </AuthSessionProvider>
           </LanguageProvider>
         </ThemeProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}

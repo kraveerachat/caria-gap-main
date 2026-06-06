@@ -10,9 +10,8 @@ import WhatIfSlider from "@/components/WhatIfSlider";
 import { GapBarChart } from "@/components/gap/GapBarChart";
 import { Badge } from "@/components/ui/badge";
 import Loading from "@/components/ui/Loading";
-import { api } from "@/lib/api";
-import { MOCK_GAP_ANALYSIS } from "@/lib/mockData";
-import type { GapAnalysisResponse, CompetencyScores } from "@/types";
+import { useGapAnalysis } from "@/hooks/use-api";
+import type { CompetencyScores } from "@/types";
 import { useLanguage } from "@/components/language-provider";
 import { CourseMatcher } from "@/components/results/CourseMatcher";
 import { SlidersHorizontal, AlertTriangle, BarChart3, GraduationCap, Dumbbell, Radar as RadarIcon } from "lucide-react";
@@ -27,25 +26,14 @@ export default function CareerGapPage() {
   const careerId = params.id as string;
   const userId = searchParams.get("user") || "demo_ton";
 
-  const [data, setData] = useState<GapAnalysisResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Roadmap Phase 3: data via React Query (caching, retries, error state) instead
+  // of a manual useEffect+useState load. Same response shape, so the rest is unchanged.
+  const { data: queryData, isLoading, isError } = useGapAnalysis(userId, careerId);
+  const data = queryData ?? null;
+  const loading = isLoading;
   const [animatedMatch, setAnimatedMatch] = useState(0);
   const [closedGaps, setClosedGaps] = useState<Set<string>>(new Set());
   const [simulatedMatchPct, setSimulatedMatchPct] = useState(0);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await api.getGapAnalysis(userId, careerId);
-        setData(res);
-      } catch {
-        setData(MOCK_GAP_ANALYSIS);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, [userId, careerId]);
 
   useEffect(() => {
     if (data) {
@@ -192,8 +180,28 @@ export default function CareerGapPage() {
     return () => clearInterval(timer);
   }, [simulatedMatchPct]);
 
-  if (loading || !data) {
+  if (loading) {
     return <Loading mode="fullpage" />;
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
+        <AlertTriangle className="size-8 text-amber-500" />
+        <p className="max-w-sm text-sm text-muted-foreground">
+          {thai
+            ? "ไม่สามารถโหลดผลการวิเคราะห์ได้ กรุณาลองใหม่อีกครั้ง"
+            : "Could not load this gap analysis. Please try again."}
+        </p>
+        <button
+          type="button"
+          onClick={() => router.refresh()}
+          className="rounded-full bg-brand-orange px-5 py-2.5 text-sm font-semibold text-brand-orange-foreground"
+        >
+          {thai ? "ลองใหม่" : "Retry"}
+        </button>
+      </div>
+    );
   }
 
   // Build currentScores from gap + strength items

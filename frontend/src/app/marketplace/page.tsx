@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CourseCard from "@/components/CourseCard";
 import Loading from "@/components/ui/Loading";
 import { CheckCircle2, ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
-import { api } from "@/lib/api";
-import { MOCK_GAP_ANALYSIS } from "@/lib/mockData";
-import type { GapAnalysisResponse, CourseRec } from "@/types";
+import { useGapAnalysis } from "@/hooks/use-api";
+import type { CourseRec } from "@/types";
 
 interface CourseWithGap {
   course: CourseRec;
@@ -23,25 +22,29 @@ function MarketplaceContent() {
   const userId = searchParams.get("user") || "demo_ton";
   const careerId = searchParams.get("career") || "C01";
 
-  const [data, setData] = useState<GapAnalysisResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Roadmap Phase 3: data via React Query (same response shape as before).
+  const { data: queryData, isLoading, isError } = useGapAnalysis(userId, careerId);
+  const data = queryData ?? null;
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await api.getGapAnalysis(userId, careerId);
-        setData(res);
-      } catch {
-        setData(MOCK_GAP_ANALYSIS);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, [userId, careerId]);
-
-  if (loading || !data) {
+  if (isLoading) {
     return <Loading mode="fullpage" />;
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center font-thai">
+        <p className="max-w-sm text-sm text-muted-foreground">
+          ไม่สามารถโหลดคอร์สแนะนำได้ กรุณาลองใหม่อีกครั้ง
+        </p>
+        <button
+          type="button"
+          onClick={() => router.refresh()}
+          className="rounded-full bg-brand-orange px-5 py-2.5 text-sm font-semibold text-brand-orange-foreground"
+        >
+          ลองใหม่
+        </button>
+      </div>
+    );
   }
 
   // Collect all courses from gaps, sorted by gap_score descending
