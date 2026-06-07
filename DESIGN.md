@@ -36,7 +36,7 @@ Design reference for CARIA-GAP (SUT advisory & curriculum platform). Companion t
 
 ## Feature: B2B SUT Curriculum Track funnel — fully implemented
 
-Routes each matched career into the SUT program that owns it. The university (SUT) is the B2B customer; the matched student is the lead. Lives on the student dashboard, built additively (the existing top-10 / dream-career flow is untouched).
+Routes each matched career into the SUT program that owns it. The university (SUT) is the B2B customer; the matched student is the lead. Lives on the student dashboard below the Top 4 recommendations (see the gap-analysis feature below), converting results into university leads and fast-track applications. This funnel is core to B2B viability and is retained on the focused dashboard, fed the Top 4.
 
 - **B2B Lead-Gen Funnel — implemented.** Every recommended career is tagged with a high-level **SUT Curriculum Track** (e.g. Data Science & AI, Software Engineering, Creative & Visual Media). A drill-down detail view (`CurriculumTrackFunnel`, "Screen 2") ends in a single track CTA that routes the student into that track's pathway. Career→track mapping and faculty-level **upskill programs/bootcamps** (no individual course codes) live in `lib/sut-tracks.ts`.
 - **Track Readiness Badge — implemented.** Derived from the **MES score** (`raw_mes`, falling back to `match_percentage`) into four tiers: Track Ready (≥85), Track Aligned (≥70), Foundational (≥55), Exploratory. Each tier carries a color, label (TH/EN), and guidance blurb.
@@ -51,3 +51,22 @@ Routes each matched career into the SUT program that owns it. The university (SU
 
 ### Status
 Merged to `main` via PR #3 (`3623a26`). `pnpm build` passes (11/11 routes); all touched files diagnostics-clean; contrast and Tailwind-class issues resolved in a polish pass.
+
+## Feature: Client-side MES gap analysis + focused dashboard — fully implemented
+
+Career ranking is computed on the client from the student's competency scores, with no backend call. The student answers the 81-question assessment (slider form, `components/assessment/GamifiedQuiz.tsx`), which averages into 66 competency scores.
+
+- **Euclidean MES, client-side.** `lib/gap-analysis.ts` runs the research engine in `lib/mes-client.ts` (Eq.1 capping `min(student, required)` + Eq.2 Modified Euclidean Similarity `1 / (1 + √Σ(diff²))`) over all 78 career requirement vectors in `lib/career-vectors.json`. Raw MES is normalized into a 60–95% match band. This is a *readiness/coverage* metric: capping means only shortfalls count, so the score reads as "how fully you meet a role's bar."
+- **Competency taxonomy alignment.** The quiz emits its own `K##` knowledge numbering, while `career-vectors.json` and `competencies.json` use the canonical career taxonomy. `gap-analysis.ts` aligns the student's scores onto the career space by semantic name and computes distance over the **60 shared dimensions** (31 skills + 6 attitudes + 23 comparable knowledge areas). Non-comparable dimensions (e.g. Mechanical, Biology) are excluded rather than silently zeroed.
+- **`useGapAnalysis(userId)` hook.** Reads `user_custom_scores` from `localStorage` (or a deterministic demo profile for the "Skip to dashboard" path), ranks all 78 careers, derives the dream-career match + ranked skill gaps, and persists `caria_last_result` for the Profile page.
+- **Focused two-section dashboard.** Section 1 `DreamCareerMatch` (the saved dream career, its calculated match ring, and the top 5 skill gaps as current-vs-required bars). Section 2 the Top 4 recommended careers (rank-1 hero + ranks 2–4). The previous Top-10 / ranks-4-to-10 rendering and the three-condition banner were removed. The B2B funnel (`CurriculumTrackFunnel` + `NextSteps`) is retained below, fed the Top 4.
+
+### Key files
+- `lib/gap-analysis.ts` — MES ranking, taxonomy alignment, dream-career gaps, demo profile.
+- `hooks/useGapAnalysis.ts` — localStorage read, client-side ranking, Profile persistence.
+- `lib/mes-client.ts` — Eq.1 + Eq.2 engine (numerically identical to the backend; unit-tested).
+- `components/dashboard/DreamCareerMatch.tsx` — Section 1 dream-career match + skill gaps.
+- `app/dashboard/page.tsx` — two-section layout (Dream + Top 4) with the B2B funnel retained.
+
+### Status
+Client-side, no backend. `next build` passes (15/15 routes); `vitest` passes (14/14); all touched files diagnostics-clean. Match band and bilingual labels verified; contrast uses semantic tokens + `brand-orange-foreground` on solid orange.

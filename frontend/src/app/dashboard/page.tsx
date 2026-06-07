@@ -1,225 +1,49 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CareerCard from "@/components/results/CareerCard";
 import { CareerRoadmapTimeline } from "@/components/results/CareerRoadmapTimeline";
 import Loading from "@/components/ui/Loading";
-import { api } from "@/lib/api";
-import { MOCK_TOP10 } from "@/lib/mockData";
-import type { Top10Response, CareerResult } from "@/types";
 import { useLanguage } from "@/components/language-provider";
 import { useMockUser } from "@/lib/mock-auth";
 import Link from "next/link";
 import { AuthButtons } from "@/components/auth/AuthButtons";
-import { CheckCircle2, Lock, Sparkles, AlertCircle, ArrowRight, LineChart, Target, Trophy, Heart, SearchX, Rocket } from "lucide-react";
-import { CAREER_THAI_NAMES } from "@/lib/career-translations";
-import mockCareers from "@/lib/mock_careers.json";
+import { CheckCircle2, Lock, ArrowRight, LineChart, Target, Trophy, SearchX } from "lucide-react";
 import CurriculumTrackFunnel from "@/components/dashboard/CurriculumTrackFunnel";
 import NextSteps from "@/components/dashboard/NextSteps";
 import { getTrackForCareer } from "@/lib/sut-tracks";
-
-// Module-level cache to persist data across React Strict Mode double-mount in development
-// and prevent timing-based bugs when navigating to Dashboard.
-let cachedData: any = null;
-let hasLoadedData = false;
+import { DreamCareerMatch } from "@/components/dashboard/DreamCareerMatch";
+import { useGapAnalysis } from "@/hooks/useGapAnalysis";
+import type { CareerResult } from "@/types";
 
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = searchParams.get("user") || "demo_ton";
-  const { lang, t } = useLanguage();
+  const { lang } = useLanguage();
   const thai = lang === "th";
   const user = useMockUser();
+  const reduce = useReducedMotion();
 
-  const [data, setData] = useState<Top10Response | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Client-side ranking via the MES (Euclidean) engine — no backend.
+  const { ready, hasData, careers, top4, dream } = useGapAnalysis(userId);
 
+  // No scores and no demo context: send the visitor to take the assessment.
   useEffect(() => {
-    async function load() {
-      try {
-        // Try localStorage first (offline fallback)
-        if (typeof window !== "undefined") {
-          const cached = localStorage.getItem("caria_top10");
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            cachedData = parsed;
-            hasLoadedData = true;
-            setData(parsed);
-            setLoading(false);
-            localStorage.removeItem("caria_top10");
-            return;
-          }
+    if (ready && !hasData) router.push("/assessment");
+  }, [ready, hasData, router]);
 
-          // If we already loaded data in this lifecycle, use it
-          if (hasLoadedData) {
-            if (cachedData) {
-              setData(cachedData);
-              setLoading(false);
-              return;
-            } else {
-              router.push("/assessment");
-              return;
-            }
-          }
-
-          // Otherwise, redirect to assessment since we have no data
-          hasLoadedData = true;
-          router.push("/assessment");
-          return;
-        }
-        const res = await api.getRecommendations(userId);
-        setData(res);
-      } catch {
-        setData(MOCK_TOP10);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, [userId, router]);
-
-  // Persist the latest result durably (the `caria_top10` handoff key is consumed
-  // and removed on load) so the Profile page can read it back anytime.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (data && (data.top10_careers?.length ?? 0) > 0) {
-      try {
-        localStorage.setItem("caria_last_result", JSON.stringify(data));
-      } catch {
-        /* storage full / unavailable — non-critical */
-      }
-    }
-  }, [data]);
-
-  const [dreamCareerData, setDreamCareerData] = useState<CareerResult | null>(null);
-  const [dreamCareerLoading, setDreamCareerLoading] = useState(false);
-
-  useEffect(() => {
-    if (loading || !data) return;
-
-    // 1. Retrieve selected dream career ID
-    let dreamId = "";
-    let dreamName = "";
-    if (typeof window !== "undefined") {
-      const localDream = localStorage.getItem("user_dream_career") || localStorage.getItem("dreamCareer");
-      if (localDream) {
-        try {
-          const parsed = JSON.parse(localDream);
-          if (parsed && parsed.id) {
-            dreamId = parsed.id;
-            dreamName = parsed.name || "";
-          }
-        } catch (e) {
-          // ignore
-        }
-      }
-    }
-
-    if (!dreamId) {
-      dreamId = data.dream_career_id || (typeof window !== "undefined" ? localStorage.getItem("caria_dream_career_id") : "") || "";
-      const found = (mockCareers as any[]).find(c => c.career_id === dreamId);
-      dreamName = found ? found.career_name : "";
-    }
-
-    if (!dreamId) return;
-
-    // 2. Check if it's already in the top 10 careers list
-    const isInTop10 = (data.top10_careers || []).some(c => c.career_id === dreamId);
-    if (isInTop10) {
-      setDreamCareerData(null);
-      return;
-    }
-
-    // 3. Load gap analysis for the dream career to construct the CareerResult
-    async function loadDreamCareer() {
-      setDreamCareerLoading(true);
-      try {
-        const gapRes = await api.getGapAnalysis(userId, dreamId);
-        
-        // Find career metadata
-        const mockCareerInfo = (mockCareers as { career_id: string; career_name: string; career_group: string; program: string }[]).find(
-          c => c.career_id === dreamId
-        );
-        
-        const careerResult: CareerResult = {
-          rank: 0, // indicates not in top 10
-          career_id: dreamId,
-          career_name: mockCareerInfo ? mockCareerInfo.career_name : dreamName,
-          career_group: mockCareerInfo ? mockCareerInfo.career_group : "Digital",
-          program: mockCareerInfo ? mockCareerInfo.program : "DT",
-          match_percentage: gapRes.match_percentage,
-          raw_mes: 0,
-          top_strengths: (gapRes.strengths || []).slice(0, 2).map(s => s.competency_id),
-          top_gaps: (gapRes.gaps || []).slice(0, 2).map(g => g.competency_id)
-        };
-        setDreamCareerData(careerResult);
-      } catch (err) {
-        console.error("Failed to load dream career gap analysis:", err);
-      } finally {
-        setDreamCareerLoading(false);
-      }
-    }
-
-    loadDreamCareer();
-  }, [loading, data, userId]);
+  if (!ready || !hasData) {
+    return <Loading mode="fullpage" />;
+  }
 
   const handleCareerClick = (career: CareerResult) => {
     router.push(`/career/${career.career_id}?user=${userId}`);
   };
-
-  if (loading) {
-    return <Loading mode="fullpage" />;
-  }
-
-  const careers = data?.top10_careers || [];
-  const top3 = careers.slice(0, 3);
-  const rest = careers.slice(3);
-
-  // Retrieve selected dream career
-  let selectedDreamCareer: { id: string; name: string } | null = null;
-  if (typeof window !== "undefined") {
-    const localDream = localStorage.getItem("user_dream_career") || localStorage.getItem("dreamCareer");
-    if (localDream) {
-      try {
-        const parsed = JSON.parse(localDream);
-        if (parsed && parsed.id) {
-          selectedDreamCareer = {
-            id: parsed.id,
-            name: parsed.name || ""
-          };
-        }
-      } catch (e) {
-        // ignore
-      }
-    }
-  }
-
-  // Fallback to legacy flat keys if selectedDreamCareer is still null
-  if (!selectedDreamCareer) {
-    const dreamCareerId = data?.dream_career_id || (typeof window !== "undefined" ? localStorage.getItem("caria_dream_career_id") : "") || "";
-    const dreamCareerObj = (mockCareers as { career_id: string; career_name: string; career_group: string; program: string }[]).find(
-      c => c.career_id === dreamCareerId
-    );
-    if (dreamCareerObj) {
-      selectedDreamCareer = {
-        id: dreamCareerObj.career_id,
-        name: dreamCareerObj.career_name
-      };
-    }
-  }
-
-  const top10_careers = careers;
-
-  // AI top recommendation for mismatch fallback
-  const topAiCareer = careers[0];
-  const topAiCareerName = topAiCareer ? topAiCareer.career_name : "";
-  const topAiCareerLabel = topAiCareer
-    ? (CAREER_THAI_NAMES[topAiCareer.career_id] || topAiCareerName)
-    : topAiCareerName;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#050A14] text-foreground font-thai relative overflow-hidden">
@@ -253,14 +77,12 @@ function DashboardContent() {
             </div>
           </div>
 
-          {/* Premium relocated Insights CTA */}
+          {/* Insights CTA */}
           <Link
             href={`/analytics?user=${userId}`}
             className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-brand-orange/30 bg-white/60 p-4 text-left shadow-sm backdrop-blur-md transition-all hover:scale-[1.02] hover:border-brand-orange/60 hover:shadow-lg hover:shadow-brand-orange/5 dark:bg-white/2 dark:border-white/10 dark:hover:border-brand-orange/40 md:w-80 shrink-0 select-none active:scale-[0.98]"
           >
-            {/* Subtle glow background */}
             <span className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-brand-orange/10 blur-xl transition-all duration-300 group-hover:scale-150" />
-            
             <div className="flex items-center gap-3.5 z-10">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-orange/15 border border-brand-orange/30 text-brand-orange shadow-inner">
                 <LineChart className="size-5 transition-transform duration-300 group-hover:scale-110" strokeWidth={2.25} />
@@ -280,233 +102,79 @@ function DashboardContent() {
           </Link>
         </div>
 
-        {/* Dream Career Comparison Banner */}
-        {(() => {
-          if (!selectedDreamCareer) {
-            return null;
-          }
-
-          const dreamRank = top10_careers.findIndex(c => c.career_id === selectedDreamCareer.id) + 1;
-          const isTop3 = dreamRank >= 1 && dreamRank <= 3;
-          const isTop10 = dreamRank >= 4 && dreamRank <= 10;
-          
-          const dreamCareerLabel = selectedDreamCareer.id 
-            ? (CAREER_THAI_NAMES[selectedDreamCareer.id] || selectedDreamCareer.name)
-            : "";
-
-          if (isTop3) {
-            // Condition A: ติด Top 3 (High Match)
-            return (
-              <div className="mb-10 rounded-3xl border border-emerald-500/20 bg-linear-to-r from-emerald-500/10 via-teal-500/5 to-transparent p-6 md:p-8 shadow-lg shadow-emerald-500/5 backdrop-blur-md animate-in fade-in duration-500">
-                <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="flex flex-col gap-5 md:flex-row md:items-center">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500">
-                    <Sparkles className="size-7 text-emerald-500 animate-pulse" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
-                        {thai ? "ตรงกันสูง (High Match)" : "High Match"}
-                      </span>
-                      <span className="text-xs text-muted-foreground font-medium">
-                        {thai ? "เปรียบเทียบกับอาชีพในฝัน" : "Compared to Dream Career"}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white">
-                      {thai ? "ยอดเยี่ยม! ทักษะของคุณมาถูกทางแล้ว" : "Excellent! Your skills are on the right track"}
-                    </h3>
-                    <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium max-w-3xl">
-                      {thai
-                        ? `อาชีพในฝัน “${dreamCareerLabel}” ติด Top ${dreamRank} ของระบบ${dreamRank === 1 ? " และเป็นอันดับ 1 ที่แนะนำ" : ` ตามหลังตัวเต็ง “${topAiCareerLabel}” มาติดๆ`} ปิด Gap อีกไม่กี่จุดก็พร้อมยื่นสมัครได้เลย`
-                        : `Your dream "${dreamCareerLabel}" sits in the system's top ${dreamRank}${dreamRank === 1 ? " as the #1 pick" : `, just behind the top match "${topAiCareerLabel}"`}. Close a few gaps and you are ready to apply.`}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => router.push(`/career/${selectedDreamCareer.id}?user=${userId}`)}
-                    className="inline-flex shrink-0 items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-xs font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:bg-emerald-700 active:scale-95"
-                  >
-                    <Rocket className="size-3.5" strokeWidth={2.5} />
-                    <span className="leading-relaxed">{thai ? `แผนการเรียนสู่ ${dreamCareerLabel.split(" (")[0]}` : `Roadmap to ${dreamCareerLabel.split(" (")[0]}`}</span>
-                    <ArrowRight className="size-3.5" strokeWidth={2.5} />
-                  </button>
-                </div>
-              </div>
-            );
-          } else if (isTop10) {
-            // Condition B: ติดอันดับ 4-10 (Potential Match)
-            return (
-              <div className="mb-10 rounded-3xl border border-amber-500/20 bg-linear-to-r from-amber-500/10 via-orange-500/5 to-transparent p-6 md:p-8 shadow-lg shadow-amber-500/5 backdrop-blur-md animate-in fade-in duration-500">
-                <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="flex flex-col gap-5 md:flex-row md:items-center">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-500">
-                    <AlertCircle className="size-7 text-amber-500 animate-pulse" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-550 border border-amber-500/30">
-                        {thai ? "มีศักยภาพ (Potential Match)" : "Potential Match"}
-                      </span>
-                      <span className="text-xs text-muted-foreground font-medium">
-                        {thai ? "เปรียบเทียบกับอาชีพในฝัน" : "Compared to Dream Career"}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white">
-                      {thai ? "เป็นไปได้สูง! แต่ยังมีทักษะที่ต้องเน้นเพิ่ม" : "Highly Possible! But more skills are needed"}
-                    </h3>
-                    <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium max-w-3xl">
-                      {thai
-                        ? `“${dreamCareerLabel}” อยู่อันดับ #${dreamRank} ส่วนตัวเต็งของระบบคือ “${topAiCareerLabel}” เพิ่มทักษะที่ยังขาดเพื่อดันตัวเองขึ้น Top 3`
-                        : `"${dreamCareerLabel}" ranks #${dreamRank}; the system's top match is "${topAiCareerLabel}". Level up the missing skills to break into the top 3.`}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => router.push(`/career/${selectedDreamCareer.id}?user=${userId}`)}
-                    className="inline-flex shrink-0 items-center gap-2 rounded-full bg-amber-500 px-5 py-3 text-xs font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:bg-amber-600 active:scale-95"
-                  >
-                    <Rocket className="size-3.5" strokeWidth={2.5} />
-                    <span className="leading-relaxed">{thai ? `แผนการเรียนสู่ ${dreamCareerLabel.split(" (")[0]}` : `Roadmap to ${dreamCareerLabel.split(" (")[0]}`}</span>
-                    <ArrowRight className="size-3.5" strokeWidth={2.5} />
-                  </button>
-                </div>
-              </div>
-            );
-          } else {
-            // Condition C: ไม่ติด Top 10 เลย (Mismatch / Reality Check)
-            return (
-              <div className="mb-10 rounded-3xl border border-red-500/20 bg-linear-to-r from-red-500/10 via-rose-500/5 to-transparent p-6 md:p-8 shadow-lg shadow-red-500/5 backdrop-blur-md animate-in fade-in duration-500">
-                <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="flex flex-col gap-5 md:flex-row md:items-center">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-red-500/15 border border-red-500/30 text-red-500">
-                    <AlertCircle className="size-7 text-red-500" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/15 text-red-500 border border-red-500/30">
-                        {thai ? "ไม่ตรงกัน (Mismatch)" : "Mismatch"}
-                      </span>
-                      <span className="text-xs text-muted-foreground font-medium">
-                        {thai ? "วิเคราะห์ทางเลือกแนะนำ" : "Reality Check"}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white">
-                      {thai ? "AI พบเส้นทางอื่นที่อาจเหมาะกับคุณมากกว่าในตอนนี้" : "AI found other paths that might fit you better right now"}
-                    </h3>
-                    <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium max-w-3xl">
-                      {thai
-                        ? `ตอนนี้ “${dreamCareerLabel}” ยังไม่ติด Top 10 ระบบแนะนำ “${topAiCareerLabel}” เป็นอันดับ 1 ลองจำลองการอัปสกิลเพื่อดูเส้นทางไปให้ถึงเป้าหมาย`
-                        : `"${dreamCareerLabel}" is not in your top 10 yet; the system's #1 is "${topAiCareerLabel}". Simulate an upskill path to see how to get there.`}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => router.push(`/career/${selectedDreamCareer.id}?user=${userId}`)}
-                    className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand-orange px-5 py-3 text-xs font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:bg-brand-orange/90 active:scale-95"
-                  >
-                    <Rocket className="size-3.5" strokeWidth={2.5} />
-                    <span className="leading-relaxed">{thai ? `แผนการเรียนสู่ ${dreamCareerLabel.split(" (")[0]}` : `Roadmap to ${dreamCareerLabel.split(" (")[0]}`}</span>
-                    <ArrowRight className="size-3.5" strokeWidth={2.5} />
-                  </button>
-                </div>
-              </div>
-            );
-          }
-        })()}
-
-
-
-        {/* Selected Dream Career (If not in Top 10) */}
-        {!dreamCareerLoading && dreamCareerData && (
-          <div className="mb-10 p-6 rounded-3xl border border-brand-orange/15 bg-brand-orange/2 border-dashed animate-in fade-in duration-500">
-            <h3 className="mb-4 flex items-center gap-2 text-sm font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
-              <Heart className="size-4 text-brand-orange" strokeWidth={2.25} aria-hidden />
-              {thai ? "อาชีพในฝันที่คุณเลือก (Your Selected Dream Career)" : "Your Selected Dream Career"}
-            </h3>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <CareerCard
-                career={dreamCareerData}
-                isTopRank={false}
-                track={getTrackForCareer(dreamCareerData)}
-                onClick={() => handleCareerClick(dreamCareerData)}
-                className="border-brand-orange/30 shadow-lg shadow-brand-orange/5 hover:border-brand-orange/60 hover:shadow-brand-orange/10 dark:hover:shadow-brand-orange/20 bg-white/80 dark:bg-[#070b14]/50 backdrop-blur-md"
-              />
-            </div>
-          </div>
+        {/* Section 1: Dream Career Match */}
+        {dream && (
+          <DreamCareerMatch
+            analysis={dream}
+            userId={userId}
+            onRoadmap={() => router.push(`/career/${dream.career.career_id}?user=${userId}`)}
+          />
         )}
 
-        {/* Top Matches Section */}
+        {/* Section 2: Top 4 Recommended Careers */}
         <div className="mb-12">
-          {/* Eyebrow badge from the design image */}
-          <div className="flex justify-center mb-3">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500 dark:border-amber-500/30">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
-              <span>{thai ? "ปัญญาด้านอาชีพ" : "Career Intelligence"}</span>
+          <div className="mb-8 text-center">
+            <div className="mb-3 flex justify-center">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:border-amber-500/30 dark:text-amber-500">
+                <Trophy className="size-3" strokeWidth={2.5} aria-hidden />
+                <span>{thai ? "จัดอันดับด้วย Euclidean MES" : "Ranked by Euclidean MES"}</span>
+              </div>
             </div>
-          </div>
-          
-          <div className="text-center mb-8">
             <h2 className="font-syne text-3xl font-black tracking-tight leading-normal text-slate-900 dark:text-white sm:text-4xl">
-              {thai ? "อาชีพที่ตรงกับคุณมากที่สุด" : "Top Career Matches"}
+              {thai ? "อาชีพที่แนะนำ 4 อันดับแรก" : "Top 4 Recommended Careers"}
             </h2>
             <p className="mt-2.5 mx-auto max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
-              {thai 
-                ? "เส้นทางที่จัดอันดับอย่างแม่นยำจากโปรไฟล์สมรรถนะของคุณและสัญญาณความต้องการของตลาดแบบเรียลไทม์" 
-                : "Paths precisely ranked based on your competency profile and real-time market demand signals."}
+              {thai
+                ? "คำนวณจากระยะห่างเชิงยุคลิด (Euclidean Distance) ระหว่างสมรรถนะ 66 มิติของคุณกับความต้องการของแต่ละอาชีพ"
+                : "Computed from the Euclidean distance between your 66 competencies and each role's requirements."}
             </p>
           </div>
-          
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.15
-                }
-              }
-            }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
-          >
-            {/* Card #1 (Top Match) spans 2 columns */}
-            {top3[0] && (
+
+          {/* Rank 1 — hero */}
+          {top4[0] && (
+            <motion.div
+              {...(reduce ? {} : { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } })}
+              className="mb-6"
+            >
               <CareerCard
-                career={top3[0]}
-                isTopRank={true}
-                isHero={true}
-                track={getTrackForCareer(top3[0])}
-                onClick={() => handleCareerClick(top3[0])}
-                className="h-full"
+                career={top4[0]}
+                isTopRank
+                isHero
+                track={getTrackForCareer(top4[0])}
+                onClick={() => handleCareerClick(top4[0])}
               />
-            )}
-            
-            {/* Cards #2 and #3 stack vertically in the remaining 1 column */}
-            <div className="flex flex-col gap-6">
-              {top3.slice(1, 3).map((career) => (
+            </motion.div>
+          )}
+
+          {/* Ranks 2–4 */}
+          {top4.length > 1 && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: reduce ? 0 : 0.12 } } }}
+              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {top4.slice(1, 4).map((career) => (
                 <CareerCard
                   key={career.career_id}
                   career={career}
-                  isTopRank={true}
-                  isHero={false}
+                  isTopRank
                   track={getTrackForCareer(career)}
                   onClick={() => handleCareerClick(career)}
-                  className="flex-1"
+                  className="h-full"
                 />
               ))}
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
         </div>
 
-        {/* SUT Curriculum Track funnel — drill-down detail (Screen 2) */}
-        {careers.length > 0 && (
-          <CurriculumTrackFunnel careers={careers} userId={userId} />
-        )}
+        {/* SUT Curriculum Track funnel — drill-down detail (B2B) */}
+        {top4.length > 0 && <CurriculumTrackFunnel careers={top4} userId={userId} />}
 
         {/* Next Steps — download CARIA report + Fast-Track application (B2B lead-gen) */}
-        {careers.length > 0 && (
-          <NextSteps careers={careers} userId={userId} />
-        )}
+        {top4.length > 0 && <NextSteps careers={top4} userId={userId} />}
 
-        {/* Login hook — appears once Top 3 are revealed (guest → save & unlock) */}
+        {/* Login hook — guest → save & unlock */}
         {careers.length > 0 && (
           <div className="mt-8">
             {user ? (
@@ -545,29 +213,6 @@ function DashboardContent() {
             )}
           </div>
         )}
-
-        {/* Remaining */}
-        {rest.length > 0 && (
-          <div className="mt-12">
-            <h2 className="mb-6 flex items-center gap-2 text-xl font-bold text-foreground">
-              {thai ? `อันดับที่ 4 – ${3 + rest.length} (Ranks 4 – ${3 + rest.length})` : `Ranks 4 – ${3 + rest.length}`}
-            </h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {rest.map((career) => (
-                <CareerCard
-                  key={career.career_id}
-                  career={career}
-                  isTopRank={false}
-                  track={getTrackForCareer(career)}
-                  onClick={() => handleCareerClick(career)}
-                  className="transition-all duration-300 hover:scale-[1.02]"
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-
 
         {/* Personalized Career Roadmap Timeline */}
         {careers.length > 0 && (
