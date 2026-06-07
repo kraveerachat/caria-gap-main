@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { RouteGuard } from "@/components/RouteGuard";
 
-// Bouncer: the dashboard requires a segment chosen at "/".
+// Public route: the dashboard gates itself on assessment data (useGapAnalysis),
+// not on a login role, so anonymous visitors can complete the flow.
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  return <RouteGuard>{children}</RouteGuard>;
+  return <>{children}</>;
 }

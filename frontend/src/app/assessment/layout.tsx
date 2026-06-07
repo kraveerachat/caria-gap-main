@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { RouteGuard } from "@/components/RouteGuard";
 
-// Bouncer: /assessment is reachable only after picking a segment at "/".
+// Auth is now optional and handled from the header, so the assessment is
+// reachable directly from the landing "Start Assessment" CTA (no role gate).
 export default function AssessmentLayout({ children }: { children: ReactNode }) {
-  return <RouteGuard>{children}</RouteGuard>;
+  return <>{children}</>;
 }

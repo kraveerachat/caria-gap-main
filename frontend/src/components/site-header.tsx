@@ -10,12 +10,13 @@ import { Logo } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
 import { useLanguage } from "@/components/language-provider"
+import { useMockIdentity, clearMockIdentity } from "@/lib/mock-auth"
 
 const NAV = [
-  { key: "howItWorks", href: "/home#how-it-works" },
-  { key: "assessment", href: "/home#assessment" },
-  { key: "results", href: "/home#results" },
-  { key: "simulator", href: "/home#simulator" },
+  { key: "howItWorks", href: "/#how-it-works" },
+  { key: "assessment", href: "/#assessment" },
+  { key: "results", href: "/#results" },
+  { key: "simulator", href: "/#simulator" },
 ] as const
 
 export function SiteHeader() {
@@ -24,6 +25,14 @@ export function SiteHeader() {
   const { t } = useLanguage()
   const { data: session, status } = useSession()
   const sessionUser = status === "authenticated" ? session?.user : null
+
+  // Mock auth (header-driven): show the signed-in identity when present.
+  const identity = useMockIdentity()
+  const displayName = identity?.label ?? sessionUser?.name ?? null
+  const handleSignOut = () => {
+    clearMockIdentity()
+    if (sessionUser) signOut({ redirect: false })
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16)
@@ -47,7 +56,7 @@ export function SiteHeader() {
             : "border border-transparent text-slate-900 dark:text-slate-100",
         )}
       >
-        <Link href="/home" className="pl-2">
+        <Link href="/" className="pl-2">
           <Logo />
           <span className="sr-only">SUT-CARIA home</span>
         </Link>
@@ -72,14 +81,14 @@ export function SiteHeader() {
         <div className="flex items-center gap-2">
           <LanguageToggle />
           <ThemeToggle onTop={false} />
-          {sessionUser ? (
+          {displayName ? (
             <div className="hidden items-center gap-2 sm:flex">
-              <span className="max-w-[9rem] truncate text-sm font-medium text-slate-700 dark:text-slate-200">
-                {sessionUser.name ?? "Account"}
+              <span className="max-w-[10rem] truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
+                {displayName}
               </span>
               <button
                 type="button"
-                onClick={() => signOut({ redirect: false })}
+                onClick={handleSignOut}
                 className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
               >
                 Sign out
@@ -87,7 +96,7 @@ export function SiteHeader() {
             </div>
           ) : (
             <Link
-              href="/signin"
+              href="/gateway"
               className="hidden rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/5 dark:hover:text-white sm:inline-flex"
             >
               Sign in
@@ -149,20 +158,20 @@ export function SiteHeader() {
             >
               {t.nav.start} <ArrowRight className="size-4" />
             </Link>
-            {sessionUser ? (
+            {displayName ? (
               <button
                 type="button"
                 onClick={() => {
                   setOpen(false)
-                  signOut({ redirect: false })
+                  handleSignOut()
                 }}
                 className="mt-1 rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground/80 hover:bg-foreground/5"
               >
-                Sign out ({sessionUser.name ?? "Account"})
+                Sign out ({displayName})
               </button>
             ) : (
               <Link
-                href="/signin"
+                href="/gateway"
                 onClick={() => setOpen(false)}
                 className="mt-1 rounded-2xl px-4 py-3 text-sm font-medium text-foreground/80 hover:bg-foreground/5"
               >

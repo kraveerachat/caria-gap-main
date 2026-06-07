@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
-import { RouteGuard } from "@/components/RouteGuard";
 
-// Bouncer: the landing page lives at /home and requires a segment chosen at "/".
+// "/home" now redirects to the public landing at "/", so no route guard here.
 export default function HomeLayout({ children }: { children: ReactNode }) {
-  return <RouteGuard>{children}</RouteGuard>;
+  return <>{children}</>;
 }

@@ -35,6 +35,17 @@ export function hasMockRole(): boolean {
   return getMockRole() !== null;
 }
 
+/** Persist the segmentation role and broadcast so guards re-evaluate. */
+export function setMockRole(role: StoredRole["role"]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(ROLE_KEY, JSON.stringify({ role, ts: Date.now() }));
+    window.dispatchEvent(new Event(AUTH_EVENT));
+  } catch {
+    /* storage unavailable (private mode) — proceed without persistence */
+  }
+}
+
 export type GuardStatus = "checking" | "authed";
 
 /**

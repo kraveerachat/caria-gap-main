@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { ROLE_KEY } from "@/hooks/useMockAuth";
 
 export type AuthProvider = "google" | "facebook";
 
@@ -24,6 +25,7 @@ export interface MockUser {
 }
 
 const USER_KEY = "sut_caria_user";
+const STUDENT_KEY = "sut_caria_student";
 const ASSESSMENT_KEYS = ["caria_top10", "user_custom_scores"];
 const AUTH_EVENT = "sut-auth-change";
 
@@ -73,4 +75,61 @@ export function useMockUser(): MockUser | null {
     };
   }, []);
   return user;
+}
+
+/* ---- Unified mock identity (guest OAuth user OR signed-in student) ------ */
+
+export interface MockIdentity {
+  label: string;
+  kind: "student" | "guest";
+}
+
+export interface StudentRecord {
+  student_id: string;
+  name?: string;
+  program?: string;
+}
+
+export function getStudentRecord(): StudentRecord | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(STUDENT_KEY);
+    return raw ? (JSON.parse(raw) as StudentRecord) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The current display identity: a logged-in guest, then a signed-in student. */
+export function getMockIdentity(): MockIdentity | null {
+  const guest = getMockUser();
+  if (guest) return { label: guest.name, kind: "guest" };
+  const student = getStudentRecord();
+  if (student) return { label: student.name?.trim() || student.student_id, kind: "student" };
+  return null;
+}
+
+/** Clear every mock auth artifact (guest user, student record, role). */
+export function clearMockIdentity(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(STUDENT_KEY);
+  localStorage.removeItem(ROLE_KEY);
+  window.dispatchEvent(new Event(AUTH_EVENT));
+}
+
+/** Reactive identity hook for the header. */
+export function useMockIdentity(): MockIdentity | null {
+  const [identity, setIdentity] = useState<MockIdentity | null>(null);
+  useEffect(() => {
+    const sync = () => setIdentity(getMockIdentity());
+    sync();
+    window.addEventListener(AUTH_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(AUTH_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+  return identity;
 }
