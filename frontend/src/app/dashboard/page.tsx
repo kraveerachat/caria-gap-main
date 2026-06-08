@@ -18,6 +18,7 @@ import NextSteps from "@/components/dashboard/NextSteps";
 import { getTrackForCareer } from "@/lib/sut-tracks";
 import { DreamCareerMatch } from "@/components/dashboard/DreamCareerMatch";
 import { useGapAnalysis } from "@/hooks/useGapAnalysis";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { CareerResult } from "@/types";
 
 function DashboardContent() {
@@ -30,7 +31,7 @@ function DashboardContent() {
   const reduce = useReducedMotion();
 
   // Client-side ranking via the MES (Euclidean) engine — no backend.
-  const { ready, hasData, careers, top4, dream } = useGapAnalysis(userId);
+  const { ready, hasData, careers, top4, dream, scores } = useGapAnalysis(userId);
 
   // No scores and no demo context: send the visitor to take the assessment.
   useEffect(() => {
@@ -168,8 +169,13 @@ function DashboardContent() {
           )}
         </div>
 
-        {/* SUT Curriculum Track funnel — drill-down detail (B2B) */}
-        {top4.length > 0 && <CurriculumTrackFunnel careers={top4} userId={userId} />}
+        {/* SUT Curriculum Track funnel — drill-down detail (B2B).
+            Wrapped so a chart render failure degrades gracefully, never blank. */}
+        {top4.length > 0 && (
+          <ErrorBoundary>
+            <CurriculumTrackFunnel careers={top4} userId={userId} scores={scores} />
+          </ErrorBoundary>
+        )}
 
         {/* Next Steps — download CARIA report + Fast-Track application (B2B lead-gen) */}
         {top4.length > 0 && <NextSteps careers={top4} userId={userId} />}

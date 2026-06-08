@@ -17,9 +17,9 @@
 
 import careerVectors from "./career-vectors.json";
 import { recomputeRanking } from "./mes-client";
-import { COMPETENCIES, competencyDomain } from "./competencies";
+import { COMPETENCIES, competencyDomain, competencyLabel, DOMAIN_META, type CompetencyDomain } from "./competencies";
 import { ASSESSMENT_QUESTIONS } from "./questions";
-import type { CareerResult, CareerVector, CompetencyScores } from "@/types";
+import type { CareerResult, CareerVector, CompetencyScores, RadarData, RadarSeries } from "@/types";
 
 export const CAREER_VECTORS = careerVectors as CareerVector[];
 
@@ -145,6 +145,70 @@ export function analyzeDreamCareer(
     gaps,
     strengths,
   };
+}
+
+/**
+ * Build the drill-down radar payload for one career, entirely client-side.
+ *
+ * Produces the same `RadarData` shape the backend `/gap-analysis` endpoint used
+ * (so `DrilldownRadar` drops in unchanged) but computes it from the student's
+ * scores + the bundled career vectors: no network, no next-auth, no async. Each
+ * domain shows the role's most-demanded competencies (capped for legibility),
+ * overlaid with the student's aligned scores, plus a 3-axis domain summary.
+ */
+export function buildRadarData(
+  quizScores: CompetencyScores,
+  careerId: string,
+  thai = false,
+  perDomain = 8,
+): RadarData {
+  const emptySeries = (): RadarSeries => ({ labels: [], student_scores: [], career_scores: [] });
+  const radar: RadarData = {
+    summary_3axis: { labels: [], student_averages: [], career_averages: [] },
+    drilldown_skills: emptySeries(),
+    drilldown_attitudes: emptySeries(),
+    drilldown_knowledge: emptySeries(),
+  };
+
+  const aligned = ALIGNED.get(careerId);
+  if (!aligned) return radar;
+
+  const scores = alignStudentScores(quizScores);
+  const vector = aligned.competency_vector;
+
+  const seriesByDomain: Record<CompetencyDomain, RadarSeries> = {
+    skill: radar.drilldown_skills,
+    knowledge: radar.drilldown_knowledge,
+    attitude: radar.drilldown_attitudes,
+  };
+  const buckets: Record<CompetencyDomain, string[]> = { skill: [], knowledge: [], attitude: [] };
+  for (const key of Object.keys(vector)) {
+    const domain = competencyDomain(key);
+    if (domain) buckets[domain].push(key);
+  }
+
+  const mean = (ns: number[]) => (ns.length ? clamp(ns.reduce((s, n) => s + n, 0) / ns.length) : 0);
+
+  (Object.keys(buckets) as CompetencyDomain[]).forEach((domain) => {
+    const keys = buckets[domain];
+    if (keys.length === 0) return;
+
+    // Whole-domain averages feed the 3-axis summary.
+    radar.summary_3axis.labels.push(thai ? DOMAIN_META[domain].labelTh : DOMAIN_META[domain].labelEn);
+    radar.summary_3axis.student_averages.push(mean(keys.map((k) => clamp(scores[k] ?? 0))));
+    radar.summary_3axis.career_averages.push(mean(keys.map((k) => clamp(vector[k]))));
+
+    // The radar itself shows the role's most-demanded competencies for legibility.
+    const top = [...keys].sort((a, b) => vector[b] - vector[a]).slice(0, perDomain);
+    const series = seriesByDomain[domain];
+    for (const key of top) {
+      series.labels.push(competencyLabel(key, thai));
+      series.student_scores.push(clamp(scores[key] ?? 0));
+      series.career_scores.push(clamp(vector[key]));
+    }
+  });
+
+  return radar;
 }
 
 /**

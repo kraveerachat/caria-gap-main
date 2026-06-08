@@ -9,21 +9,25 @@
  */
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { GraduationCap, ArrowRight, Gauge, Clock, Layers } from "lucide-react";
 import DrilldownRadar from "@/components/dashboard/DrilldownRadar";
 import { useLanguage } from "@/components/language-provider";
-import { useGapAnalysis } from "@/hooks/use-api";
-import type { CareerResult } from "@/types";
+import { buildRadarData, demoStudentScores } from "@/lib/gap-analysis";
+import { MOCK_GAP_ANALYSIS } from "@/lib/mockData";
+import type { CareerResult, CompetencyScores, RadarData } from "@/types";
 import { getTrackForCareer, getTrackReadiness, getMes, readableOn } from "@/lib/sut-tracks";
 
 export default function CurriculumTrackFunnel({
   careers,
   userId,
+  scores,
 }: {
   careers: CareerResult[];
   userId: string;
+  /** Resolved competency scores from the dashboard; falls back to localStorage / demo. */
+  scores?: CompetencyScores | null;
 }) {
   const { lang } = useLanguage();
   const thai = lang === "th";
@@ -32,9 +36,42 @@ export default function CurriculumTrackFunnel({
   const [selectedId, setSelectedId] = useState(options[0]?.career_id ?? "");
   const selected = options.find((c) => c.career_id === selectedId) ?? options[0];
 
-  // Roadmap Phase 3: radar via React Query (same response shape as before).
-  const { data: gap, isLoading: loading } = useGapAnalysis(userId, selected?.career_id);
-  const radar = gap?.radar_data ?? null;
+  // Resolve the student's scores without any backend or next-auth: prefer the
+  // value passed from the dashboard, then localStorage (parsed defensively),
+  // then the deterministic demo profile so there is always real input.
+  const resolvedScores = useMemo<CompetencyScores>(() => {
+    if (scores && Object.keys(scores).length > 0) return scores;
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("user_custom_scores");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === "object" && Object.keys(parsed).length > 0) {
+            return parsed as CompetencyScores;
+          }
+        }
+      } catch {
+        /* malformed JSON — fall through to the demo profile */
+      }
+    }
+    return demoStudentScores();
+  }, [scores]);
+
+  // Radar is built synchronously client-side via the MES engine. It renders
+  // immediately and can never hang: any failure falls back to bundled mock data.
+  const radar = useMemo<RadarData>(() => {
+    try {
+      const built = buildRadarData(resolvedScores, selected?.career_id ?? "", thai);
+      const hasData =
+        built.drilldown_skills.labels.length > 0 ||
+        built.drilldown_attitudes.labels.length > 0 ||
+        built.drilldown_knowledge.labels.length > 0;
+      return hasData ? built : MOCK_GAP_ANALYSIS.radar_data;
+    } catch (err) {
+      console.warn("Radar computation failed; using mock data", err);
+      return MOCK_GAP_ANALYSIS.radar_data;
+    }
+  }, [resolvedScores, selected?.career_id, thai]);
 
   if (!selected) return null;
 
@@ -104,13 +141,7 @@ export default function CurriculumTrackFunnel({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         {/* Radar */}
         <div className="lg:col-span-3">
-          {loading || !radar ? (
-            <div className="flex h-[452px] animate-pulse items-center justify-center rounded-2xl border border-border/60 bg-card/40">
-              <span className="text-sm text-muted-foreground">{thai ? "กำลังวิเคราะห์สมรรถนะ..." : "Analyzing competencies..."}</span>
-            </div>
-          ) : (
-            <DrilldownRadar radarData={radar} accent={track.accent} />
-          )}
+          <DrilldownRadar radarData={radar} accent={track.accent} />
         </div>
 
         {/* Readiness + programs + CTA */}

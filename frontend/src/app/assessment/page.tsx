@@ -9,9 +9,10 @@ import { motion, AnimatePresence } from "motion/react";
 import { OnboardingCard } from "@/components/assessment/OnboardingCard";
 import { DreamCareerSelectCard } from "@/components/assessment/DreamCareerSelectCard";
 import { GamifiedQuiz } from "@/components/assessment/GamifiedQuiz";
-import { api } from "@/lib/api";
 import { getAnonId } from "@/lib/anon-id";
 import { MOCK_TOP10 } from "@/lib/mockData";
+import { rankCareers } from "@/lib/gap-analysis";
+import type { CareerResult, Top10Response } from "@/types";
 import mockCareers from "@/lib/mock_careers.json";
 
 export default function AssessmentPage() {
@@ -96,67 +97,53 @@ export default function AssessmentPage() {
     router.push("/dashboard?user=demo_ton");
   };
 
-  // Submit from the 81-question quiz
-  const handleQuizComplete = async (compiledScores: Record<string, number>) => {
+  // Submit from the 81-question quiz — fully client-side. The MES ranking is
+  // computed from the student's answers and persisted to localStorage; the
+  // dashboard reads it from there. No backend POST and no next-auth dependency,
+  // so the native flow behaves exactly like "Skip to Dashboard" on Vercel.
+  const handleQuizComplete = (compiledScores: Record<string, number>) => {
     setIsSubmitting(true);
     try {
-      const res = await api.submitAssessment({
-        // Stable per-browser key so guest results stay claimable after sign-in.
-        user_id: getAnonId() || `user_81_${Date.now()}`,
-        program: "Digital Technology",
-        scores: compiledScores,
-        input_method: "quiz_81",
-        dream_career_id: dreamCareerId || undefined,
-        dream_career_group: dreamCareerGroup || undefined,
-      });
-      
-      // Store in localStorage to pass values
-      if (typeof window !== "undefined") {
-        const actualId = res.dream_career_id || dreamCareerId || "";
-        const actualGroup = res.dream_career_group || dreamCareerGroup || "";
-        const found = (mockCareers as any[]).find((c) => c.career_id === actualId);
-        const name = found ? found.career_name : "";
-        const selectedObj = { id: actualId, name, group: actualGroup };
-        
-        const customResults = {
-          ...res,
-          dream_career_id: actualId || undefined,
-          dream_career_group: actualGroup || undefined,
-          user_id: res.user_id,
-          timestamp: new Date().toISOString()
-        };
-        localStorage.setItem("dreamCareer", JSON.stringify(selectedObj));
-        localStorage.setItem("user_dream_career", JSON.stringify(selectedObj));
-        localStorage.setItem("caria_top10", JSON.stringify(customResults));
-        localStorage.setItem("caria_dream_career_id", actualId);
-        localStorage.setItem("caria_dream_career_group", actualGroup);
-        localStorage.setItem("user_custom_scores", JSON.stringify(compiledScores));
+      // Stable per-browser key so guest results stay claimable after sign-in.
+      const userId = getAnonId() || `user_81_${Date.now()}`;
+      const actualId = dreamCareerId || "";
+      const actualGroup = dreamCareerGroup || "";
+      const found = (mockCareers as any[]).find((c) => c.career_id === actualId);
+      const selectedObj = { id: actualId, name: found ? found.career_name : "", group: actualGroup };
+
+      // Rank all 78 careers client-side via the MES engine; fall back to the
+      // bundled mock results if the computation ever throws.
+      let topCareers: CareerResult[];
+      try {
+        topCareers = rankCareers(compiledScores).slice(0, 10);
+        if (topCareers.length === 0) topCareers = MOCK_TOP10.top10_careers;
+      } catch (err) {
+        console.warn("Client-side ranking failed; using mock results", err);
+        topCareers = MOCK_TOP10.top10_careers;
       }
-      router.push(`/dashboard?user=${res.user_id}`);
-    } catch {
-      const fallbackUserId = `user_81_demo`;
-      if (typeof window !== "undefined") {
-        const actualId = dreamCareerId || "";
-        const actualGroup = dreamCareerGroup || "";
-        const found = (mockCareers as any[]).find((c) => c.career_id === actualId);
-        const name = found ? found.career_name : "";
-        const selectedObj = { id: actualId, name, group: actualGroup };
-        
-        const customResults = {
-          ...MOCK_TOP10,
-          user_id: fallbackUserId,
-          timestamp: new Date().toISOString(),
-          dream_career_id: actualId || undefined,
-          dream_career_group: actualGroup || undefined,
-        };
-        localStorage.setItem("dreamCareer", JSON.stringify(selectedObj));
-        localStorage.setItem("user_dream_career", JSON.stringify(selectedObj));
-        localStorage.setItem("caria_top10", JSON.stringify(customResults));
-        localStorage.setItem("caria_dream_career_id", actualId);
-        localStorage.setItem("caria_dream_career_group", actualGroup);
-        localStorage.setItem("user_custom_scores", JSON.stringify(compiledScores));
-      }
-      router.push(`/dashboard?user=${fallbackUserId}`);
+
+      const results: Top10Response = {
+        assessment_id: `ASM_${userId}`,
+        user_id: userId,
+        timestamp: new Date().toISOString(),
+        top10_careers: topCareers,
+        dream_career_id: actualId || undefined,
+        dream_career_group: actualGroup || undefined,
+      };
+
+      localStorage.setItem("dreamCareer", JSON.stringify(selectedObj));
+      localStorage.setItem("user_dream_career", JSON.stringify(selectedObj));
+      localStorage.setItem("caria_top10", JSON.stringify(results));
+      localStorage.setItem("caria_dream_career_id", actualId);
+      localStorage.setItem("caria_dream_career_group", actualGroup);
+      // The canonical input the dashboard's MES engine + radar read back.
+      localStorage.setItem("user_custom_scores", JSON.stringify(compiledScores));
+
+      router.push(`/dashboard?user=${userId}`);
+    } catch (err) {
+      // Last-resort failsafe: never strand the user on the quiz screen.
+      console.error("Quiz completion failed; routing to the demo dashboard", err);
+      router.push("/dashboard?user=user_81_demo");
     } finally {
       setIsSubmitting(false);
     }
