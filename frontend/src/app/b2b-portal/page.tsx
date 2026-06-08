@@ -1,5 +1,5 @@
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { SiteFooter } from "@/components/site-footer";
 import { Search, Filter, Lock, Star, ChevronDown, Download } from "lucide-react";
 
 export default function B2BPortalPage() {
@@ -186,7 +186,7 @@ export default function B2BPortalPage() {
         </div>
       </main>
 
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

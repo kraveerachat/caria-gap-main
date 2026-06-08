@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { ROLE_KEY } from "@/hooks/useMockAuth";
+import { ROLE_KEY, getMockRole } from "@/hooks/useMockAuth";
 
 export type AuthProvider = "google" | "facebook";
 
@@ -26,7 +26,7 @@ export interface MockUser {
 
 const USER_KEY = "sut_caria_user";
 const STUDENT_KEY = "sut_caria_student";
-const ASSESSMENT_KEYS = ["caria_top10", "user_custom_scores"];
+const ASSESSMENT_KEYS = ["caria_top10", "user_custom_scores", "caria_last_result"];
 const AUTH_EVENT = "sut-auth-change";
 
 export function getMockUser(): MockUser | null {
@@ -132,4 +132,58 @@ export function useMockIdentity(): MockIdentity | null {
     };
   }, []);
   return identity;
+}
+
+/* ---- Full account snapshot (for the state-aware profile page) ----------- */
+
+export interface MockAccount {
+  /** Signed in through any path (student ID, guest OAuth, or guest pass). */
+  loggedIn: boolean;
+  /** A real SUT student (has a `sut_caria_student` record / student role). */
+  isStudent: boolean;
+  role: "student" | "guest" | null;
+  /** Student ID record, present only for the student path. */
+  student: StudentRecord | null;
+  /** Mocked Google/Facebook identity, present only when a guest links one. */
+  guestUser: MockUser | null;
+}
+
+const EMPTY_ACCOUNT: MockAccount = {
+  loggedIn: false,
+  isStudent: false,
+  role: null,
+  student: null,
+  guestUser: null,
+};
+
+/** Resolve the unified account state from every mock-auth artifact. */
+export function getMockAccount(): MockAccount {
+  if (typeof window === "undefined") return EMPTY_ACCOUNT;
+  const role = getMockRole()?.role ?? null;
+  const student = getStudentRecord();
+  const guestUser = getMockUser();
+  const isStudent = !!student || role === "student";
+  return {
+    loggedIn: role !== null || !!student || !!guestUser,
+    isStudent,
+    role,
+    student,
+    guestUser,
+  };
+}
+
+/** Reactive account hook for the profile/settings surface. */
+export function useMockAccount(): MockAccount {
+  const [account, setAccount] = useState<MockAccount>(EMPTY_ACCOUNT);
+  useEffect(() => {
+    const sync = () => setAccount(getMockAccount());
+    sync();
+    window.addEventListener(AUTH_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(AUTH_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+  return account;
 }

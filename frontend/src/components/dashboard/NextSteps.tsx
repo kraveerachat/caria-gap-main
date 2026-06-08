@@ -198,7 +198,7 @@ export default function NextSteps({
                 <Sparkles className="size-3" strokeWidth={2.5} aria-hidden />
                 {thai ? "Your Next Step" : "Your Next Step"}
               </div>
-              <h2 className="font-syne text-2xl font-bold leading-tight tracking-tight text-slate-900 sm:text-3xl dark:text-white text-balance">
+              <h2 className="font-heading text-2xl font-bold leading-tight tracking-tight text-slate-900 sm:text-3xl dark:text-white text-balance">
                 {thai ? "ก้าวต่อไปของคุณสู่เส้นทางสายดิจิทัล" : "Your next step into a digital career"}
               </h2>
               <p className="mt-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -260,7 +260,7 @@ export default function NextSteps({
                       <div className="animate-in zoom-in-50 duration-300 flex size-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-500">
                         <CheckCircle2 className="size-9" strokeWidth={2} aria-hidden />
                       </div>
-                      <DialogTitle className="mt-5 font-syne text-2xl font-bold text-slate-900 dark:text-white">
+                      <DialogTitle className="mt-5 font-heading text-2xl font-bold text-slate-900 dark:text-white">
                         {thai ? "ส่งใบสมัครสำเร็จ" : "Application submitted"}
                       </DialogTitle>
                       <DialogDescription className="mt-2 max-w-sm text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -289,7 +289,7 @@ export default function NextSteps({
                             <Rocket className="size-5" strokeWidth={2.25} aria-hidden />
                           </span>
                           <div className="min-w-0">
-                            <DialogTitle className="font-syne text-lg font-bold leading-snug tracking-tight text-slate-900 dark:text-white text-balance">
+                            <DialogTitle className="font-heading text-lg font-bold leading-snug tracking-tight text-slate-900 dark:text-white text-balance">
                               {thai
                                 ? "ยื่นใบสมัครเข้าศึกษาต่อ สำนักวิชาศาสตร์และศิลป์ดิจิทัล (SUT)"
                                 : "Apply to the School of Digital Science and Arts (SUT)"}

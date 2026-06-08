@@ -41,7 +41,7 @@ export default function Footer() {
           style={{ perspective: 800 }}
           className="text-center mb-20"
         >
-          <h2 className="font-syne font-extrabold text-4xl lg:text-5xl text-white mb-4">
+          <h2 className="font-heading font-extrabold text-4xl lg:text-5xl text-white mb-4">
             Ready to Map Your
             <br />
             <span
@@ -56,7 +56,7 @@ export default function Footer() {
           </p>
           <motion.a
             href="#assessment"
-            className="inline-flex items-center gap-3 px-10 py-4 rounded-full font-syne font-bold text-[#050A14] text-base tracking-wide"
+            className="inline-flex items-center gap-3 px-10 py-4 rounded-full font-heading font-bold text-[#050A14] text-base tracking-wide"
             style={{
               background: "linear-gradient(135deg, #F39200, #FFB84D)",
               boxShadow: "0 0 40px rgba(243,146,0,0.4), 0 8px 30px rgba(0,0,0,0.3)",
@@ -93,8 +93,8 @@ export default function Footer() {
                 </div>
               </div>
               <div>
-                <span className="font-syne font-extrabold text-white text-lg">SUT</span>
-                <span className="font-syne font-extrabold text-[#F39200] text-lg">-CARIA</span>
+                <span className="font-heading font-extrabold text-white text-lg">SUT</span>
+                <span className="font-heading font-extrabold text-[#F39200] text-lg">-CARIA</span>
               </div>
             </div>
             <p className="text-sm font-dm text-white/40 leading-relaxed max-w-xs">
@@ -107,7 +107,7 @@ export default function Footer() {
 
           {/* Product */}
           <div>
-            <h4 className="font-syne font-semibold text-white/60 text-xs tracking-widest uppercase mb-4">Platform</h4>
+            <h4 className="font-heading font-semibold text-white/60 text-xs tracking-widest uppercase mb-4">Platform</h4>
             <ul className="flex flex-col gap-2.5">
               <li>
                 <Link href="/assessment" className="text-sm font-dm text-white/40 hover:text-white/80 transition-colors">
@@ -136,7 +136,7 @@ export default function Footer() {
 
           {/* Research */}
           <div>
-            <h4 className="font-syne font-semibold text-white/60 text-xs tracking-widest uppercase mb-4">Research</h4>
+            <h4 className="font-heading font-semibold text-white/60 text-xs tracking-widest uppercase mb-4">Research</h4>
             <ul className="flex flex-col gap-2.5">
               {["Methodology", "SFIA Framework", "66 Competencies", "Publications", "About"].map((item) => (
                 <li key={item}>

@@ -127,7 +127,7 @@ function CareerCard({ role, thai }: { role: CareerRole; thai: boolean }) {
         >
           <role.Icon className="size-5" strokeWidth={2.25} aria-hidden />
         </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/12 px-2.5 py-1 font-syne text-xs font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
+        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/12 px-2.5 py-1 font-heading text-xs font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
           <TrendingUp className="size-3.5" strokeWidth={2.75} aria-hidden />
           +{role.demand}% · 2026
         </span>
@@ -140,7 +140,7 @@ function CareerCard({ role, thai }: { role: CareerRole; thai: boolean }) {
         >
           {role.track === "DT" ? "Digital Technology" : "Digital Communication"}
         </span>
-        <h3 className={`mt-2 text-lg font-bold text-slate-900 dark:text-white ${thai ? "font-thai leading-snug" : "font-syne"}`}>
+        <h3 className={`mt-2 text-lg font-bold text-slate-900 dark:text-white ${thai ? "font-thai leading-snug" : "font-heading"}`}>
           {thai ? role.nameTh : role.nameEn}
         </h3>
       </div>
@@ -182,7 +182,7 @@ function CareerCard({ role, thai }: { role: CareerRole; thai: boolean }) {
       >
         <div className="flex items-center gap-2">
           <GraduationCap className="size-4 text-brand-orange" strokeWidth={2.25} aria-hidden />
-          <p className={`text-sm font-bold text-slate-900 dark:text-white ${thai ? "font-thai" : "font-syne"}`}>
+          <p className={`text-sm font-bold text-slate-900 dark:text-white ${thai ? "font-thai" : "font-heading"}`}>
             {thai ? "สมรรถนะหลัก (CARIA)" : "Core CARIA competencies"}
           </p>
         </div>
@@ -236,7 +236,7 @@ export default function InDemandRoles() {
       <div className="relative mx-auto max-w-7xl px-6">
         {/* Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className={`text-3xl font-extrabold tracking-tight text-balance text-slate-900 dark:text-white sm:text-4xl ${thai ? "font-thai leading-snug" : "font-syne leading-tight"}`}>
+          <h2 className={`text-3xl font-extrabold tracking-tight text-balance text-slate-900 dark:text-white sm:text-4xl ${thai ? "font-thai leading-snug" : "font-heading leading-tight"}`}>
             {thai ? "สายงานดิจิทัลมาแรง พร้อมค่าตอบแทนจริงปี 2026" : "In-demand digital roles & real 2026 pay"}
           </h2>
           <p className={`mx-auto mt-4 max-w-2xl text-base text-slate-600 dark:text-slate-300 sm:text-lg ${thai ? "font-thai leading-relaxed" : "leading-relaxed"}`}>
@@ -264,7 +264,7 @@ export default function InDemandRoles() {
                   onClick={() => switchTrack(tabItem.id)}
                   className={`relative z-10 rounded-full px-4 py-2 text-xs font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-5 sm:text-sm ${
                     active ? "text-white" : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
-                  } ${thai ? "font-thai" : "font-syne"}`}
+                  } ${thai ? "font-thai" : "font-heading"}`}
                 >
                   {active && (
                     <motion.span

@@ -168,7 +168,7 @@ export function DreamCareerSelectCard({ onContinue, lang }: DreamCareerSelectCar
             {/* DT Program Group */}
             {dtCareers.length > 0 && (
               <div>
-                <div className="sticky top-0 flex items-center gap-1.5 bg-[#002F6C]/10 px-4 py-2 font-syne text-[10px] font-bold uppercase tracking-[0.18em] text-[#002F6C] backdrop-blur-md dark:bg-[#002F6C]/35 dark:text-[#9CC3FF]">
+                <div className="sticky top-0 flex items-center gap-1.5 bg-[#002F6C]/10 px-4 py-2 font-heading text-[10px] font-bold uppercase tracking-[0.18em] text-[#002F6C] backdrop-blur-md dark:bg-[#002F6C]/35 dark:text-[#9CC3FF]">
                   <Code2 className="size-3" strokeWidth={2.5} aria-hidden />
                   Digital Technology (DT) · {dtCareers.length} {thai ? "อาชีพ" : "Careers"}
                 </div>
@@ -188,7 +188,7 @@ export function DreamCareerSelectCard({ onContinue, lang }: DreamCareerSelectCar
             {/* DC Program Group */}
             {dcCareers.length > 0 && (
               <div>
-                <div className="sticky top-0 flex items-center gap-1.5 bg-brand-orange/10 px-4 py-2 font-syne text-[10px] font-bold uppercase tracking-[0.18em] text-brand-orange backdrop-blur-md dark:bg-brand-orange/15">
+                <div className="sticky top-0 flex items-center gap-1.5 bg-brand-orange/10 px-4 py-2 font-heading text-[10px] font-bold uppercase tracking-[0.18em] text-brand-orange backdrop-blur-md dark:bg-brand-orange/15">
                   <Palette className="size-3" strokeWidth={2.5} aria-hidden />
                   Digital Communication (DC) · {dcCareers.length} {thai ? "อาชีพ" : "Careers"}
                 </div>

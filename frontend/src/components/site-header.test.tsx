@@ -36,12 +36,17 @@ describe("SiteHeader auth control", () => {
     expect(screen.getByRole("link", { name: "Sign in" })).toBeInTheDocument();
   });
 
-  it("shows the user name and Sign out when authenticated", () => {
+  it("shows only the profile avatar (no name, no inline Sign out) when authenticated", () => {
     mocks.session.data = { user: { name: "Somchai", role: "student" } };
     mocks.session.status = "authenticated";
     render(<SiteHeader />);
-    expect(screen.getByText("Somchai")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument();
+    // The avatar is the sole account indicator and links to the profile page.
+    const avatar = screen.getByRole("link", { name: "My profile" });
+    expect(avatar).toBeInTheDocument();
+    expect(avatar).toHaveAttribute("href", "/profile");
+    // The crowding name text and inline Sign out link/button are gone.
+    expect(screen.queryByText("Somchai")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Sign out" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Sign in" })).not.toBeInTheDocument();
   });
 });

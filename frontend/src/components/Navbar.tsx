@@ -49,8 +49,8 @@ export default function Navbar() {
             <div className="absolute inset-0 rounded-full border border-[#1E90FF] opacity-40 scale-125" />
           </div>
           <div>
-            <span className="font-syne font-800 text-white text-lg tracking-tight">CARIA</span>
-            <span className="font-syne font-800 text-[#F39200] text-lg tracking-tight">-GAP</span>
+            <span className="font-heading font-800 text-white text-lg tracking-tight">CARIA</span>
+            <span className="font-heading font-800 text-[#F39200] text-lg tracking-tight">-GAP</span>
           </div>
         </motion.a>
 
@@ -74,7 +74,7 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           <motion.a
             href="#assessment"
-            className="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#F39200] text-[#050A14] font-syne font-700 text-sm tracking-wide"
+            className="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#F39200] text-[#050A14] font-heading font-700 text-sm tracking-wide"
             style={{ boxShadow: "0 0 20px rgba(243,146,0,0.35)" }}
             whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(243,146,0,0.55)" }}
             whileTap={{ scale: 0.97 }}
@@ -129,7 +129,7 @@ export default function Navbar() {
           ))}
           <a
             href="#assessment"
-            className="mt-2 text-center px-6 py-3 rounded-full bg-[#F39200] text-[#050A14] font-syne font-700 text-sm"
+            className="mt-2 text-center px-6 py-3 rounded-full bg-[#F39200] text-[#050A14] font-heading font-700 text-sm"
             onClick={() => setMobileOpen(false)}
           >
             Start Assessment

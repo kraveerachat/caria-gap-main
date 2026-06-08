@@ -81,7 +81,7 @@ export function DreamCareerMatch({
   const reduce = useReducedMotion();
 
   const id = analysis.career.career_id;
-  const name = CAREER_THAI_NAMES[id] || analysis.career.career_name;
+  const name = thai ? (CAREER_THAI_NAMES[id] || analysis.career.career_name) : analysis.career.career_name;
   const shortName = name.split(" (")[0];
   const pct = analysis.match_percentage;
   const topGaps = analysis.gaps.slice(0, 5);
@@ -115,7 +115,7 @@ export function DreamCareerMatch({
             <Heart className="size-3" strokeWidth={2.5} aria-hidden />
             {thai ? "อาชีพในฝันของคุณ" : "Your Dream Career"}
           </span>
-          <h2 className="mt-3 text-balance font-syne text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+          <h2 className="mt-3 text-balance font-heading text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
             {name}
           </h2>
           <p className="mt-2 max-w-xl font-thai text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300">

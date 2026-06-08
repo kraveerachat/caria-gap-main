@@ -4,7 +4,7 @@ import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { SiteFooter } from "@/components/site-footer";
 import CareerCard from "@/components/results/CareerCard";
 import { CareerRoadmapTimeline } from "@/components/results/CareerRoadmapTimeline";
 import Loading from "@/components/ui/Loading";
@@ -63,7 +63,7 @@ function DashboardContent() {
               <Target className="size-3" strokeWidth={2.5} />
               {thai ? "ผลการประเมิน" : "Assessment Results"}
             </div>
-            <h1 className="font-syne text-4xl font-bold tracking-tight text-slate-900 dark:text-white md:text-5xl text-balance leading-tight">
+            <h1 className="font-heading text-4xl font-bold tracking-tight text-slate-900 dark:text-white md:text-5xl text-balance leading-tight">
               {thai ? "อาชีพที่เหมาะกับคุณ" : "Recommended Careers"}
             </h1>
             <p className="mt-3 max-w-2xl text-base font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -120,7 +120,7 @@ function DashboardContent() {
                 <span>{thai ? "จัดอันดับด้วย Euclidean MES" : "Ranked by Euclidean MES"}</span>
               </div>
             </div>
-            <h2 className="font-syne text-3xl font-black tracking-tight leading-normal text-slate-900 dark:text-white sm:text-4xl">
+            <h2 className="font-heading text-3xl font-black tracking-tight leading-normal text-slate-900 dark:text-white sm:text-4xl">
               {thai ? "อาชีพที่แนะนำ 4 อันดับแรก" : "Top 4 Recommended Careers"}
             </h2>
             <p className="mt-2.5 mx-auto max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
@@ -241,7 +241,7 @@ function DashboardContent() {
         )}
       </main>
 
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

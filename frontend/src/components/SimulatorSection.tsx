@@ -376,11 +376,11 @@ export default function SimulatorSection() {
         >
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#F39200]/30 bg-[#F39200]/10 px-4 py-1.5">
             <SlidersHorizontal className="size-3.5 text-[#F39200]" strokeWidth={2.5} aria-hidden />
-            <span className={`text-xs font-bold uppercase tracking-[0.18em] text-[#F39200] ${thai ? "font-thai" : "font-syne"}`}>
+            <span className={`text-xs font-bold uppercase tracking-[0.18em] text-[#F39200] ${thai ? "font-thai" : "font-heading"}`}>
               {t.simulator.eyebrow}
             </span>
           </div>
-          <h2 className={`mb-3 text-balance text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white lg:text-5xl ${thai ? "font-thai leading-relaxed" : "font-syne leading-tight"}`}>
+          <h2 className={`mb-3 text-balance text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white lg:text-5xl ${thai ? "font-thai leading-relaxed" : "font-heading leading-tight"}`}>
             {t.simulator.title}
           </h2>
           <p className={`mx-auto max-w-2xl text-base font-medium text-slate-600 dark:text-slate-400 ${thai ? "font-thai leading-loose" : "leading-relaxed"}`}>
@@ -398,7 +398,7 @@ export default function SimulatorSection() {
                 <Activity className="size-5" strokeWidth={2.25} aria-hidden />
               </div>
               <div className="min-w-0">
-                <h3 className={`text-base font-bold tracking-tight text-slate-900 dark:text-white ${thai ? "font-thai" : "font-syne"}`}>
+                <h3 className={`text-base font-bold tracking-tight text-slate-900 dark:text-white ${thai ? "font-thai" : "font-heading"}`}>
                   {thai ? "ปรับระดับสมรรถนะ" : "Competency Calibration"}
                 </h3>
                 <p className="font-mono text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -487,7 +487,7 @@ export default function SimulatorSection() {
                   <BrainCircuit className="size-5" strokeWidth={2.25} aria-hidden />
                 </div>
                 <div className="min-w-0">
-                  <h3 className={`text-base font-bold tracking-tight text-slate-900 dark:text-white ${thai ? "font-thai" : "font-syne"}`}>
+                  <h3 className={`text-base font-bold tracking-tight text-slate-900 dark:text-white ${thai ? "font-thai" : "font-heading"}`}>
                     {thai ? "อันดับอาชีพแบบเรียลไทม์" : "Live MES Ranking"}
                   </h3>
                   <p className="font-mono text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -547,7 +547,7 @@ export default function SimulatorSection() {
                   <Building2 className="size-5" strokeWidth={2.25} aria-hidden />
                 </div>
                 <div>
-                  <h3 className={`text-base font-bold tracking-tight text-slate-900 dark:text-white ${thai ? "font-thai" : "font-syne"}`}>
+                  <h3 className={`text-base font-bold tracking-tight text-slate-900 dark:text-white ${thai ? "font-thai" : "font-heading"}`}>
                     {thai ? "บริษัทที่ตรงกับคุณ (Top 3)" : "Top 3 Company Matches"}
                   </h3>
                   <p className="font-mono text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500">

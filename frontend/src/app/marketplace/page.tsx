@@ -3,11 +3,12 @@
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { SiteFooter } from "@/components/site-footer";
 import CourseCard from "@/components/CourseCard";
 import Loading from "@/components/ui/Loading";
 import { CheckCircle2, ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 import { useGapAnalysis } from "@/hooks/use-api";
+import { useLanguage } from "@/components/language-provider";
 import type { CourseRec } from "@/types";
 
 interface CourseWithGap {
@@ -21,6 +22,8 @@ function MarketplaceContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get("user") || "demo_ton";
   const careerId = searchParams.get("career") || "C01";
+  const { lang } = useLanguage();
+  const thai = lang === "th";
 
   // Roadmap Phase 3: data via React Query (same response shape as before).
   const { data: queryData, isLoading, isError } = useGapAnalysis(userId, careerId);
@@ -84,20 +87,20 @@ function MarketplaceContent() {
           className="mb-6 inline-flex items-center gap-2 font-thai text-sm font-medium text-slate-500 transition-colors hover:text-brand-orange dark:text-slate-400"
         >
           <ArrowLeft className="size-4" strokeWidth={2.5} aria-hidden />
-          กลับไปหน้า Gap Analysis
+          {thai ? "กลับไปหน้า Gap Analysis" : "Back to Gap Analysis"}
         </button>
 
         {/* Header */}
         <div className="mb-10 font-thai">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-brand-orange/10 px-3 py-1 font-syne text-[11px] font-bold uppercase tracking-[0.18em] text-brand-orange">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-brand-orange/10 px-3 py-1 font-heading text-[11px] font-bold uppercase tracking-[0.18em] text-brand-orange">
             <BookOpen className="size-3" strokeWidth={2.5} aria-hidden />
             Curriculum Match
           </div>
-          <h1 className="font-syne text-4xl font-bold tracking-tight text-slate-900 dark:text-white md:text-5xl leading-tight text-balance">
-            คอร์สเรียนเพื่อปิด Gap
+          <h1 className="font-heading text-4xl font-bold tracking-tight text-slate-900 dark:text-white md:text-5xl leading-tight text-balance">
+            {thai ? "คอร์สเรียนเพื่อปิด Gap" : "Courses to Close Gaps"}
           </h1>
           <p className="mt-3 text-base font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
-            คอร์สแนะนำสำหรับอาชีพ{" "}
+            {thai ? "คอร์สแนะนำสำหรับอาชีพ " : "Recommended courses for "}
             <span className="font-bold text-brand-orange">
               {data.career.career_name}
             </span>
@@ -109,13 +112,15 @@ function MarketplaceContent() {
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="text-2xl font-bold text-foreground">
-                เรียนครบ{" "}
-                <span className="text-brand-orange">{totalCourses} คอร์ส</span>{" "}
-                ช่วยปิด Gap ได้{" "}
-                <span className="text-emerald-500">{totalGapAddressed} จุด</span>
+                {thai ? "เรียนครบ " : "Complete "}
+                <span className="text-brand-orange">{totalCourses} {thai ? "คอร์ส" : "courses"}</span>{" "}
+                {thai ? "ช่วยปิด Gap ได้ " : "to address "}
+                <span className="text-emerald-500">{totalGapAddressed} {thai ? "จุด" : "gap points"}</span>
               </h2>
               <p className="mt-2 text-muted-foreground">
-                คัดเลือกจากระบบ xLane SUT เพื่อปิด Gap ทักษะของคุณโดยตรง พร้อมสะสมหน่วยกิตล่วงหน้า
+                {thai 
+                  ? "คัดเลือกจากระบบ xLane SUT เพื่อปิด Gap ทักษะของคุณโดยตรง พร้อมสะสมหน่วยกิตล่วงหน้า"
+                  : "Selected from xLane SUT to close your skill gaps directly, while earning advance credits"}
               </p>
             </div>
             <div className="flex items-center gap-6">
@@ -123,7 +128,7 @@ function MarketplaceContent() {
                 <div className="text-3xl font-bold text-brand-orange">
                   {totalCourses}
                 </div>
-                <div className="text-xs text-muted-foreground">คอร์ส</div>
+                <div className="text-xs text-muted-foreground">{thai ? "คอร์ส" : "Courses"}</div>
               </div>
               <div className="h-10 w-px bg-border" />
               <div className="text-center">
@@ -158,7 +163,7 @@ function MarketplaceContent() {
             <div className="flex size-20 items-center justify-center rounded-2xl border border-emerald-500/30 bg-white/70 text-emerald-500 backdrop-blur-xl dark:border-emerald-400/20 dark:bg-slate-900/60">
               <CheckCircle2 className="size-10" strokeWidth={2} aria-hidden />
             </div>
-            <h3 className="mt-6 font-syne text-2xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
+            <h3 className="mt-6 font-heading text-2xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
               ไม่มี Gap ที่ต้องปิด
             </h3>
             <p className="mt-3 max-w-md text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -190,7 +195,7 @@ function MarketplaceContent() {
         )}
       </main>
 
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

@@ -125,7 +125,7 @@ export default function StudentSignInPage() {
             <GraduationCap className="size-3.5" strokeWidth={2.5} aria-hidden />
             <span className={thai ? "font-thai" : ""}>{t.badge}</span>
           </span>
-          <h1 className={`mt-4 text-balance text-2xl font-bold leading-tight sm:text-3xl ${thai ? "font-thai" : "font-syne"}`}>
+          <h1 className={`mt-4 text-balance text-2xl font-bold leading-tight sm:text-3xl ${thai ? "font-thai" : "font-heading"}`}>
             {t.heading}
           </h1>
           <p className={`mt-2.5 text-sm leading-relaxed text-muted-foreground ${thai ? "font-thai" : ""}`}>

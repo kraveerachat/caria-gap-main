@@ -105,7 +105,7 @@ function Logo({ name, src, hidden = false }: Company & { hidden?: boolean }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt={hidden ? "" : name} loading="lazy" className="max-h-8 max-w-full object-contain" />
       ) : (
-        <span className="font-syne text-base font-bold tracking-tight text-muted-foreground transition-colors group-hover/logo:text-foreground">
+        <span className="font-heading text-base font-bold tracking-tight text-muted-foreground transition-colors group-hover/logo:text-foreground">
           {name}
         </span>
       )}
@@ -155,7 +155,7 @@ export default function IndustryDemand() {
         {/* The hook — a massive premium headline over the logo wall */}
         <h2
           className={`mx-auto max-w-4xl text-center text-4xl font-extrabold tracking-tight text-balance md:text-6xl ${
-            thai ? "font-thai leading-snug" : "font-syne leading-[1.05]"
+            thai ? "font-thai leading-snug" : "font-heading leading-[1.05]"
           }`}
         >
           <span className="bg-linear-to-r from-primary to-blue-500 bg-clip-text pb-1 text-transparent">
@@ -180,7 +180,7 @@ export default function IndustryDemand() {
             href="/company-directory"
             className="group inline-flex items-center gap-2.5 rounded-full border border-[#002F6C]/25 bg-white/70 px-7 py-3.5 text-base font-bold text-[#002F6C] shadow-sm backdrop-blur transition-all duration-300 hover:scale-[1.02] hover:border-[#002F6C]/50 hover:shadow-md active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none motion-reduce:hover:scale-100 dark:border-[#1E90FF]/30 dark:bg-white/5 dark:text-[#7FB0FF]"
           >
-            <span className={thai ? "font-thai" : "font-syne"}>
+            <span className={thai ? "font-thai" : "font-heading"}>
               {thai ? "[ ดูข้อมูลเพิ่มเติม ]" : "[ View more ]"}
             </span>
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" strokeWidth={2.5} aria-hidden />

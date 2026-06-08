@@ -44,13 +44,13 @@ export function AssessmentMockup() {
           </motion.div>
 
           {/* Pre-title badge */}
-          <p className="mt-5 text-center font-syne text-xs font-bold uppercase tracking-[0.22em] text-brand-orange">
+          <p className="mt-5 text-center font-heading text-xs font-bold uppercase tracking-[0.22em] text-brand-orange">
             In-Depth Evaluation
           </p>
 
           {/* Headline */}
           <h2
-            className={`mb-2 mt-2 text-center text-3xl font-bold tracking-tight text-balance text-slate-900 dark:text-white md:text-4xl ${thai ? "font-thai leading-relaxed" : "font-syne leading-tight"}`}
+            className={`mb-2 mt-2 text-center text-3xl font-bold tracking-tight text-balance text-slate-900 dark:text-white md:text-4xl ${thai ? "font-thai leading-relaxed" : "font-heading leading-tight"}`}
           >
             {thai ? "แบบทดสอบประเมินตนเอง 81 ข้อ" : "81-Question Self Assessment"}
           </h2>

@@ -89,7 +89,7 @@ export default function CareerGroupPage() {
             <div className="text-[10px] tracking-widest text-[#F39200] dark:text-amber-400 font-extrabold uppercase">
               {isDT ? "DT - DIGITAL TECHNOLOGY" : "DC - DIGITAL COMMUNICATIONS & MEDIA"}
             </div>
-            <h1 className="text-3xl md:text-5xl font-extrabold font-syne text-slate-900 dark:text-white leading-tight">
+            <h1 className="text-3xl md:text-5xl font-extrabold font-heading text-slate-900 dark:text-white leading-tight">
               {groupData.name}
             </h1>
             {thai && groupData.nameTh && (
@@ -107,7 +107,7 @@ export default function CareerGroupPage() {
           <div className="lg:col-span-5 flex flex-col gap-6">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-white/10">
               <span className="w-2.5 h-2.5 rounded-full bg-[#F39200]" />
-              <h2 className={`text-lg font-bold tracking-wide text-slate-900 dark:text-white ${thai ? "font-thai font-bold" : "font-syne"}`}>
+              <h2 className={`text-lg font-bold tracking-wide text-slate-900 dark:text-white ${thai ? "font-thai font-bold" : "font-heading"}`}>
                 {thai ? "อาชีพย่อยที่อยู่ในกลุ่มนี้" : "Focused Sub-Careers"}
               </h2>
             </div>
@@ -140,7 +140,7 @@ export default function CareerGroupPage() {
           <div className="lg:col-span-7 flex flex-col gap-6">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-white/10">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-              <h2 className={`text-lg font-bold tracking-wide text-slate-900 dark:text-white ${thai ? "font-thai font-bold" : "font-syne"}`}>
+              <h2 className={`text-lg font-bold tracking-wide text-slate-900 dark:text-white ${thai ? "font-thai font-bold" : "font-heading"}`}>
                 {thai ? "รายวิชาบังคับเรียนของกลุ่มอาชีพ (SUT)" : "Compulsory SUT Curriculum"}
               </h2>
             </div>

@@ -44,7 +44,7 @@ export default function CompanyDirectoryPage() {
 
           <h1
             className={`mx-auto max-w-3xl text-balance text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl ${
-              thai ? "font-thai leading-snug" : "font-syne leading-[1.08]"
+              thai ? "font-thai leading-snug" : "font-heading leading-[1.08]"
             }`}
           >
             <span className="bg-linear-to-r from-primary to-blue-500 bg-clip-text pb-1 text-transparent">

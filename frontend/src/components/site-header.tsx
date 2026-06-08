@@ -4,13 +4,13 @@ import { useEffect, useState } from "react"
 import { motion } from "motion/react"
 import { ArrowRight, Menu, X, User } from "lucide-react"
 import Link from "next/link"
-import { useSession, signOut } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
 import { useLanguage } from "@/components/language-provider"
-import { useMockIdentity, clearMockIdentity } from "@/lib/mock-auth"
+import { useMockIdentity } from "@/lib/mock-auth"
 
 const NAV = [
   { key: "howItWorks", href: "/#how-it-works" },
@@ -22,17 +22,15 @@ const NAV = [
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
+  const thai = lang === "th"
   const { data: session, status } = useSession()
   const sessionUser = status === "authenticated" ? session?.user : null
 
-  // Mock auth (header-driven): show the signed-in identity when present.
+  // Mock auth (header-driven): once signed in, the avatar is the only account
+  // indicator (no name, no inline sign-out). Sign-out lives on the profile page.
   const identity = useMockIdentity()
-  const displayName = identity?.label ?? sessionUser?.name ?? null
-  const handleSignOut = () => {
-    clearMockIdentity()
-    if (sessionUser) signOut({ redirect: false })
-  }
+  const isAuthed = Boolean(identity?.label ?? sessionUser?.name)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16)
@@ -78,28 +76,15 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
           <LanguageToggle />
           <ThemeToggle onTop={false} />
-          {displayName ? (
-            <div className="hidden items-center gap-2 sm:flex">
-              <span className="max-w-[10rem] truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
-                {displayName}
-              </span>
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
-              >
-                Sign out
-              </button>
-            </div>
-          ) : (
+          {!isAuthed && (
             <Link
               href="/gateway"
               className="hidden rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/5 dark:hover:text-white sm:inline-flex"
             >
-              Sign in
+              {thai ? "เข้าสู่ระบบ" : "Sign in"}
             </Link>
           )}
           <Link
@@ -109,14 +94,22 @@ export function SiteHeader() {
             {t.nav.start}
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
           </Link>
-          <Link
-            href="/settings"
-            aria-label="บัญชีและการตั้งค่า"
-            title="บัญชีและการตั้งค่า"
-            className="inline-flex size-10 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition-colors hover:bg-slate-900/5 hover:text-slate-900 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5 dark:hover:text-white"
-          >
-            <User className="size-[18px]" />
-          </Link>
+          {/* Signed in: a single avatar is the account indicator. The brand ring
+              + presence dot signal the active session; it routes to the profile. */}
+          {isAuthed && (
+            <Link
+              href="/profile"
+              aria-label={thai ? "โปรไฟล์ของฉัน" : "My profile"}
+              title={thai ? "โปรไฟล์ของฉัน" : "My profile"}
+              className="relative inline-flex size-10 items-center justify-center rounded-full border-2 border-brand-orange/60 text-slate-700 transition-colors hover:bg-brand-orange/10 hover:text-slate-900 dark:text-slate-100 dark:hover:bg-brand-orange/15 dark:hover:text-white"
+            >
+              <User className="size-[18px]" />
+              <span
+                aria-hidden
+                className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#0a0f1c]"
+              />
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -158,24 +151,21 @@ export function SiteHeader() {
             >
               {t.nav.start} <ArrowRight className="size-4" />
             </Link>
-            {displayName ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false)
-                  handleSignOut()
-                }}
-                className="mt-1 rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground/80 hover:bg-foreground/5"
+            {isAuthed ? (
+              <Link
+                href="/profile"
+                onClick={() => setOpen(false)}
+                className="mt-1 rounded-2xl px-4 py-3 text-sm font-medium text-foreground/80 hover:bg-foreground/5"
               >
-                Sign out ({displayName})
-              </button>
+                {thai ? "โปรไฟล์ของฉัน" : "My profile"}
+              </Link>
             ) : (
               <Link
                 href="/gateway"
                 onClick={() => setOpen(false)}
                 className="mt-1 rounded-2xl px-4 py-3 text-sm font-medium text-foreground/80 hover:bg-foreground/5"
               >
-                Sign in
+                {thai ? "เข้าสู่ระบบ" : "Sign in"}
               </Link>
             )}
           </nav>

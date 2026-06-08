@@ -111,7 +111,7 @@ export default function GatewayPage() {
           <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-orange/30 bg-brand-orange/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-orange">
             {t.badge}
           </span>
-          <h1 className={`mx-auto mt-4 max-w-2xl text-balance text-3xl font-extrabold tracking-tight sm:text-4xl ${thai ? "font-thai" : "font-syne"}`}>
+          <h1 className={`mx-auto mt-4 max-w-2xl text-balance text-3xl font-extrabold tracking-tight sm:text-4xl ${thai ? "font-thai" : "font-heading"}`}>
             {t.heading}
           </h1>
           <p className={`mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-base ${thai ? "font-thai" : ""}`}>

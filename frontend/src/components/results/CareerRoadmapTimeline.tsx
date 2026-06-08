@@ -219,7 +219,7 @@ export function CareerRoadmapTimeline() {
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             {thai ? "เลือกเส้นทางดิจิทัลของคุณกับหลักสูตร" : "Design Your Digital Path with"}{" "}
             <span className="bg-linear-to-r from-brand-orange to-amber-500 bg-clip-text text-transparent">
-              DIGITECH มทส.
+              {thai ? "DIGITECH มทส." : "SUT DIGITECH"}
             </span>
           </h2>
           <p className="mt-4 text-slate-600 dark:text-white/70 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">

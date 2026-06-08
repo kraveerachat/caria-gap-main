@@ -215,7 +215,7 @@ export function GamifiedQuiz({ onComplete, onBack, onSkip, lang }: GamifiedQuizP
           <Sparkles className="size-10 animate-bounce" />
         </div>
         
-        <h3 className="mb-4 font-syne text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white md:text-3xl">
+        <h3 className="mb-4 font-heading text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white md:text-3xl">
           {thai ? "ยอดเยี่ยมมาก!" : "Excellent Job!"}
         </h3>
         

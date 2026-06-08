@@ -1,8 +1,8 @@
 // Navigation steps for the 3-step wizard flow
 export const STEPS = [
-  { id: 1, label: 'วิเคราะห์ตัวเอง', path: '/assessment' },
-  { id: 2, label: 'ผลลัพธ์อาชีพ', path: '/dashboard' },
-  { id: 3, label: 'ปิด Gap', path: '/marketplace' },
+  { id: 1, label_th: 'วิเคราะห์ตัวเอง', label_en: 'Assessment', path: '/assessment' },
+  { id: 2, label_th: 'ผลลัพธ์อาชีพ', label_en: 'Career Match', path: '/dashboard' },
+  { id: 3, label_th: 'ปิด Gap', label_en: 'Close Gaps', path: '/marketplace' },
 ] as const;
 
 // RIASEC attitude items used in the self-assessment form

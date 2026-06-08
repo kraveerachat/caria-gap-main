@@ -62,7 +62,7 @@ const ApplicationFormSheet = forwardRef<HTMLDivElement, ApplicationFormSheetProp
             SUT
           </div>
           <div className="min-w-0">
-            <p className="font-syne text-lg font-extrabold leading-tight text-slate-900">
+            <p className="font-heading text-lg font-extrabold leading-tight text-slate-900">
               มหาวิทยาลัยเทคโนโลยีสุรนารี
             </p>
             <p className="text-[12px] font-semibold text-slate-600">
@@ -72,7 +72,7 @@ const ApplicationFormSheet = forwardRef<HTMLDivElement, ApplicationFormSheetProp
         </header>
 
         <div className="mt-5 text-center">
-          <h1 className="font-syne text-xl font-bold text-slate-900">
+          <h1 className="font-heading text-xl font-bold text-slate-900">
             ใบสมัครเข้าศึกษาต่อระดับปริญญาตรี (รอบ Fast-Track)
           </h1>
           <p className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-400">

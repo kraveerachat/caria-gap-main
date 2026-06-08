@@ -2,6 +2,7 @@
 
 import { STEPS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/components/language-provider';
 
 interface ProgressBarProps {
   currentStep: number; // 1-based
@@ -9,6 +10,8 @@ interface ProgressBarProps {
 }
 
 export default function ProgressBar({ currentStep, totalSteps = 3 }: ProgressBarProps) {
+  const { lang } = useLanguage();
+  const thai = lang === 'th';
   const progress = Math.min(((currentStep - 1) / (totalSteps - 1)) * 100, 100);
 
   return (
@@ -42,7 +45,7 @@ export default function ProgressBar({ currentStep, totalSteps = 3 }: ProgressBar
                 !isCompleted && !isActive && 'text-white/30',
               )}
             >
-              {step.label}
+              {thai ? step.label_th : step.label_en}
             </span>
           );
         })}

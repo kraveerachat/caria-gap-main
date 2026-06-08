@@ -4,13 +4,14 @@ import { useEffect, useState } from "react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from "motion/react"
-import { Check, ArrowRight, UserRound } from 'lucide-react';
+import { Check, ArrowRight, UserRound, LogIn } from 'lucide-react';
 import { STEPS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { Logo } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
 import { useLanguage } from "@/components/language-provider"
+import { useMockIdentity } from "@/lib/mock-auth"
 
 /** Determine which step index (0-based) is active based on pathname */
 function getActiveStep(pathname: string): number {
@@ -25,7 +26,10 @@ export default function Navbar() {
   const pathname = usePathname();
   const activeIdx = getActiveStep(pathname);
   const [scrolled, setScrolled] = useState(false)
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
+  // Profile/settings is only reachable once signed in; otherwise the icon
+  // routes to the sign-in gateway instead of leaking the profile route.
+  const isAuthed = Boolean(useMockIdentity())
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16)
@@ -96,7 +100,7 @@ export default function Navbar() {
                       isFuture && 'text-slate-500 dark:text-white/40',
                     )}
                   >
-                    {step.label}
+                    {lang === 'th' ? step.label_th : step.label_en}
                   </span>
                 </Link>
               </div>
@@ -107,18 +111,33 @@ export default function Navbar() {
         {/* Actions (Insights, Language, Theme, Reset, Start) */}
         <div className="flex items-center gap-2">
 
-          <Link
-            href="/profile"
-            aria-label="Profile"
-            className={cn(
-              "flex size-9 items-center justify-center rounded-full border text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10",
-              pathname.startsWith("/profile")
-                ? "border-brand-orange/40 bg-brand-orange/10 text-brand-orange dark:text-brand-orange"
-                : "border-transparent",
-            )}
-          >
-            <UserRound className="size-[18px]" strokeWidth={2} />
-          </Link>
+          {isAuthed ? (
+            <Link
+              href="/profile"
+              aria-label="Profile"
+              className={cn(
+                "relative flex size-9 items-center justify-center rounded-full border-2 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10",
+                pathname.startsWith("/profile")
+                  ? "border-brand-orange bg-brand-orange/10 text-brand-orange dark:text-brand-orange"
+                  : "border-brand-orange/50",
+              )}
+            >
+              <UserRound className="size-[18px]" strokeWidth={2} />
+              <span
+                aria-hidden
+                className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900"
+              />
+            </Link>
+          ) : (
+            <Link
+              href="/gateway"
+              aria-label="Sign in"
+              title="Sign in"
+              className="flex size-9 items-center justify-center rounded-full border border-transparent text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10"
+            >
+              <LogIn className="size-[18px]" strokeWidth={2} />
+            </Link>
+          )}
           <LanguageToggle />
           <ThemeToggle onTop={false} />
           {pathname.startsWith("/career/") ? (

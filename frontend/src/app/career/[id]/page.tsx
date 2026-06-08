@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { SiteFooter } from "@/components/site-footer";
 import GapRadarChart, { PriorityGapsList } from "@/components/dashboard/GapAnalysisSection";
 import WhatIfSlider from "@/components/WhatIfSlider";
 import { GapBarChart } from "@/components/gap/GapBarChart";
@@ -280,7 +280,7 @@ export default function CareerGapPage() {
           {/* Left - Radar Chart (col-span-3) */}
           <div className="lg:col-span-3 flex flex-col justify-stretch">
             <div className="flex-1">
-              <h2 className="mb-4 flex items-center gap-2.5 font-syne text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
+              <h2 className="mb-4 flex items-center gap-2.5 font-heading text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
                 <RadarIcon className="size-5 text-[#002F6C] dark:text-[#6AA6E8]" strokeWidth={2.25} aria-hidden />
                 {thai ? "แผนภูมิใยแมงมุมสมรรถนะ" : "Drilldown Radar"}
               </h2>
@@ -297,7 +297,7 @@ export default function CareerGapPage() {
           {/* Right - What-If Simulator (col-span-2) */}
           <div className="lg:col-span-2 flex flex-col justify-stretch">
             <div className="flex-1">
-              <h2 className="mb-4 flex items-center gap-2.5 font-syne text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
+              <h2 className="mb-4 flex items-center gap-2.5 font-heading text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
                 <SlidersHorizontal className="size-5 text-brand-orange" strokeWidth={2.25} aria-hidden />
                 {thai ? "แผนปิดช่องว่างทักษะ" : "Your Upskilling Path"}
               </h2>
@@ -316,7 +316,7 @@ export default function CareerGapPage() {
           {/* Left - Priority Gaps (col-span-3) */}
           <div className="lg:col-span-3 flex flex-col justify-stretch">
             <div className="flex-1">
-              <h2 className="mb-4 flex items-center gap-2.5 font-syne text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
+              <h2 className="mb-4 flex items-center gap-2.5 font-heading text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
                 <AlertTriangle className="size-5 text-amber-500" strokeWidth={2.25} aria-hidden />
                 {thai ? "ช่องว่างสมรรถนะสำคัญ" : "Priority Gaps"}
               </h2>
@@ -327,7 +327,7 @@ export default function CareerGapPage() {
           {/* Right - Gap Bar Chart (col-span-2) */}
           <div className="lg:col-span-2 flex flex-col justify-stretch">
             <div className="flex-1">
-              <h2 className="mb-4 flex items-center gap-2.5 font-syne text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
+              <h2 className="mb-4 flex items-center gap-2.5 font-heading text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
                 <BarChart3 className="size-5 text-[#002F6C] dark:text-[#6AA6E8]" strokeWidth={2.25} aria-hidden />
                 {thai ? "แผนภูมิเปรียบเทียบช่องว่าง" : "Top Gaps Comparison"}
               </h2>
@@ -342,7 +342,7 @@ export default function CareerGapPage() {
 
         {/* SUT Course Curriculum Mapping & Career Group Matcher */}
         <div className="mt-10">
-          <h2 className="mb-4 flex items-center gap-2.5 font-syne text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
+          <h2 className="mb-4 flex items-center gap-2.5 font-heading text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
             <GraduationCap className="size-5 text-brand-orange" strokeWidth={2.25} aria-hidden />
             {thai ? "การวิเคราะห์และแนะนำแผนการเรียน มทส." : "SUT Curriculum Advisory"}
           </h2>
@@ -356,7 +356,7 @@ export default function CareerGapPage() {
         {/* Strengths */}
         {data.strengths.length > 0 && (
           <div className="mt-10 rounded-2xl border border-border/60 bg-card/50 dark:bg-card/30 p-6 backdrop-blur-md shadow-sm">
-            <h2 className="mb-4 flex items-center gap-2.5 font-syne text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
+            <h2 className="mb-4 flex items-center gap-2.5 font-heading text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-relaxed">
               <Dumbbell className="size-5 text-emerald-500" strokeWidth={2.25} aria-hidden />
               {thai ? "จุดแข็งของคุณ (Your Strengths)" : "Your Strengths"}
             </h2>
@@ -395,7 +395,7 @@ export default function CareerGapPage() {
         </div>
       </main>
 
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

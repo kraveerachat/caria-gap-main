@@ -85,7 +85,7 @@ function StepCard({ step, index, thai }: { step: any; index: number; thai: boole
       >
         {/* Step number watermark */}
         <div
-          className="absolute -top-4 -right-2 font-syne font-extrabold text-8xl opacity-[0.04] select-none pointer-events-none"
+          className="absolute -top-4 -right-2 font-heading font-extrabold text-8xl opacity-[0.04] select-none pointer-events-none"
           style={{ color: step.color }}
         >
           {step.step}
@@ -113,7 +113,7 @@ function StepCard({ step, index, thai }: { step: any; index: number; thai: boole
           <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, ${step.color}30, transparent)` }} />
         </div>
 
-        <h3 className={`font-bold text-xl text-foreground mb-1 ${thai ? "font-thai" : "font-syne"}`}>{step.title}</h3>
+        <h3 className={`font-bold text-xl text-foreground mb-1 ${thai ? "font-thai" : "font-heading"}`}>{step.title}</h3>
         <p className={`text-sm text-muted-foreground mb-3 ${thai ? "font-thai leading-relaxed" : "font-dm"}`}>{step.subtitle}</p>
         <p className={`text-sm text-muted-foreground leading-relaxed ${thai ? "font-thai leading-loose" : "font-dm"}`}>{step.description}</p>
 
@@ -217,7 +217,7 @@ export default function HowItWorks() {
             <div className="w-2 h-2 rounded-full bg-[#1E90FF]" />
             <span className={`text-xs text-[#1E90FF] ${thai ? "font-thai" : "font-dm tracking-widest uppercase"}`}>{t.howItWorks.eyebrow}</span>
           </div>
-          <h2 className={`font-extrabold text-4xl lg:text-5xl text-foreground mb-4 ${thai ? "font-thai leading-snug" : "font-syne"}`}>
+          <h2 className={`font-extrabold text-4xl lg:text-5xl text-foreground mb-4 ${thai ? "font-thai leading-snug" : "font-heading"}`}>
             {t.howItWorks.title}
           </h2>
           <p className={`text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto ${thai ? "font-thai leading-loose" : "font-dm leading-relaxed"}`}>

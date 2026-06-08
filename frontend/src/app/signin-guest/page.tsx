@@ -94,7 +94,7 @@ export default function GuestSignInPage() {
           <span className="inline-flex items-center rounded-full border border-border bg-muted px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
             {t.badge}
           </span>
-          <h1 className={`mt-4 text-balance text-2xl font-bold leading-tight sm:text-3xl ${thai ? "font-thai" : "font-syne"}`}>
+          <h1 className={`mt-4 text-balance text-2xl font-bold leading-tight sm:text-3xl ${thai ? "font-thai" : "font-heading"}`}>
             {t.heading}
           </h1>
           <p className={`mt-2.5 text-sm leading-relaxed text-muted-foreground ${thai ? "font-thai" : ""}`}>

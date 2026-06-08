@@ -287,7 +287,7 @@ export default function CareerCard({ career, isTopRank, isHero, track, onClick, 
       {/* TOP MATCH ribbon */}
       {isHero && rank === 1 && (
         <div className="absolute -top-3 left-7 z-10">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange px-3 py-1 font-syne text-[10px] font-black uppercase tracking-wider text-[#1a1100] shadow-md shadow-brand-orange/25">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange px-3 py-1 font-heading text-[10px] font-black uppercase tracking-wider text-[#1a1100] shadow-md shadow-brand-orange/25">
             <Star className="size-3" fill="currentColor" />
             <span>TOP MATCH</span>
           </div>

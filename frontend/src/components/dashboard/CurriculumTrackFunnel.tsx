@@ -54,7 +54,7 @@ export default function CurriculumTrackFunnel({
           <GraduationCap className="size-3.5" strokeWidth={2.5} aria-hidden />
           {thai ? "เส้นทางหลักสูตร มทส." : "SUT Curriculum Track"}
         </div>
-        <h2 className="font-syne text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+        <h2 className="font-heading text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
           {thai ? "แต่ละอาชีพเชื่อมตรงสู่หลักสูตรของ มทส." : "Each career maps to an SUT program"}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
@@ -123,7 +123,7 @@ export default function CurriculumTrackFunnel({
               </span>
               <div className="min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{thai ? "สายหลักสูตร มทส." : "SUT Track"}</p>
-                <p className="truncate font-syne text-base font-bold text-slate-900 dark:text-white">
+                <p className="truncate font-heading text-base font-bold text-slate-900 dark:text-white">
                   {thai ? track.labelTh : track.labelEn}
                 </p>
               </div>
@@ -137,7 +137,7 @@ export default function CurriculumTrackFunnel({
                   {thai ? readiness.labelTh : readiness.labelEn}
                 </span>
                 <div className="text-right">
-                  <span className="font-syne text-2xl font-extrabold tabular-nums leading-none" style={{ color: readiness.color }}>
+                  <span className="font-heading text-2xl font-extrabold tabular-nums leading-none" style={{ color: readiness.color }}>
                     {mes}
                   </span>
                   <span className="ml-0.5 text-xs font-bold text-muted-foreground">MES</span>

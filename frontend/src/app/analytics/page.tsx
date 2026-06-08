@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { SiteFooter } from "@/components/site-footer";
 import DrilldownRadar from "@/components/dashboard/DrilldownRadar";
 import { cn } from "@/lib/utils";
 import { useGapAnalysis } from "@/hooks/use-api";
@@ -75,13 +75,22 @@ const TRENDING_CAREERS = [
   { name: "Cybersecurity", value: 15, color: "#EC4899" },
 ];
 
-const DEMAND_VS_SUPPLY = [
+const DEMAND_VS_SUPPLY_TH = [
   { month: "ม.ค.", demand: 1240, supply: 820 },
   { month: "ก.พ.", demand: 1380, supply: 870 },
   { month: "มี.ค.", demand: 1520, supply: 910 },
   { month: "เม.ย.", demand: 1690, supply: 960 },
   { month: "พ.ค.", demand: 1880, supply: 1010 },
   { month: "มิ.ย.", demand: 2110, supply: 1090 },
+];
+
+const DEMAND_VS_SUPPLY_EN = [
+  { month: "Jan", demand: 1240, supply: 820 },
+  { month: "Feb", demand: 1380, supply: 870 },
+  { month: "Mar", demand: 1520, supply: 910 },
+  { month: "Apr", demand: 1690, supply: 960 },
+  { month: "May", demand: 1880, supply: 1010 },
+  { month: "Jun", demand: 2110, supply: 1090 },
 ];
 
 const tooltipStyle = {
@@ -121,7 +130,7 @@ export default function AnalyticsPage() {
           </div>
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
-              <h1 className="font-syne text-3xl font-extrabold leading-[1.05] tracking-tight text-balance sm:text-4xl md:text-[2.75rem]">
+              <h1 className="font-heading text-3xl font-extrabold leading-[1.05] tracking-tight text-balance sm:text-4xl md:text-[2.75rem]">
                 {thai ? "สถิติเชิงลึกของคุณ" : "Your Insights"}
               </h1>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-white/60 sm:text-[15px]">
@@ -144,18 +153,18 @@ export default function AnalyticsPage() {
         <section aria-labelledby="market-heading" className="mt-12">
           <div className="mb-5 flex items-center gap-2.5">
             <Target className="size-5 text-[#1E90FF]" strokeWidth={2.25} aria-hidden />
-            <h2 id="market-heading" className="font-syne text-xl font-bold tracking-tight">
+            <h2 id="market-heading" className="font-heading text-xl font-bold tracking-tight">
               {thai ? "ภาพรวมตลาดแรงงานดิจิทัล" : "Digital Job Market"}
             </h2>
           </div>
-          <PublicInsights />
+          <PublicInsights thai={thai} />
         </section>
 
         {/* Faculty & curriculum analytics — university module, inline (no handoff) */}
         <FacultyCurriculumAnalytics thai={thai} />
       </main>
 
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }
@@ -228,7 +237,7 @@ function PersonalInsights({ thai }: { thai: boolean }) {
     <section aria-labelledby="personal-heading">
       <div className="mb-5 flex items-center gap-2.5">
         <GraduationCap className="size-5 text-brand-orange" strokeWidth={2.25} aria-hidden />
-        <h2 id="personal-heading" className="font-syne text-xl font-bold tracking-tight">
+        <h2 id="personal-heading" className="font-heading text-xl font-bold tracking-tight">
           {thai ? "ผลวิเคราะห์ของคุณ" : "Your Results"}
         </h2>
         {top && (
@@ -299,7 +308,7 @@ function PersonalInsights({ thai }: { thai: boolean }) {
                     {i + 1}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-slate-800 dark:text-slate-100">
-                    {CAREER_THAI_NAMES[c.career_id] || c.career_name}
+                    {thai ? (CAREER_THAI_NAMES[c.career_id] || c.career_name) : c.career_name}
                   </span>
                   <span className="shrink-0 font-mono text-xs font-bold tabular-nums text-brand-orange">
                     {Math.round(c.match_percentage)}%
@@ -325,12 +334,12 @@ function PersonalInsights({ thai }: { thai: boolean }) {
 /*  Public Insights — 2x2 market grid                                  */
 /* ================================================================== */
 
-function PublicInsights() {
+function PublicInsights({ thai }: { thai: boolean }) {
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
       <GlassCard
-        title="ทักษะดิจิทัลที่ขาดแคลนสูงสุด 5 อันดับ"
-        subtitle="Top 5 Digital Skills Lacking · n = 8,450 ผู้ประเมิน"
+        title={thai ? "ทักษะดิจิทัลที่ขาดแคลนสูงสุด 5 อันดับ" : "Top 5 Lacking Digital Skills"}
+        subtitle={thai ? "Top 5 Digital Skills Lacking · n = 8,450 ผู้ประเมิน" : "Top 5 Digital Skills Lacking · n = 8,450 participants"}
         accent="#F39200"
         icon={<TrendingUp className="size-4" strokeWidth={2.25} />}
       >
@@ -366,8 +375,8 @@ function PublicInsights() {
       </GlassCard>
 
       <GlassCard
-        title="เส้นทางอาชีพที่มาแรง"
-        subtitle="Trending Career Paths · สัดส่วนความสนใจ"
+        title={thai ? "เส้นทางอาชีพที่มาแรง" : "Trending Career Paths"}
+        subtitle={thai ? "Trending Career Paths · สัดส่วนความสนใจ" : "Trending Career Paths · Interest Ratio"}
         accent="#1E90FF"
         icon={<Sparkles className="size-4" strokeWidth={2.25} />}
       >
@@ -387,14 +396,14 @@ function PublicInsights() {
       </GlassCard>
 
       <GlassCard
-        title="อุปสงค์ vs อุปทาน บุคลากรสายเทคโนโลยี"
-        subtitle="Demand vs Supply of Tech Talent · 6 เดือนล่าสุด"
+        title={thai ? "อุปสงค์ vs อุปทาน บุคลากรสายเทคโนโลยี" : "Demand vs Supply of Tech Talent"}
+        subtitle={thai ? "Demand vs Supply of Tech Talent · 6 เดือนล่าสุด" : "Demand vs Supply of Tech Talent · Last 6 months"}
         accent="#34D399"
         icon={<TrendingUp className="size-4" strokeWidth={2.25} />}
       >
         <div className="h-[260px] w-full sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={DEMAND_VS_SUPPLY} margin={{ top: 8, right: 16, left: -10, bottom: 0 }}>
+            <LineChart data={thai ? DEMAND_VS_SUPPLY_TH : DEMAND_VS_SUPPLY_EN} margin={{ top: 8, right: 16, left: -10, bottom: 0 }}>
               <defs>
                 <linearGradient id="demandGrad" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0%" stopColor="#F39200" />
@@ -410,29 +419,29 @@ function PublicInsights() {
               <YAxis stroke="currentColor" tick={{ fontSize: 10, fill: "currentColor" }} className="text-slate-500 dark:text-white/50" />
               <Tooltip contentStyle={tooltipStyle} />
               <Legend iconType="plainline" iconSize={18} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-              <Line type="monotone" dataKey="demand" name="ความต้องการตลาด (Demand)" stroke="url(#demandGrad)" strokeWidth={2.5} dot={{ r: 3, strokeWidth: 0, fill: "#F39200" }} activeDot={{ r: 5 }} />
-              <Line type="monotone" dataKey="supply" name="บัณฑิตที่ผลิต (Supply)" stroke="url(#supplyGrad)" strokeWidth={2.5} strokeDasharray="6 4" dot={{ r: 3, strokeWidth: 0, fill: "#1E90FF" }} activeDot={{ r: 5 }} />
+              <Line type="monotone" dataKey="demand" name={thai ? "ความต้องการตลาด (Demand)" : "Market Demand"} stroke="url(#demandGrad)" strokeWidth={2.5} dot={{ r: 3, strokeWidth: 0, fill: "#F39200" }} activeDot={{ r: 5 }} />
+              <Line type="monotone" dataKey="supply" name={thai ? "บัณฑิตที่ผลิต (Supply)" : "Talent Supply"} stroke="url(#supplyGrad)" strokeWidth={2.5} strokeDasharray="6 4" dot={{ r: 3, strokeWidth: 0, fill: "#1E90FF" }} activeDot={{ r: 5 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </GlassCard>
 
       <GlassCard
-        title="ภาพรวมตลาดแรงงานดิจิทัล"
-        subtitle="Macro snapshot · อัปเดต มิ.ย. 2026"
+        title={thai ? "ภาพรวมตลาดแรงงานดิจิทัล" : "Digital Job Market Overview"}
+        subtitle={thai ? "Macro snapshot · อัปเดต มิ.ย. 2026" : "Macro snapshot · Updated Jun 2026"}
         accent="#A78BFA"
         icon={<Users className="size-4" strokeWidth={2.25} />}
       >
         <div className="flex h-full flex-col justify-between gap-5">
           <dl className="grid grid-cols-2 gap-4">
-            <Stat label="ผู้เข้าประเมินสะสม" value="8,450+" tone="orange" />
-            <Stat label="Skill gap เฉลี่ย" value="46%" tone="blue" />
-            <Stat label="สาย DT เติบโต YoY" value="+38%" tone="green" />
+            <Stat label={thai ? "ผู้เข้าประเมินสะสม" : "Total Participants"} value="8,450+" tone="orange" />
+            <Stat label={thai ? "Skill gap เฉลี่ย" : "Average Skill Gap"} value="46%" tone="blue" />
+            <Stat label={thai ? "สาย DT เติบโต YoY" : "DT Field YoY Growth"} value="+38%" tone="green" />
             <Stat label="Demand : Supply" value="1.94×" tone="purple" />
           </dl>
           <div className="rounded-xl border border-slate-200/70 bg-white/60 p-4 text-xs leading-relaxed text-slate-600 backdrop-blur-md dark:border-white/10 dark:bg-white/3 dark:text-white/60">
             <ShieldCheck className="mb-1.5 inline size-3.5 text-[#34D399]" strokeWidth={2.25} />{" "}
-            <strong className="text-slate-800 dark:text-white/85">ข้อมูลสาธารณะ:</strong> รวมจากการประเมินใน CARIA-GAP แบบ aggregate ไม่ระบุตัวตน
+            <strong className="text-slate-800 dark:text-white/85">{thai ? "ข้อมูลสาธารณะ:" : "Public Data:"}</strong> {thai ? "รวมจากการประเมินใน CARIA-GAP แบบ aggregate ไม่ระบุตัวตน" : "Aggregated from CARIA-GAP assessments anonymously"}
           </div>
         </div>
       </GlassCard>
@@ -526,7 +535,7 @@ function FacultyCurriculumAnalytics({ thai }: { thai: boolean }) {
       <div className="mb-5">
         <h2
           id="curriculum-heading"
-          className="font-syne text-lg font-bold leading-snug tracking-tight text-balance text-slate-800 dark:text-slate-200 sm:text-xl"
+          className="font-heading text-lg font-bold leading-snug tracking-tight text-balance text-slate-800 dark:text-slate-200 sm:text-xl"
         >
           {thai ? (
             <>
@@ -617,7 +626,7 @@ function FacultyCurriculumAnalytics({ thai }: { thai: boolean }) {
                       >
                         {thai ? `ปี ${y}` : `Year ${y}`}
                       </span>
-                      <span className="font-syne text-2xl font-extrabold tabular-nums text-slate-800 dark:text-slate-100">
+                      <span className="font-heading text-2xl font-extrabold tabular-nums text-slate-800 dark:text-slate-100">
                         {readinessByYear[y - 1]}%
                       </span>
                     </button>
@@ -635,7 +644,7 @@ function FacultyCurriculumAnalytics({ thai }: { thai: boolean }) {
                 </span>
               </div>
               <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <span className="font-syne text-3xl font-extrabold tabular-nums text-slate-900 dark:text-white">
+                <span className="font-heading text-3xl font-extrabold tabular-nums text-slate-900 dark:text-white">
                   {selectedReadiness}%
                 </span>
                 {year > 1 && (
@@ -770,7 +779,7 @@ function GlassCard({
       />
       <header className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-syne text-[15px] font-bold leading-tight text-slate-900 dark:text-white sm:text-base">{title}</h3>
+          <h3 className="font-heading text-[15px] font-bold leading-tight text-slate-900 dark:text-white sm:text-base">{title}</h3>
           <p className="mt-1 text-[11px] text-slate-500 dark:text-white/55">{subtitle}</p>
         </div>
         <div className="flex size-8 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: accent, boxShadow: `0 6px 18px -8px ${accent}` }}>
@@ -792,7 +801,7 @@ function Stat({ label, value, tone }: { label: string; value: string; tone: "ora
   return (
     <div className="rounded-xl border border-slate-200/70 bg-white/60 p-3 backdrop-blur-md dark:border-white/10 dark:bg-white/3">
       <dt className="text-[10px] uppercase tracking-[0.14em] text-slate-500 dark:text-white/45">{label}</dt>
-      <dd className={cn("mt-1 font-syne text-xl font-extrabold tracking-tight sm:text-2xl", tones[tone])}>{value}</dd>
+      <dd className={cn("mt-1 font-heading text-xl font-extrabold tracking-tight sm:text-2xl", tones[tone])}>{value}</dd>
     </div>
   );
 }

@@ -80,7 +80,7 @@ const CariaReportSheet = forwardRef<HTMLDivElement, CariaReportSheetProps>(
     const readiness = getTrackReadiness(mes);
     const accent = track.accent;
 
-    const careerLabel = CAREER_THAI_NAMES[career.career_id] || career.career_name;
+    const careerLabel = thai ? (CAREER_THAI_NAMES[career.career_id] || career.career_name) : career.career_name;
     const generatedOn = new Date().toLocaleDateString(thai ? "th-TH" : "en-GB", {
       year: "numeric",
       month: "long",
@@ -105,7 +105,7 @@ const CariaReportSheet = forwardRef<HTMLDivElement, CariaReportSheetProps>(
               CG
             </div>
             <div>
-              <p className="font-syne text-xl font-extrabold tracking-tight text-slate-900">
+              <p className="font-heading text-xl font-extrabold tracking-tight text-slate-900">
                 CARIA-GAP
               </p>
               <p className="text-[12px] font-medium text-slate-500">
@@ -130,7 +130,7 @@ const CariaReportSheet = forwardRef<HTMLDivElement, CariaReportSheetProps>(
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               {thai ? "ผู้สมัคร" : "Candidate"}
             </p>
-            <p className="mt-1 font-syne text-2xl font-bold text-slate-900">{userId}</p>
+            <p className="mt-1 font-heading text-2xl font-bold text-slate-900">{userId}</p>
             <div className="mt-4 flex items-center gap-2">
               <span
                 className="inline-flex items-center rounded-md px-2 py-1 text-[11px] font-bold"
@@ -157,7 +157,7 @@ const CariaReportSheet = forwardRef<HTMLDivElement, CariaReportSheetProps>(
               MES
             </p>
             <p
-              className="font-syne text-5xl font-black leading-none"
+              className="font-heading text-5xl font-black leading-none"
               style={{ color: readiness.color }}
             >
               {mes}
@@ -173,7 +173,7 @@ const CariaReportSheet = forwardRef<HTMLDivElement, CariaReportSheetProps>(
 
         {/* Radar — the captured DrilldownRadar */}
         <section className="mt-6">
-          <h2 className="mb-3 font-syne text-base font-bold text-slate-900">
+          <h2 className="mb-3 font-heading text-base font-bold text-slate-900">
             {thai ? "การวิเคราะห์สมรรถนะเทียบอาชีพ" : "Competency vs. Career Profile"}
           </h2>
           <DrilldownRadar radarData={radar} accent={accent} />
@@ -182,7 +182,7 @@ const CariaReportSheet = forwardRef<HTMLDivElement, CariaReportSheetProps>(
         {/* Top career matches */}
         {careers && careers.length > 0 && (
           <section className="mt-6">
-            <h2 className="mb-3 font-syne text-base font-bold text-slate-900">
+            <h2 className="mb-3 font-heading text-base font-bold text-slate-900">
               {thai ? "อาชีพที่ตรงกับคุณมากที่สุด" : "Top Career Matches"}
             </h2>
             <ol className="overflow-hidden rounded-2xl border border-slate-200">
@@ -195,7 +195,7 @@ const CariaReportSheet = forwardRef<HTMLDivElement, CariaReportSheetProps>(
                     {i + 1}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-slate-800">
-                    {CAREER_THAI_NAMES[c.career_id] || c.career_name}
+                    {thai ? (CAREER_THAI_NAMES[c.career_id] || c.career_name) : c.career_name}
                   </span>
                   <span className="shrink-0 font-mono text-[13px] font-bold tabular-nums" style={{ color: accent }}>
                     {Math.round(c.match_percentage)}%
@@ -209,7 +209,7 @@ const CariaReportSheet = forwardRef<HTMLDivElement, CariaReportSheetProps>(
         {/* Domain summary */}
         <section className="mt-6">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-syne text-base font-bold text-slate-900">
+            <h2 className="font-heading text-base font-bold text-slate-900">
               {thai ? "สรุปรายหมวด" : "Domain Summary"}
             </h2>
             <div className="flex items-center gap-4 text-[11px] font-medium text-slate-500">

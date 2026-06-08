@@ -283,7 +283,7 @@ function CareerCard({
                 <div className="flex items-start gap-3.5">
                   {/* Rank badge */}
                   <div
-                    className="w-10 h-10 rounded-2xl flex items-center justify-center font-syne font-black text-sm shrink-0 border"
+                    className="w-10 h-10 rounded-2xl flex items-center justify-center font-heading font-black text-sm shrink-0 border"
                     style={{
                       background: `${career.color}12`,
                       borderColor: `${career.color}35`,
@@ -297,18 +297,18 @@ function CareerCard({
                     <span className="inline-flex bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider mb-1.5">
                       {career.department || "-"}
                     </span>
-                    <h3 className="text-slate-800 dark:text-white text-xl sm:text-2xl leading-snug font-extrabold tracking-tight font-syne text-balance">
+                    <h3 className="text-balance text-xl sm:text-2xl font-bold leading-tight tracking-tight text-slate-900 dark:text-white">
                       {career.title || "-"}
                     </h3>
                   </div>
                 </div>
 
                 {/* Match score display */}
-                <div className="flex flex-col items-end shrink-0">
-                  <div className="font-syne font-black text-3xl sm:text-4xl bg-linear-to-r from-[#F39200] to-orange-400 bg-clip-text text-transparent">
+                <div className="flex shrink-0 flex-col items-end text-right">
+                  <div className="font-black text-3xl sm:text-4xl leading-none tabular-nums text-[#b86c00] dark:text-brand-orange">
                     {career.match !== null && career.match !== undefined ? `${career.match}%` : "-"}
                   </div>
-                  <div className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-widest mt-0.5">
+                  <div className="mt-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                     {thai ? "คะแนนจับคู่" : "Match Score"}
                   </div>
                 </div>
@@ -331,7 +331,7 @@ function CareerCard({
 
               {/* Description */}
               <p className={cn(
-                "text-sm mb-6 font-medium text-balance min-h-[64px] text-slate-600 dark:text-slate-350",
+                "text-sm mb-6 font-medium text-balance min-h-[64px] text-slate-600 dark:text-slate-300",
                 thai ? "font-thai leading-relaxed" : "font-dm leading-relaxed"
               )}>
                 {thai 
@@ -360,34 +360,34 @@ function CareerCard({
             {/* Compartmentalized Stats & CTA */}
             <div>
               {/* 3-Column Compartment Metrics Grid */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center border-t border-slate-100 dark:border-white/5 pt-6">
+              <div className="grid grid-cols-3 gap-3 text-center border-t border-slate-100 dark:border-white/5 pt-6">
                 {/* 1. Gaps */}
-                <div className="bg-slate-50 dark:bg-white/1 p-2.5 rounded-2xl border border-slate-200/40 dark:border-white/3 flex flex-col justify-center items-center min-h-[60px]">
-                  <span className="text-[10px] font-semibold text-slate-400 dark:text-white/30 flex items-center justify-center gap-1 leading-normal shrink-0">
+                <div className="flex min-h-[68px] flex-col items-center justify-center gap-1.5 rounded-2xl border border-slate-200/60 bg-slate-50 p-3 dark:border-white/5 dark:bg-white/[0.03]">
+                  <span className="flex shrink-0 items-center justify-center gap-1 text-[11px] font-semibold leading-tight text-slate-500 dark:text-slate-400">
                     <Target className="size-3 text-brand-orange" />
                     {thai ? "ทักษะที่ขาด" : "Skills Gap"}
                   </span>
-                  <span className="block mt-1 font-syne text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 leading-none">
+                  <span className="text-sm font-bold leading-tight text-slate-800 dark:text-slate-100">
                     {gapDisplay}
                   </span>
                 </div>
                 {/* 2. Salary */}
-                <div className="bg-slate-50 dark:bg-white/1 p-2.5 rounded-2xl border border-slate-200/40 dark:border-white/3 flex flex-col justify-center items-center min-h-[60px]">
-                  <span className="text-[10px] font-semibold text-slate-400 dark:text-white/30 flex items-center justify-center gap-1 leading-normal shrink-0">
+                <div className="flex min-h-[68px] flex-col items-center justify-center gap-1.5 rounded-2xl border border-slate-200/60 bg-slate-50 p-3 dark:border-white/5 dark:bg-white/[0.03]">
+                  <span className="flex shrink-0 items-center justify-center gap-1 text-[11px] font-semibold leading-tight text-slate-500 dark:text-slate-400">
                     <DollarSign className="size-3 text-slate-400 dark:text-white/40" />
                     {thai ? "เงินเดือนแรกเข้า" : "Salary Range"}
                   </span>
-                  <span className="block mt-1 font-syne text-[10px] sm:text-xs font-extrabold text-slate-700 dark:text-slate-300 leading-none truncate max-w-full">
+                  <span className="max-w-full truncate text-[13px] sm:text-sm font-bold leading-tight text-slate-700 dark:text-slate-200">
                     {salaryDisplay}
                   </span>
                 </div>
                 {/* 3. Trend */}
-                <div className="bg-slate-50 dark:bg-white/1 p-2.5 rounded-2xl border border-slate-200/40 dark:border-white/3 flex flex-col justify-center items-center min-h-[60px]">
-                  <span className="text-[10px] font-semibold text-slate-400 dark:text-white/30 flex items-center justify-center gap-1 leading-normal shrink-0">
+                <div className="flex min-h-[68px] flex-col items-center justify-center gap-1.5 rounded-2xl border border-slate-200/60 bg-slate-50 p-3 dark:border-white/5 dark:bg-white/[0.03]">
+                  <span className="flex shrink-0 items-center justify-center gap-1 text-[11px] font-semibold leading-tight text-slate-500 dark:text-slate-400">
                     <TrendingUp className="size-3 text-emerald-500" />
                     {thai ? "การเติบโต" : "Demand"}
                   </span>
-                  <span className="block mt-1 font-syne text-xs sm:text-sm font-extrabold text-emerald-500 leading-none">
+                  <span className="text-sm font-bold leading-tight text-emerald-500">
                     {demandDisplay}
                   </span>
                 </div>
@@ -413,7 +413,7 @@ function CareerCard({
           initial={{ opacity: 0, y: -10 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.5 }}
-          className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full px-3.5 py-1 font-syne text-[10px] font-black uppercase tracking-[0.18em] text-[#1a1100] shadow-md shadow-[#F39200]/15"
+          className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full px-3.5 py-1 font-heading text-[10px] font-black uppercase tracking-[0.18em] text-[#1a1100] shadow-md shadow-[#F39200]/15"
           style={{
             background: "linear-gradient(135deg, #F39200, #FFB84D)",
           }}
@@ -520,7 +520,7 @@ export default function ResultsSection() {
               {t.results.eyebrow}
             </span>
           </div>
-          <h2 className={`font-extrabold text-4xl lg:text-5xl text-foreground mb-4 ${thai ? "font-thai leading-snug" : "font-syne"}`}>
+          <h2 className={`font-extrabold text-4xl lg:text-5xl text-foreground mb-4 ${thai ? "font-thai leading-snug" : "font-heading"}`}>
             {t.results.title}
           </h2>
           <p className={`text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed text-balance ${thai ? "font-thai" : "font-dm"}`}>

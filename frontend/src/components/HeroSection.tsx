@@ -1,6 +1,6 @@
 /**
  * CARIA-GAP Hero Section — Precision Instrument UI
- * Design: Full-bleed dark canvas, animated neural orb, bold Syne typography
+ * Design: Full-bleed dark canvas, animated neural orb, bold Outfit headings
  * Colors: #050A14 bg | #F39200 accent | #1E90FF secondary
  */
 "use client";
@@ -8,6 +8,7 @@
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import * as HoverCard from "@radix-ui/react-hover-card";
 import { useLanguage } from "@/components/language-provider";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -203,18 +204,18 @@ export default function HeroSection() {
             <motion.h1
               layout
               transition={{ type: "spring", stiffness: 200, damping: 25 }}
-              className={`font-extrabold tracking-tight text-slate-900 dark:text-white transition-all duration-300 ${
-                thai ? "font-thai" : "font-syne"
+              className={`font-extrabold tracking-tight text-slate-900 dark:text-white transition-all duration-300 text-balance ${
+                thai ? "font-thai" : "font-heading"
               } ${
                 isExploring
                   ? "text-4xl sm:text-5xl md:text-6xl lg:text-6xl leading-snug"
-                  : `text-5xl sm:text-6xl md:text-7xl lg:text-8xl ${thai ? "leading-snug" : "leading-[1.1]"}`
+                  : `text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] ${thai ? "leading-snug" : "leading-[1.05]"}`
               }`}
             >
               {t.hero.line1}
-              <br />
+              {thai ? <br className="hidden sm:block" /> : " "}
               <span className="text-[#F39200]">{t.hero.accent}</span>
-              <br />
+              {thai ? "" : " "}
               {t.hero.line3}
             </motion.h1>
 
@@ -226,7 +227,7 @@ export default function HeroSection() {
                   animate={{ opacity: 1, height: "auto", y: 0 }}
                   exit={{ opacity: 0, height: 0, y: -15 }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                  className="flex flex-col gap-6 overflow-hidden"
+                  className="flex flex-col gap-6"
                 >
                   {/* Subheading */}
                   <p className={`text-slate-600 dark:text-slate-300 text-lg sm:text-xl md:text-2xl max-w-2xl ${
@@ -239,7 +240,7 @@ export default function HeroSection() {
                   <div className="flex flex-wrap gap-4 items-center pt-2">
                     <motion.a
                       href="/assessment"
-                      className="flex items-center gap-2 px-8 py-4 rounded-full bg-[#F39200] text-[#050A14] font-syne font-bold text-base tracking-wide"
+                      className="flex items-center gap-2 px-8 py-4 rounded-full bg-[#F39200] text-[#050A14] font-heading font-bold text-base tracking-wide"
                       style={{ boxShadow: "0 0 30px rgba(243,146,0,0.4), 0 4px 20px rgba(0,0,0,0.3)" }}
                       whileHover={{ scale: 1.04, boxShadow: "0 0 45px rgba(243,146,0,0.6), 0 4px 24px rgba(0,0,0,0.4)" }}
                       whileTap={{ scale: 0.97 }}
@@ -266,7 +267,7 @@ export default function HeroSection() {
                   <div className="flex gap-8 pt-6 border-t border-slate-200 dark:border-white/8 mt-2">
                     {stats.map((stat, i) => (
                       <div key={stat.label} className="flex flex-col gap-1">
-                        <div className="font-syne font-extrabold text-2xl text-slate-900 dark:text-white">
+                        <div className="font-heading font-extrabold text-2xl text-slate-900 dark:text-white">
                           {stat.value}
                           <span className="text-[#F39200]">{stat.unit}</span>
                         </div>
@@ -456,7 +457,7 @@ export default function HeroSection() {
                   className="order-2 inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-transparent px-4 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:border-brand-orange/40 hover:bg-slate-100 hover:text-brand-orange dark:border-white/15 dark:text-slate-200 dark:hover:bg-white/5 sm:order-1 sm:flex-1"
                 >
                   <BookOpen className="size-4 shrink-0" strokeWidth={2.25} aria-hidden />
-                  <span className={thai ? "font-thai" : "font-syne"}>
+                  <span className={thai ? "font-thai" : "font-heading"}>
                     {thai ? "ดูแผนการเรียน" : "View Curriculum"}
                   </span>
                 </Link>
@@ -467,70 +468,94 @@ export default function HeroSection() {
                   className="order-1 inline-flex items-center justify-center gap-2 rounded-full bg-brand-orange px-5 py-3.5 text-sm font-bold text-brand-orange-foreground shadow-md shadow-brand-orange/25 transition-all duration-300 hover:scale-[1.02] hover:bg-[#ff9e0d] hover:shadow-lg hover:shadow-brand-orange/35 active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100 sm:order-2 sm:flex-[1.6]"
                 >
                   <Target className="size-4 shrink-0" strokeWidth={2.5} aria-hidden />
-                  <span className={thai ? "font-thai" : "font-syne"}>
+                  <span className={thai ? "font-thai" : "font-heading"}>
                     {thai ? "เริ่มทำแบบประเมิน" : "Start assessment"}
                   </span>
                 </Link>
               </div>
 
               {/* List Header */}
-              <div className={`text-[10px] text-slate-400 dark:text-white/40 uppercase font-bold tracking-wider mt-6 ${thai ? "font-thai" : ""}`}>
-                {panelTexts.listHeader}
+              <div className={`flex items-center justify-between gap-3 mt-6 ${thai ? "font-thai" : ""}`}>
+                <span className="text-[10px] text-slate-400 dark:text-white/40 uppercase font-bold tracking-wider">
+                  {panelTexts.listHeader}
+                </span>
+                <span className={`text-[10px] text-slate-400/80 dark:text-white/30 font-medium normal-case ${thai ? "font-thai" : ""}`}>
+                  {thai ? "ชี้เพื่อดูรายละเอียด" : "Hover for details"}
+                </span>
               </div>
 
-              {/* Scrollable careers list */}
-              <div className="flex-1 min-h-0 overflow-y-auto mt-2 pr-1 scrollbar-thin flex flex-col gap-2">
+              {/* Scrollable careers list — premium rows; full description reveals
+                  in a floating popover on hover/focus (portaled, never clipped). */}
+              <div className="-mr-1 mt-2 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto pr-1 scrollbar-thin">
                 {activeGroupObj?.careers.map((career) => {
-                  const isExpanded = selectedCareer === career.name;
+                  const isSelected = selectedCareer === career.name;
+                  const desc = thai ? career.description : (career.descriptionEn || career.description);
                   return (
-                    <div
-                      key={career.name}
-                      className={`rounded-xl border transition-all duration-300 overflow-hidden ${
-                        isExpanded
-                          ? "bg-slate-50 dark:bg-white/5 border-slate-300 dark:border-white/20 shadow-md"
-                          : "bg-transparent border-slate-200/50 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/2 cursor-pointer"
-                      }`}
-                      onClick={() => setSelectedCareer(isExpanded ? "" : career.name)}
-                    >
-                      {/* Career Row */}
-                      <div className="px-6 py-4 flex items-center justify-between">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-sm text-slate-800 dark:text-white">
-                            {career.name}
+                    <HoverCard.Root key={career.name} openDelay={120} closeDelay={80}>
+                      <HoverCard.Trigger asChild>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCareer(career.name)}
+                          aria-pressed={isSelected}
+                          className={`group relative flex w-full flex-col gap-0.5 rounded-xl p-4 text-left outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#2D9CFF]/60 ${
+                            isSelected
+                              ? "bg-slate-100 dark:bg-white/[0.07]"
+                              : "hover:bg-slate-100/70 dark:hover:bg-white/5"
+                          }`}
+                        >
+                          <span className="flex items-start gap-2">
+                            <span className="text-base font-semibold leading-snug text-slate-900 dark:text-white">
+                              {career.name}
+                            </span>
+                            {isSelected && (
+                              <span className="mt-1.5 ml-auto size-1.5 shrink-0 rounded-full bg-[#F39200]" aria-hidden />
+                            )}
                           </span>
-                          {thai && career.nameTh && (
-                            <span className="text-xs text-slate-500 dark:text-slate-400 font-thai mt-0.5 leading-relaxed">
+                          {career.nameTh && (
+                            <span className="font-thai text-sm leading-snug text-slate-500 dark:text-slate-400">
                               {career.nameTh}
                             </span>
                           )}
-                        </div>
-                        {/* Chevron */}
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 14 14"
-                          fill="none"
-                          className={`text-slate-400 transition-transform duration-300 ${isExpanded ? "rotate-90" : ""}`}
+                        </button>
+                      </HoverCard.Trigger>
+                      <HoverCard.Portal>
+                        <HoverCard.Content
+                          side="left"
+                          align="center"
+                          sideOffset={14}
+                          collisionPadding={16}
+                          className="z-50 w-72 rounded-xl border border-slate-700 bg-slate-900 p-5 text-slate-300 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 motion-reduce:animate-none motion-reduce:transition-none"
                         >
-                          <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </div>
-
-                      {/* Expanded description */}
-                      {isExpanded && (
-                        <div 
-                          onClick={(e) => e.stopPropagation()}
-                          className="px-6 pb-6 pt-3.5 border-t border-slate-200/50 dark:border-white/5">
-                          <p className={`text-xs text-slate-600 dark:text-slate-300 leading-relaxed ${thai ? "font-thai" : ""}`}>
-                            {thai ? career.description : (career.descriptionEn || career.description)}
+                          <p className="text-base font-semibold leading-snug text-white">
+                            {career.name}
                           </p>
-                        </div>
-                      )}
-                    </div>
+                          {career.nameTh && (
+                            <p className="mt-1 font-thai text-xs font-medium text-slate-400">
+                              {career.nameTh}
+                            </p>
+                          )}
+                          <p className={`mt-3 text-sm leading-relaxed text-slate-300 ${thai ? "font-thai" : ""}`}>
+                            {desc}
+                          </p>
+                          {career.skills && career.skills.length > 0 && (
+                            <div className="mt-4 flex flex-wrap gap-1.5">
+                              {career.skills.map((skill) => (
+                                <span
+                                  key={skill}
+                                  className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-300"
+                                >
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </HoverCard.Content>
+                      </HoverCard.Portal>
+                    </HoverCard.Root>
                   );
                 })}
                 {(!activeGroupObj || activeGroupObj.careers.length === 0) && (
-                  <div className="text-center py-6 text-xs text-slate-500">
+                  <div className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
                     {panelTexts.noSubCareers}
                   </div>
                 )}
